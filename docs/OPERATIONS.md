@@ -213,6 +213,7 @@ are present in the output.
 ## Live Deployment Smoke
 
 ```bash
+python3 scripts/reviewer_snapshot.py
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 ```
@@ -220,6 +221,12 @@ bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 This verifies the public Caddy/HAProxy route, browser demo HTML, `/demo/run`, Google Drive import,
 approval callback base URL, Telegram callback webhook, runtime evidence, metrics endpoint, and
 dry-run integration contracts. It also checks `/llm/runtime`.
+
+For a concise live evidence report that reviewers can paste into an evaluation note:
+
+```bash
+python3 scripts/reviewer_snapshot.py --json
+```
 
 ## n8n Import
 

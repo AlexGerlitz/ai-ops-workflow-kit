@@ -20,6 +20,7 @@ prompt demo.
 | What to check | Why it matters |
 | --- | --- |
 | [Live demo](https://saleops.duckdns.org/) | Public one-click proof of the deployed Sales Ops workflow. |
+| [Technical review packet](docs/TECHNICAL_REVIEW_PACKET.md) | 10-15 minute reviewer route covering live snapshot, architecture decisions, failure modes, and rollout boundaries. |
 | [Evidence map](docs/EVIDENCE_MAP.md) | Maps the repo to AI automation, RAG, approval flow, Bitrix24, Telegram, and self-hosting requirements. |
 | [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Maps common AI automation vacancy requirements to exact files, endpoints, verification commands, and production boundaries. |
 | [Offer demo](docs/OFFER_DEMO.md) | One-command proof of Google Drive import -> RAG -> transcript scoring -> Telegram approval -> idempotent outbox drain -> mock Bitrix CRM handoff. |
@@ -44,11 +45,11 @@ Best-fit evidence:
 Fast evaluation path:
 
 1. Open `https://saleops.duckdns.org/` and run the browser demo.
-2. Run `bash scripts/smoke_live_demo.sh`.
-3. Run `bash scripts/verify_public.sh`.
-4. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
-5. Read `docs/EVIDENCE_MAP.md`.
-6. Read `docs/OFFER_DEMO.md`.
+2. Run `python3 scripts/reviewer_snapshot.py`.
+3. Run `bash scripts/smoke_live_demo.sh`.
+4. Run `bash scripts/verify_public.sh`.
+5. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+6. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
 7. Review `infra/n8n/` to see the external workflow boundary.
 
 ## System Shape
@@ -108,6 +109,7 @@ bash scripts/verify_public.sh
 Live deployment smoke:
 
 ```bash
+python3 scripts/reviewer_snapshot.py
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 ```

@@ -2,7 +2,8 @@
 
 This map connects the repository to the work expected from an AI automation engineer.
 For a vacancy-style checklist with verification commands and production boundaries, read
-[AI Automation Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md).
+[AI Automation Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md). For a 10-15 minute reviewer route,
+read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 
 | Requirement | Evidence |
 | --- | --- |
@@ -17,7 +18,8 @@ For a vacancy-style checklist with verification commands and production boundari
 | Bitrix24 handoff contract | `app/integrations.py`, `app/store.py`, `POST /integration-events/{id}/dispatch/bitrix24`, `POST /integrations/bitrix24/drain` |
 | Self-hosted runtime | `Dockerfile`, `docker-compose.yml`, `docs/LIVE_DEMO.md`, `docs/OPERATIONS.md` |
 | Runtime observability | `GET /runtime`, `GET /metrics`, worker state, `app/observability.py`, `scripts/smoke_live_demo.sh` |
-| Public proof | `https://saleops.duckdns.org/`, `scripts/smoke_live_demo.sh` |
+| Technical reviewer snapshot | `scripts/reviewer_snapshot.py`, `docs/TECHNICAL_REVIEW_PACKET.md`, `GET /runtime`, `GET /llm/runtime`, `POST /demo/run` |
+| Public proof | `https://saleops.duckdns.org/`, `scripts/reviewer_snapshot.py`, `scripts/smoke_live_demo.sh` |
 | Verification discipline | `scripts/verify_public.sh`, `.github/workflows/ci.yml`, `tests/` |
 
 ## Design Signals
@@ -36,8 +38,10 @@ For a vacancy-style checklist with verification commands and production boundari
 ## Review Order
 
 1. Open the live demo: `https://saleops.duckdns.org/`.
-2. Run `bash scripts/smoke_live_demo.sh`.
-3. Open `https://saleops.duckdns.org/llm/runtime`.
-4. Run `bash scripts/verify_public.sh`.
-5. Read `docs/ARCHITECTURE.md`.
-6. Read `docs/INTEGRATION_SKELETON.md`.
+2. Run `python3 scripts/reviewer_snapshot.py`.
+3. Run `bash scripts/smoke_live_demo.sh`.
+4. Open `https://saleops.duckdns.org/llm/runtime`.
+5. Run `bash scripts/verify_public.sh`.
+6. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+7. Read `docs/ARCHITECTURE.md`.
+8. Read `docs/INTEGRATION_SKELETON.md`.

@@ -28,11 +28,20 @@ as a narrower alias for the scoring surface.
 ## Command-Line Smoke
 
 ```bash
+python3 scripts/reviewer_snapshot.py
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 ```
 
 Expected output:
+
+```text
+technical reviewer snapshot passed
+base_url=https://saleops.duckdns.org
+llm=local requested=auto fallback=True
+```
+
+Smoke output:
 
 ```text
 live demo smoke passed
@@ -58,6 +67,8 @@ contracts are aligned. It also verifies that the browser UI exposes the current 
 labels: Google Drive import, OpenAI/Claude/Gemini provider boundary, Telegram callback approval,
 outbox drain, and worker state.
 The `leadscore` alias intentionally keeps approval callbacks on the primary `saleops` URL.
+
+For the complete reviewer route, read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 
 ## What Is Real
 
