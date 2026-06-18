@@ -18,6 +18,7 @@ prompt demo.
 | --- | --- |
 | [Offer demo](docs/OFFER_DEMO.md) | One-command proof of transcript -> RAG -> scoring -> approval -> mock Bitrix CRM handoff. |
 | [Reviewer checklist](docs/REVIEWER_CHECKLIST.md) | Single public gate for tests, offer demo, and output validation. |
+| Live demo UI | `GET /` opens a one-click Sales Ops Control Tower demo. |
 | [Architecture notes](docs/ARCHITECTURE.md) | Shows the FastAPI/n8n/PostgreSQL boundary and why stateful logic stays in the backend. |
 | [Operations notes](docs/OPERATIONS.md) | Shows how the system is run, checked, and handed off. |
 | [n8n approval flow](docs/N8N_APPROVAL_FLOW.md) | Shows the webhook, Telegram payload, approval callback, and CRM handoff boundary. |
@@ -36,11 +37,12 @@ Best-fit evidence:
 
 Fast evaluation path:
 
-1. Run `python3 scripts/run_offer_demo.py`.
-2. Read `docs/OFFER_DEMO.md`.
-3. Run `bash scripts/verify_public.sh`.
-4. Start `docker compose up --build`.
-5. Review `infra/n8n/` to see the external workflow boundary.
+1. Start `docker compose up --build`.
+2. Open `http://127.0.0.1:8080/` and run the demo workflow.
+3. Run `python3 scripts/run_offer_demo.py`.
+4. Read `docs/OFFER_DEMO.md`.
+5. Run `bash scripts/verify_public.sh`.
+6. Review `infra/n8n/` to see the external workflow boundary.
 
 ## System Shape
 
@@ -58,6 +60,7 @@ flowchart LR
 ## What It Demonstrates
 
 - FastAPI service boundary for AI workflow orchestration.
+- Browser-visible Sales Ops Control Tower demo at `/`.
 - RAG ingestion and retrieval with deterministic local embeddings for repeatable development.
 - pgvector-ready schema and Docker Compose runtime.
 - Transcript webhook that produces a structured analysis and a human approval item.
@@ -96,6 +99,12 @@ cp .env.example .env
 docker compose up --build
 ```
 
+Demo UI:
+
+```text
+http://127.0.0.1:8080/
+```
+
 API:
 
 ```bash
@@ -130,8 +139,10 @@ curl -X POST http://127.0.0.1:8080/approvals \
 
 | Endpoint | Purpose |
 | --- | --- |
+| `GET /` | Browser-visible Sales Ops Control Tower demo. |
 | `GET /health` | Runtime health and active storage mode. |
 | `GET /integrations/runtime` | Inspect Telegram and Bitrix24 adapter configuration/dry-run status. |
+| `POST /demo/run` | Run the synthetic transcript -> RAG -> approval -> Telegram/Bitrix dry-run demo. |
 | `POST /documents` | Chunk and ingest text into the vector store. |
 | `POST /query` | Retrieve context and produce an answer draft. |
 | `POST /approvals` | Create a human-in-the-loop approval item. |
@@ -147,8 +158,8 @@ curl -X POST http://127.0.0.1:8080/approvals \
 ## Repository Layout
 
 ```text
-app/              FastAPI application and workflow domain code
-demo/             Synthetic sales playbook and transcript for the offer demo
+app/              FastAPI application, workflow domain code, and browser demo payloads
+demo/             Synthetic reference playbook and transcript fixtures
 infra/n8n/        Importable n8n workflow example
 docs/             Offer demo, reviewer checklist, architecture, n8n, integrations and operations notes
 scripts/          Reviewer-facing demo runner and public verification gate

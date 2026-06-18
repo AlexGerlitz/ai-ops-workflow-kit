@@ -12,6 +12,12 @@ Services:
 - `postgres`: PostgreSQL with pgvector enabled on port `5432`.
 - `n8n`: workflow orchestration UI on port `5678`.
 
+Browser demo:
+
+```text
+http://127.0.0.1:8080/
+```
+
 ## Health
 
 ```bash
@@ -59,7 +65,7 @@ Run the complete reviewer demo without Docker or API keys:
 python3 scripts/run_offer_demo.py
 ```
 
-The demo uses the synthetic files in `demo/` and proves:
+The demo uses synthetic sales payloads and proves:
 
 - playbook ingestion;
 - RAG query with source context;
@@ -67,6 +73,7 @@ The demo uses the synthetic files in `demo/` and proves:
 - approval creation;
 - approval transition;
 - mock Bitrix24 integration event queued after approval.
+- browser-visible control tower at `/`.
 
 See `docs/OFFER_DEMO.md` for the expected output shape.
 

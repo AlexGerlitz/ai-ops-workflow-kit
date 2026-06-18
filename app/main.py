@@ -2,8 +2,10 @@ from contextlib import asynccontextmanager
 from uuid import UUID, uuid4
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 
 from app.chunking import chunk_text
+from app.demo_payloads import DEMO_SALES_PLAYBOOK, DEMO_TRANSCRIPT
 from app.embeddings import HashEmbeddingProvider
 from app.integrations import (
     dispatch_bitrix24_event,
@@ -22,6 +24,7 @@ from app.schemas import (
     IntegrationDispatchOut,
     IntegrationEventOut,
     IntegrationRuntimeOut,
+    OfferDemoRunOut,
     QueryIn,
     QueryOut,
     TranscriptWebhookIn,
@@ -30,6 +33,7 @@ from app.schemas import (
 from app.scoring import score_transcript
 from app.settings import settings
 from app.store import ChunkRecord, build_store
+from app.ui import DEMO_PAGE_HTML
 
 embedding_provider = HashEmbeddingProvider(settings.embedding_dim)
 store = build_store(settings.database_url, settings.embedding_dim)
@@ -49,6 +53,11 @@ app = FastAPI(
 )
 
 
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
+def demo_page() -> HTMLResponse:
+    return HTMLResponse(DEMO_PAGE_HTML)
+
+
 @app.get("/health")
 def health() -> dict[str, object]:
     return {
@@ -61,6 +70,82 @@ def health() -> dict[str, object]:
 @app.get("/integrations/runtime", response_model=IntegrationRuntimeOut)
 def get_integration_runtime() -> IntegrationRuntimeOut:
     return integration_runtime(settings)
+
+
+@app.post("/demo/run", response_model=OfferDemoRunOut)
+async def run_demo_workflow() -> OfferDemoRunOut:
+    document = ingest_document(
+        DocumentIn(
+            source="drive://demo/sales-playbook",
+            text=DEMO_SALES_PLAYBOOK,
+            metadata={"team": "sales", "public_demo": True},
+        )
+    )
+    rag = await query(
+        QueryIn(
+            question="What should happen before a follow-up reaches the CRM?",
+            top_k=3,
+        )
+    )
+    analysis = call_transcript_webhook(TranscriptWebhookIn(**DEMO_TRANSCRIPT))
+    telegram = notify_approval_in_telegram(analysis.approval.id)
+    approved = approve(
+        analysis.approval.id,
+        ApprovalDecision(reviewer="sales-lead", notes="Synthetic demo approval"),
+    )
+    events = [
+        event
+        for event in store.list_integration_events("bitrix24.mock")
+        if event.source_approval_id == analysis.approval.id
+    ]
+    if not events:
+        raise HTTPException(status_code=500, detail="CRM handoff event was not queued")
+    crm_event = events[-1]
+    bitrix24 = dispatch_event_to_bitrix24(crm_event.id)
+    return OfferDemoRunOut(
+        runtime=health(),
+        integrations=get_integration_runtime(),
+        ingestion=document,
+        rag_context_sources=[
+            {"source": context.source, "score": context.score}
+            for context in rag.contexts
+        ],
+        call_analysis={
+            "call_id": analysis.call_id,
+            "customer_id": analysis.customer_id,
+            "score": analysis.score,
+            "risk_level": analysis.analysis.risk_level,
+            "missing_signals": analysis.analysis.missing_signals,
+            "objections": analysis.analysis.objections,
+            "next_action": analysis.analysis.next_action,
+            "follow_up_draft": analysis.analysis.follow_up_draft,
+        },
+        approval={
+            "id": str(analysis.approval.id),
+            "status": approved.status.value,
+            "reviewer": approved.reviewer,
+        },
+        telegram_approval={
+            "adapter_key": telegram.adapter_key,
+            "operation": telegram.operation,
+            "status": telegram.status.value,
+            "callback_contract": telegram.payload["callback_contract"],
+        },
+        crm_handoff={
+            "event_id": str(crm_event.id),
+            "adapter_key": crm_event.adapter_key,
+            "operation": crm_event.operation,
+            "status": crm_event.status.value,
+            "target_stage": crm_event.payload["target_stage"],
+            "task": crm_event.payload["task"],
+        },
+        bitrix24_dispatch={
+            "adapter_key": bitrix24.adapter_key,
+            "operation": bitrix24.operation,
+            "status": bitrix24.status.value,
+            "method": bitrix24.payload["method"],
+        },
+    )
 
 
 @app.post("/documents", response_model=DocumentOut)

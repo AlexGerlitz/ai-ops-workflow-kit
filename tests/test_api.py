@@ -10,6 +10,14 @@ def test_health_endpoint_reports_runtime() -> None:
     assert response.json()["ok"] is True
 
 
+def test_public_demo_page_is_available() -> None:
+    with TestClient(app) as client:
+        response = client.get("/")
+    assert response.status_code == 200
+    assert "AI Sales Ops Control Tower" in response.text
+    assert "Run demo workflow" in response.text
+
+
 def test_integration_runtime_reports_dry_run_capabilities() -> None:
     with TestClient(app) as client:
         response = client.get("/integrations/runtime")
@@ -18,6 +26,22 @@ def test_integration_runtime_reports_dry_run_capabilities() -> None:
     capabilities = {item["adapter_key"]: item for item in body["capabilities"]}
     assert capabilities["telegram.approval"]["dry_run"] is True
     assert capabilities["bitrix24"]["dry_run"] is True
+
+
+def test_public_demo_run_proves_workflow_contract() -> None:
+    with TestClient(app) as client:
+        response = client.post("/demo/run")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["runtime"]["ok"] is True
+    assert body["ingestion"]["chunks"] >= 1
+    assert body["rag_context_sources"]
+    assert body["call_analysis"]["score"] >= 80
+    assert body["approval"]["status"] == "approved"
+    assert body["telegram_approval"]["status"] == "dry_run"
+    assert body["telegram_approval"]["callback_contract"]["approve"]["url"].endswith("/approve")
+    assert body["crm_handoff"]["status"] == "queued"
+    assert body["bitrix24_dispatch"]["status"] == "dry_run"
 
 
 def test_ingest_query_and_approval_flow() -> None:

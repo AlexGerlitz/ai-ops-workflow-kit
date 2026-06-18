@@ -137,3 +137,15 @@ class IntegrationDispatchOut(BaseModel):
     status: IntegrationDispatchStatus
     payload: dict[str, Any]
     detail: str = ""
+
+
+class OfferDemoRunOut(BaseModel):
+    runtime: dict[str, Any]
+    integrations: IntegrationRuntimeOut
+    ingestion: DocumentOut
+    rag_context_sources: list[dict[str, Any]]
+    call_analysis: dict[str, Any]
+    approval: dict[str, Any]
+    telegram_approval: dict[str, Any]
+    crm_handoff: dict[str, Any]
+    bitrix24_dispatch: dict[str, Any]

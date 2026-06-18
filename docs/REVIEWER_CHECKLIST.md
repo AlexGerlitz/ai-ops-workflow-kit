@@ -12,7 +12,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-10 passed
+12 passed
 public verification passed
 ```
 
@@ -38,7 +38,19 @@ in-memory storage so the reviewer can inspect the behavior quickly.
 
 Read: [Offer Demo](./OFFER_DEMO.md).
 
-## 3. Inspect The Runtime Boundary
+## 3. Inspect The Browser Demo
+
+Run the API and open the one-click demo surface:
+
+```bash
+docker compose up --build
+```
+
+Then open:
+
+- Sales Ops Control Tower: http://127.0.0.1:8080/
+
+## 4. Inspect The Runtime Boundary
 
 Run the Docker stack when you want to inspect the API with PostgreSQL/pgvector and n8n:
 
@@ -53,7 +65,7 @@ Then open:
 - FastAPI docs: http://127.0.0.1:8080/docs
 - n8n UI: http://127.0.0.1:5678
 
-## 4. Review The Engineering Decisions
+## 5. Review The Engineering Decisions
 
 | File | What to check |
 | --- | --- |
@@ -64,9 +76,10 @@ Then open:
 | [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Telegram and Bitrix24 dry-run contracts become real credentials later. |
 | [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, and CRM handoff. |
 
-## 5. What This Proves
+## 6. What This Proves
 
 - AI workflow logic is backend-owned and testable.
+- The project has a browser-visible demo, not only README claims.
 - n8n is used as orchestration glue, not as hidden domain logic.
 - LLM/RAG behavior has deterministic local fallbacks for repeatable review.
 - CRM mutation is queued only after explicit human approval.

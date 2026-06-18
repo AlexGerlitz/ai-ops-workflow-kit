@@ -28,6 +28,12 @@ python3 scripts/run_offer_demo.py
 The script uses in-memory storage so a reviewer can run it without Docker or API keys.
 Docker/PostgreSQL mode is still available through `docker compose up --build`.
 
+The same workflow is available through the browser demo:
+
+```text
+http://127.0.0.1:8080/
+```
+
 The full public gate also runs tests and validates the demo output:
 
 ```bash
@@ -41,6 +47,7 @@ The output contains these sections:
 | Section | What it proves |
 | --- | --- |
 | `runtime` | API booted and reported the active storage mode. |
+| `integrations` | Telegram and Bitrix24 adapter readiness and public callback base URL. |
 | `ingestion` | Sales playbook was chunked and stored. |
 | `rag_context_sources` | Retrieval returned explicit source context. |
 | `call_analysis` | Transcript was scored and converted into structured business action. |
@@ -95,6 +102,7 @@ That maps directly to real AI automation work:
 - Telegram-style approval;
 - Bitrix/CRM integration;
 - dry-run integration contracts before credentials are connected;
+- browser-visible control tower for a one-click review path;
 - audit-friendly state transitions;
 - repeatable local verification.
 
