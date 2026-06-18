@@ -1,0 +1,65 @@
+# Live Demo
+
+The public demo is deployed as a self-hosted FastAPI service behind Caddy/HAProxy.
+
+Primary URL:
+
+```text
+https://saleops.duckdns.org/
+```
+
+Alias:
+
+```text
+https://leadscore.duckdns.org/
+```
+
+`saleops` is the main project name because the workflow covers more than a lead score:
+RAG retrieval, transcript analysis, approval routing, and CRM handoff. `leadscore` is kept
+as a narrower alias for the scoring surface.
+
+## Browser Path
+
+1. Open `https://saleops.duckdns.org/`.
+2. Click `Run demo workflow`.
+3. Verify the response shows a high lead score, approved review state, dry-run Telegram payload,
+   and dry-run Bitrix24 dispatch.
+
+## Command-Line Smoke
+
+```bash
+bash scripts/smoke_live_demo.sh
+bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
+```
+
+Expected output:
+
+```text
+live demo smoke passed
+base_url=https://saleops.duckdns.org
+callback_base_url=https://saleops.duckdns.org
+score=100
+approval=approved
+telegram=dry_run
+bitrix24=dry_run
+```
+
+The smoke check proves that the public edge route, FastAPI runtime, workflow endpoint,
+approval callback base URL, and integration dry-run contracts are aligned.
+The `leadscore` alias intentionally keeps approval callbacks on the primary `saleops` URL.
+
+## What Is Real
+
+- The API is a real deployed service, not a static mock.
+- The workflow runs through the same `/demo/run` endpoint used by local tests.
+- The callback contract uses the public HTTPS base URL.
+- Telegram and Bitrix24 remain in dry-run mode until credentials are configured.
+
+## Local Fallback
+
+If the public VPS is unavailable, run the same proof locally:
+
+```bash
+python3 -m pip install -r requirements.txt
+bash scripts/verify_public.sh
+```

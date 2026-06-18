@@ -18,6 +18,13 @@ Browser demo:
 http://127.0.0.1:8080/
 ```
 
+Public demo:
+
+```text
+https://saleops.duckdns.org/
+https://leadscore.duckdns.org/
+```
+
 ## Health
 
 ```bash
@@ -82,7 +89,7 @@ See `docs/OFFER_DEMO.md` for the expected output shape.
 The public callback base URL is:
 
 ```env
-PUBLIC_BASE_URL=http://saleops.duckdns.org
+PUBLIC_BASE_URL=https://saleops.duckdns.org
 ```
 
 Telegram and Bitrix24 are dry-run by default. This keeps public verification deterministic while
@@ -105,6 +112,16 @@ bash scripts/verify_public.sh
 
 The gate runs tests, runs the offer demo, and validates that RAG retrieval, approval, and mock
 Bitrix24 handoff are present in the output.
+
+## Live Deployment Smoke
+
+```bash
+bash scripts/smoke_live_demo.sh
+bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
+```
+
+This verifies the public Caddy/HAProxy route, browser demo HTML, `/demo/run`, approval callback
+base URL, and dry-run integration contracts.
 
 ## n8n Import
 

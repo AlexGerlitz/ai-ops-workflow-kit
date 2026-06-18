@@ -32,7 +32,7 @@ http://127.0.0.1:8080/webhooks/n8n/call-transcript
 For the public demo callback contract, use:
 
 ```text
-http://saleops.duckdns.org
+https://saleops.duckdns.org
 ```
 
 ## Input Contract

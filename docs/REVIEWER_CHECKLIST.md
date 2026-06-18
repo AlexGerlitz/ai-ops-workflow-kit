@@ -38,7 +38,22 @@ in-memory storage so the reviewer can inspect the behavior quickly.
 
 Read: [Offer Demo](./OFFER_DEMO.md).
 
-## 3. Inspect The Browser Demo
+## 3. Inspect The Live Demo
+
+Open:
+
+- Sales Ops Control Tower: https://saleops.duckdns.org/
+- Lead score alias: https://leadscore.duckdns.org/
+
+Or run:
+
+```bash
+bash scripts/smoke_live_demo.sh
+```
+
+Read: [Live Demo](./LIVE_DEMO.md).
+
+## 4. Inspect The Browser Demo Locally
 
 Run the API and open the one-click demo surface:
 
@@ -50,7 +65,7 @@ Then open:
 
 - Sales Ops Control Tower: http://127.0.0.1:8080/
 
-## 4. Inspect The Runtime Boundary
+## 5. Inspect The Runtime Boundary
 
 Run the Docker stack when you want to inspect the API with PostgreSQL/pgvector and n8n:
 
@@ -65,18 +80,20 @@ Then open:
 - FastAPI docs: http://127.0.0.1:8080/docs
 - n8n UI: http://127.0.0.1:5678
 
-## 5. Review The Engineering Decisions
+## 6. Review The Engineering Decisions
 
 | File | What to check |
 | --- | --- |
 | [README](../README.md) | Reviewer snapshot, API surface, repository layout, and checks. |
+| [Evidence Map](./EVIDENCE_MAP.md) | Requirement-by-requirement proof map for AI automation roles. |
+| [Live Demo](./LIVE_DEMO.md) | Public deployment URL and public smoke checks. |
 | [Architecture](./ARCHITECTURE.md) | FastAPI/n8n/PostgreSQL/LLM boundaries and state ownership. |
 | [Operations](./OPERATIONS.md) | Local runtime, health checks, smoke test, logs, and handoff. |
 | [n8n Approval Flow](./N8N_APPROVAL_FLOW.md) | How webhook routing, Telegram payloads, and approval callbacks connect. |
 | [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Telegram and Bitrix24 dry-run contracts become real credentials later. |
 | [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, and CRM handoff. |
 
-## 6. What This Proves
+## 7. What This Proves
 
 - AI workflow logic is backend-owned and testable.
 - The project has a browser-visible demo, not only README claims.

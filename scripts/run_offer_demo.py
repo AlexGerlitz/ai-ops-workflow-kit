@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 os.environ["DATABASE_URL"] = ""
-os.environ.setdefault("PUBLIC_BASE_URL", "http://saleops.duckdns.org")
+os.environ.setdefault("PUBLIC_BASE_URL", "https://saleops.duckdns.org")
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))

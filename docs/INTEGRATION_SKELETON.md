@@ -8,13 +8,13 @@ committing credentials or making public demo runs depend on external accounts.
 The current public callback base URL is:
 
 ```text
-http://saleops.duckdns.org
+https://saleops.duckdns.org
 ```
 
 Set it through:
 
 ```env
-PUBLIC_BASE_URL=http://saleops.duckdns.org
+PUBLIC_BASE_URL=https://saleops.duckdns.org
 ```
 
 Telegram approval payloads use this URL to describe the backend approve/reject callback contract.

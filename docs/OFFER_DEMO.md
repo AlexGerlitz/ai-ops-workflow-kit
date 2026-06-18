@@ -34,10 +34,22 @@ The same workflow is available through the browser demo:
 http://127.0.0.1:8080/
 ```
 
+The deployed browser demo is available at:
+
+```text
+https://saleops.duckdns.org/
+```
+
 The full public gate also runs tests and validates the demo output:
 
 ```bash
 bash scripts/verify_public.sh
+```
+
+The live deployment smoke validates the public route and HTTPS callback base URL:
+
+```bash
+bash scripts/smoke_live_demo.sh
 ```
 
 ## Expected Shape

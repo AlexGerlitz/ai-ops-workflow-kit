@@ -16,9 +16,11 @@ prompt demo.
 
 | What to check | Why it matters |
 | --- | --- |
+| [Live demo](https://saleops.duckdns.org/) | Public one-click proof of the deployed Sales Ops workflow. |
+| [Evidence map](docs/EVIDENCE_MAP.md) | Maps the repo to AI automation, RAG, approval flow, Bitrix24, Telegram, and self-hosting requirements. |
 | [Offer demo](docs/OFFER_DEMO.md) | One-command proof of transcript -> RAG -> scoring -> approval -> mock Bitrix CRM handoff. |
 | [Reviewer checklist](docs/REVIEWER_CHECKLIST.md) | Single public gate for tests, offer demo, and output validation. |
-| Live demo UI | `GET /` opens a one-click Sales Ops Control Tower demo. |
+| [Live demo notes](docs/LIVE_DEMO.md) | Public URLs and smoke checks for the deployed service. |
 | [Architecture notes](docs/ARCHITECTURE.md) | Shows the FastAPI/n8n/PostgreSQL boundary and why stateful logic stays in the backend. |
 | [Operations notes](docs/OPERATIONS.md) | Shows how the system is run, checked, and handed off. |
 | [n8n approval flow](docs/N8N_APPROVAL_FLOW.md) | Shows the webhook, Telegram payload, approval callback, and CRM handoff boundary. |
@@ -37,11 +39,11 @@ Best-fit evidence:
 
 Fast evaluation path:
 
-1. Start `docker compose up --build`.
-2. Open `http://127.0.0.1:8080/` and run the demo workflow.
-3. Run `python3 scripts/run_offer_demo.py`.
-4. Read `docs/OFFER_DEMO.md`.
-5. Run `bash scripts/verify_public.sh`.
+1. Open `https://saleops.duckdns.org/` and run the browser demo.
+2. Run `bash scripts/smoke_live_demo.sh`.
+3. Run `bash scripts/verify_public.sh`.
+4. Read `docs/EVIDENCE_MAP.md`.
+5. Read `docs/OFFER_DEMO.md`.
 6. Review `infra/n8n/` to see the external workflow boundary.
 
 ## System Shape
@@ -92,6 +94,13 @@ Full public verification gate:
 bash scripts/verify_public.sh
 ```
 
+Live deployment smoke:
+
+```bash
+bash scripts/smoke_live_demo.sh
+bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
+```
+
 ## Local Run
 
 ```bash
@@ -103,6 +112,13 @@ Demo UI:
 
 ```text
 http://127.0.0.1:8080/
+```
+
+Public demo:
+
+```text
+https://saleops.duckdns.org/
+https://leadscore.duckdns.org/
 ```
 
 API:
