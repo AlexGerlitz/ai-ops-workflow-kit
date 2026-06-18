@@ -97,7 +97,7 @@ Then open:
 | [Live Demo](./LIVE_DEMO.md) | Public deployment URL and public smoke checks. |
 | [Architecture](./ARCHITECTURE.md) | FastAPI/n8n/PostgreSQL/LLM boundaries and state ownership. |
 | [Operations](./OPERATIONS.md) | Local runtime, health checks, smoke test, logs, and handoff. |
-| [n8n Approval Flow](./N8N_APPROVAL_FLOW.md) | How webhook routing, Telegram payloads, and approval callbacks connect. |
+| [n8n Approval Flow](./N8N_APPROVAL_FLOW.md) | How importable transcript and Google Drive workflow routing, Telegram payloads, and approval callbacks connect. |
 | [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Google Drive, Telegram, and Bitrix24 dry-run contracts become real credentials later. |
 | [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, CRM handoff, idempotency, drain, background worker, and integration retry/dead-letter behavior. |
 
@@ -105,7 +105,7 @@ Then open:
 
 - AI workflow logic is backend-owned and testable.
 - The project has a browser-visible demo, not only README claims.
-- n8n is used as orchestration glue, not as hidden domain logic.
+- n8n is used as orchestration glue and connector routing, not as hidden domain logic.
 - LLM/RAG behavior has deterministic local fallbacks for repeatable review.
 - CRM mutation is queued only after explicit human approval.
 - CRM dispatch failures become retry/dead-letter state with `next_retry_at`, not invisible log-only errors.

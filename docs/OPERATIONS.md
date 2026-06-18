@@ -187,8 +187,17 @@ dry-run integration contracts.
 
 ## n8n Import
 
-Import `infra/n8n/call-transcript-approval.json` into n8n, then set the API URL in the HTTP Request node.
-The workflow accepts a transcript webhook, sends it to the FastAPI service, and returns the approval item.
+Import one of these workflows into n8n, then set the API URL in the HTTP Request nodes:
+
+```text
+infra/n8n/call-transcript-approval.json
+infra/n8n/google-drive-sales-ops-approval.json
+```
+
+The transcript workflow accepts a transcript webhook, sends it to the FastAPI service, and returns
+the approval item. The Google Drive workflow first sends exported Drive text to
+`POST /integrations/google-drive/import`, then sends the transcript event to
+`POST /webhooks/n8n/call-transcript`.
 
 See `docs/N8N_APPROVAL_FLOW.md` for the webhook payload, Telegram payload boundary, approval callback,
 and CRM handoff rule.

@@ -1,0 +1,160 @@
+{
+  "name": "Google Drive Sales Ops Approval Flow",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "sales-ops-google-drive",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "SalesOpsWebhook",
+      "name": "Sales Ops Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api:8080/integrations/google-drive/import",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify({ file_id: ($json.body?.drive_document?.file_id || $json.drive_document?.file_id || 'n8n-sales-playbook'), name: ($json.body?.drive_document?.name || $json.drive_document?.name || 'Sales playbook'), mime_type: ($json.body?.drive_document?.mime_type || $json.drive_document?.mime_type || 'application/vnd.google-apps.document'), text: ($json.body?.drive_document?.text || $json.drive_document?.text || ''), web_url: ($json.body?.drive_document?.web_url || $json.drive_document?.web_url || null), metadata: { source: 'n8n', workflow: 'google-drive-sales-ops-approval', original: ($json.body?.drive_document?.metadata || $json.drive_document?.metadata || {}) } }) }}"
+      },
+      "id": "ImportGoogleDriveText",
+      "name": "Import Google Drive Text",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        520,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api:8080/webhooks/n8n/call-transcript",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($('Sales Ops Webhook').item.json.body?.transcript_event || $('Sales Ops Webhook').item.json.transcript_event || $('Sales Ops Webhook').item.json.body || $('Sales Ops Webhook').item.json) }}"
+      },
+      "id": "AnalyzeTranscript",
+      "name": "Analyze Transcript",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        820,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "drive_source",
+              "name": "drive_source",
+              "value": "={{ $('Import Google Drive Text').item.json.source }}",
+              "type": "string"
+            },
+            {
+              "id": "approval_id",
+              "name": "approval_id",
+              "value": "={{ $json.approval.id }}",
+              "type": "string"
+            },
+            {
+              "id": "telegram_text",
+              "name": "telegram_text",
+              "value": "={{ 'Approve follow-up for ' + $json.customer_id + '\\nDrive source: ' + $('Import Google Drive Text').item.json.source + '\\nScore: ' + $json.score + '/100\\nRisk: ' + $json.analysis.risk_level + '\\nNext action: ' + $json.analysis.next_action + '\\nApproval ID: ' + $json.approval.id }}",
+              "type": "string"
+            },
+            {
+              "id": "crm_operation",
+              "name": "crm_operation",
+              "value": "={{ $json.analysis.crm_update.adapter + '/' + $json.analysis.crm_update.operation }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "BuildTelegramApprovalPayload",
+      "name": "Build Telegram Approval Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "Respond",
+      "name": "Return Approval Item",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Sales Ops Webhook": {
+      "main": [
+        [
+          {
+            "node": "Import Google Drive Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Import Google Drive Text": {
+      "main": [
+        [
+          {
+            "node": "Analyze Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Transcript": {
+      "main": [
+        [
+          {
+            "node": "Build Telegram Approval Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Telegram Approval Payload": {
+      "main": [
+        [
+          {
+            "node": "Return Approval Item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ai-ops-google-drive-sales-ops"
+}

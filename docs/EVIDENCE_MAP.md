@@ -6,7 +6,7 @@ For a vacancy-style checklist with verification commands and production boundari
 
 | Requirement | Evidence |
 | --- | --- |
-| AI workflow orchestration | `app/main.py`, `infra/n8n/call-transcript-approval.json`, `docs/N8N_APPROVAL_FLOW.md` |
+| AI workflow orchestration | `app/main.py`, `infra/n8n/call-transcript-approval.json`, `infra/n8n/google-drive-sales-ops-approval.json`, `docs/N8N_APPROVAL_FLOW.md` |
 | Google Drive intake | `POST /integrations/google-drive/import`, `GoogleDriveImportIn`, `docs/INTEGRATION_SKELETON.md` |
 | RAG and embeddings | `app/chunking.py`, `app/embeddings.py`, `app/store.py`, `POST /documents`, `POST /query` |
 | pgvector-ready persistence | `app/store.py`, `docker-compose.yml`, `docs/ARCHITECTURE.md` |

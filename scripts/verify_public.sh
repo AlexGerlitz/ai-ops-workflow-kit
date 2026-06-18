@@ -40,6 +40,22 @@ assert payload["bitrix24_dispatch"]["attempt_count"] == 0
 assert payload["bitrix24_dispatch"]["max_attempts"] >= 1
 assert payload["bitrix24_dispatch"]["method"] == "crm.lead.update"
 
+workflow_dir = Path("infra/n8n")
+for workflow_name in (
+    "call-transcript-approval.json",
+    "google-drive-sales-ops-approval.json",
+):
+    workflow = json.loads((workflow_dir / workflow_name).read_text(encoding="utf-8"))
+    node_urls = {
+        node.get("parameters", {}).get("url")
+        for node in workflow["nodes"]
+        if node["type"] == "n8n-nodes-base.httpRequest"
+    }
+    assert "http://api:8080/webhooks/n8n/call-transcript" in node_urls
+    if workflow_name.startswith("google-drive"):
+        assert "http://api:8080/integrations/google-drive/import" in node_urls
+        assert "Sales Ops Webhook" in workflow["connections"]
+
 from fastapi.testclient import TestClient
 from app.main import app
 

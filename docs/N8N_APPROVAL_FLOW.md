@@ -4,22 +4,31 @@ This project keeps n8n useful at the edge while the backend owns durable workflo
 
 ## Importable Workflow
 
-Import:
+Import either workflow:
 
 ```text
 infra/n8n/call-transcript-approval.json
+infra/n8n/google-drive-sales-ops-approval.json
 ```
 
-The example workflow does four things:
+`call-transcript-approval.json` does four things:
 
 1. accepts a normalized transcript webhook;
 2. sends it to `POST /webhooks/n8n/call-transcript`;
 3. builds a Telegram-ready approval payload;
 4. returns the approval item and CRM operation summary.
 
+`google-drive-sales-ops-approval.json` adds the document-intake edge:
+
+1. accepts a sales-ops webhook with exported Google Drive text and a transcript event;
+2. sends the Drive payload to `POST /integrations/google-drive/import`;
+3. sends the transcript payload to `POST /webhooks/n8n/call-transcript`;
+4. builds a Telegram-ready approval payload with the Drive source and CRM operation summary.
+
 When n8n runs inside `docker compose`, the API URL is:
 
 ```text
+http://api:8080/integrations/google-drive/import
 http://api:8080/webhooks/n8n/call-transcript
 ```
 
@@ -37,6 +46,8 @@ https://saleops.duckdns.org
 
 ## Input Contract
 
+Transcript-only workflow:
+
 ```json
 {
   "call_id": "CALL-2026-001",
@@ -45,6 +56,32 @@ https://saleops.duckdns.org
   "metadata": {
     "source": "telephony",
     "manager": "sales-demo"
+  }
+}
+```
+
+Google Drive + transcript workflow:
+
+```json
+{
+  "drive_document": {
+    "file_id": "sales-playbook",
+    "name": "Sales playbook",
+    "mime_type": "application/vnd.google-apps.document",
+    "text": "Exported Google Drive document text...",
+    "web_url": "https://drive.google.com/file/d/sales-playbook",
+    "metadata": {
+      "folder": "knowledge-base"
+    }
+  },
+  "transcript_event": {
+    "call_id": "CALL-2026-001",
+    "customer_id": "LEAD-ACME-42",
+    "transcript": "Client transcript text...",
+    "metadata": {
+      "source": "telephony",
+      "manager": "sales-demo"
+    }
   }
 }
 ```
@@ -60,8 +97,9 @@ The backend returns:
 - approval item;
 - CRM update payload inside the approval context.
 
-The n8n workflow creates a Telegram-ready text payload from this response. A real Telegram node can
-send that text with approve/reject buttons or links.
+The n8n workflows create a Telegram-ready text payload from this response. A real Telegram node can
+send that text with approve/reject buttons or links. In the Google Drive workflow, n8n owns OAuth and
+document export while the backend owns normalization, RAG, scoring, approval state, and CRM handoff.
 
 The backend also exposes a direct dry-run Telegram skeleton:
 

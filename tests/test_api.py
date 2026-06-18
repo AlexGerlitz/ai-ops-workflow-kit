@@ -1,4 +1,6 @@
+import json
 import time
+from pathlib import Path
 from uuid import UUID
 
 from fastapi.testclient import TestClient
@@ -56,6 +58,43 @@ def test_integration_runtime_reports_dry_run_capabilities() -> None:
     assert capabilities["google_drive"]["configured"] is False
     assert capabilities["bitrix24"]["dry_run"] is True
     assert capabilities["telegram.approval"]["webhook_secret_configured"] is False
+
+
+def test_n8n_workflow_artifacts_cover_drive_import_and_transcript_analysis() -> None:
+    workflow_dir = Path("infra/n8n")
+    transcript_workflow = json.loads(
+        (workflow_dir / "call-transcript-approval.json").read_text(encoding="utf-8")
+    )
+    drive_workflow = json.loads(
+        (workflow_dir / "google-drive-sales-ops-approval.json").read_text(encoding="utf-8")
+    )
+
+    transcript_urls = {
+        node.get("parameters", {}).get("url")
+        for node in transcript_workflow["nodes"]
+        if node["type"] == "n8n-nodes-base.httpRequest"
+    }
+    assert "http://api:8080/webhooks/n8n/call-transcript" in transcript_urls
+
+    drive_nodes = {node["name"]: node for node in drive_workflow["nodes"]}
+    assert drive_nodes["Sales Ops Webhook"]["type"] == "n8n-nodes-base.webhook"
+    assert (
+        drive_nodes["Import Google Drive Text"]["parameters"]["url"]
+        == "http://api:8080/integrations/google-drive/import"
+    )
+    assert (
+        drive_nodes["Analyze Transcript"]["parameters"]["url"]
+        == "http://api:8080/webhooks/n8n/call-transcript"
+    )
+    assert "Drive source:" in drive_nodes["Build Telegram Approval Payload"]["parameters"][
+        "assignments"
+    ]["assignments"][2]["value"]
+    assert drive_workflow["connections"]["Sales Ops Webhook"]["main"][0][0]["node"] == (
+        "Import Google Drive Text"
+    )
+    assert drive_workflow["connections"]["Import Google Drive Text"]["main"][0][0]["node"] == (
+        "Analyze Transcript"
+    )
 
 
 def test_public_demo_run_proves_workflow_contract() -> None:

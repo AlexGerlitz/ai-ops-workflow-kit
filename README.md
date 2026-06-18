@@ -27,7 +27,7 @@ prompt demo.
 | [Live demo notes](docs/LIVE_DEMO.md) | Public URLs and smoke checks for the deployed service. |
 | [Architecture notes](docs/ARCHITECTURE.md) | Shows the FastAPI/n8n/PostgreSQL boundary and why stateful logic stays in the backend. |
 | [Operations notes](docs/OPERATIONS.md) | Shows how the system is run, checked, and handed off. |
-| [n8n approval flow](docs/N8N_APPROVAL_FLOW.md) | Shows the webhook, Telegram payload, approval callback, and CRM handoff boundary. |
+| [n8n approval flow](docs/N8N_APPROVAL_FLOW.md) | Shows importable transcript and Google Drive workflows, Telegram payloads, approval callbacks, and CRM handoff boundaries. |
 | [Integration skeleton](docs/INTEGRATION_SKELETON.md) | Shows dry-run Telegram, Bitrix24, idempotency, retry scheduling, drain, opt-in worker, and dead-letter contracts before credentials are connected. |
 | [Tests](tests/) | Shows deterministic coverage around chunking, retrieval, approvals, and API behavior. |
 | [CI workflow](.github/workflows/ci.yml) | Shows the public verification gate. |
@@ -79,7 +79,7 @@ flowchart LR
 - Telegram callback webhook for inline approve/reject decisions.
 - Optional Telegram webhook secret verification for production callbacks.
 - Approval state machine for Telegram, CRM, or internal review loops.
-- n8n workflow example for webhook-to-API-to-approval routing.
+- n8n workflow examples for Google Drive-to-RAG and webhook-to-API-to-approval routing.
 - Runtime evidence endpoints for version, deploy environment, counters, and Prometheus-style metrics.
 - Tests around chunking, embeddings, retrieval, and approval state transitions.
 
@@ -194,7 +194,7 @@ curl -X POST http://127.0.0.1:8080/approvals \
 ```text
 app/              FastAPI application, workflow domain code, and browser demo payloads
 demo/             Synthetic reference playbook and transcript fixtures
-infra/n8n/        Importable n8n workflow example
+infra/n8n/        Importable n8n workflow examples
 docs/             Offer demo, reviewer checklist, architecture, n8n, integrations and operations notes
 scripts/          Reviewer-facing demo runner and public verification gate
 tests/            Unit tests for the core behavior
