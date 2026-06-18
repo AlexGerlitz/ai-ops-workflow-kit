@@ -16,6 +16,7 @@ prompt demo.
 
 | What to check | Why it matters |
 | --- | --- |
+| [Offer demo](docs/OFFER_DEMO.md) | One-command proof of transcript -> RAG -> scoring -> approval -> mock Bitrix CRM handoff. |
 | [Architecture notes](docs/ARCHITECTURE.md) | Shows the FastAPI/n8n/PostgreSQL boundary and why stateful logic stays in the backend. |
 | [Operations notes](docs/OPERATIONS.md) | Shows how the system is run, checked, and handed off. |
 | [Tests](tests/) | Shows deterministic coverage around chunking, retrieval, approvals, and API behavior. |
@@ -32,10 +33,10 @@ Best-fit evidence:
 
 Fast evaluation path:
 
-1. Read `docs/ARCHITECTURE.md`.
-2. Run `pytest -q`.
-3. Start `docker compose up --build`.
-4. Try `POST /documents`, `POST /query`, and `POST /approvals`.
+1. Run `python scripts/run_offer_demo.py`.
+2. Read `docs/OFFER_DEMO.md`.
+3. Run `pytest -q`.
+4. Start `docker compose up --build`.
 5. Review `infra/n8n/` to see the external workflow boundary.
 
 ## System Shape
@@ -57,9 +58,26 @@ flowchart LR
 - RAG ingestion and retrieval with deterministic local embeddings for repeatable development.
 - pgvector-ready schema and Docker Compose runtime.
 - Transcript webhook that produces a structured analysis and a human approval item.
+- Mock Bitrix24 CRM handoff event queued only after human approval.
 - Approval state machine for Telegram, CRM, or internal review loops.
 - n8n workflow example for webhook-to-API-to-approval routing.
 - Tests around chunking, embeddings, retrieval, and approval state transitions.
+
+## Offer Demo
+
+```bash
+python -m pip install -r requirements.txt
+python scripts/run_offer_demo.py
+```
+
+The script runs a complete synthetic sales workflow without external API keys:
+
+```text
+sales playbook -> RAG retrieval -> call transcript webhook -> AI scoring
+-> follow-up approval -> mock Bitrix24 CRM handoff event
+```
+
+See [docs/OFFER_DEMO.md](docs/OFFER_DEMO.md) for the reviewer path and expected output shape.
 
 ## Local Run
 
@@ -106,16 +124,21 @@ curl -X POST http://127.0.0.1:8080/approvals \
 | `POST /documents` | Chunk and ingest text into the vector store. |
 | `POST /query` | Retrieve context and produce an answer draft. |
 | `POST /approvals` | Create a human-in-the-loop approval item. |
+| `GET /approvals` | List approval items, optionally filtered by status. |
+| `GET /approvals/{id}` | Inspect one approval item. |
 | `POST /approvals/{id}/approve` | Approve an item and attach reviewer notes. |
 | `POST /approvals/{id}/reject` | Reject an item and attach reviewer notes. |
+| `GET /integration-events` | Inspect queued CRM/integration handoff events. |
 | `POST /webhooks/n8n/call-transcript` | Accept a transcript event, score it, ingest it, and create approval work. |
 
 ## Repository Layout
 
 ```text
 app/              FastAPI application and workflow domain code
+demo/             Synthetic sales playbook and transcript for the offer demo
 infra/n8n/        Importable n8n workflow example
 docs/             Architecture and operations notes
+scripts/          Reviewer-facing demo runner
 tests/            Unit tests for the core behavior
 docker-compose.yml
 Dockerfile

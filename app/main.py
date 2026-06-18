@@ -6,12 +6,15 @@ from fastapi import FastAPI, HTTPException
 from app.chunking import chunk_text
 from app.embeddings import HashEmbeddingProvider
 from app.llm import LLMClient
+from app.sales_workflow import build_call_analysis
 from app.schemas import (
     ApprovalDecision,
     ApprovalIn,
     ApprovalOut,
+    ApprovalStatus,
     DocumentIn,
     DocumentOut,
+    IntegrationEventOut,
     QueryIn,
     QueryOut,
     TranscriptWebhookIn,
@@ -77,12 +80,27 @@ def create_approval(payload: ApprovalIn) -> ApprovalOut:
     return store.create_approval(payload)
 
 
+@app.get("/approvals", response_model=list[ApprovalOut])
+def list_approvals(status: ApprovalStatus | None = None) -> list[ApprovalOut]:
+    return store.list_approvals(status)
+
+
+@app.get("/approvals/{item_id}", response_model=ApprovalOut)
+def get_approval(item_id: UUID) -> ApprovalOut:
+    try:
+        return store.get_approval(item_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="approval item not found") from exc
+
+
 @app.post("/approvals/{item_id}/approve", response_model=ApprovalOut)
 def approve(item_id: UUID, decision: ApprovalDecision) -> ApprovalOut:
     try:
-        return store.approve(item_id, decision.reviewer, decision.notes)
+        approval = store.approve(item_id, decision.reviewer, decision.notes)
     except (KeyError, ValueError) as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+    queue_crm_handoff_if_needed(approval)
+    return approval
 
 
 @app.post("/approvals/{item_id}/reject", response_model=ApprovalOut)
@@ -93,8 +111,17 @@ def reject(item_id: UUID, decision: ApprovalDecision) -> ApprovalOut:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
+@app.get("/integration-events", response_model=list[IntegrationEventOut])
+def list_integration_events(adapter_key: str | None = None) -> list[IntegrationEventOut]:
+    return store.list_integration_events(adapter_key)
+
+
 @app.post("/webhooks/n8n/call-transcript", response_model=TranscriptWebhookOut)
 def call_transcript_webhook(payload: TranscriptWebhookIn) -> TranscriptWebhookOut:
+    knowledge_context = store.search(
+        embedding_provider.embed(payload.transcript),
+        settings.top_k,
+    )
     ingest_document(
         DocumentIn(
             source=f"call://{payload.call_id}",
@@ -107,16 +134,36 @@ def call_transcript_webhook(payload: TranscriptWebhookIn) -> TranscriptWebhookOu
         )
     )
     transcript_score = score_transcript(payload.transcript)
+    analysis = build_call_analysis(
+        call_id=payload.call_id,
+        customer_id=payload.customer_id,
+        transcript=payload.transcript,
+        transcript_score=transcript_score,
+        knowledge_context=knowledge_context,
+    )
     approval = store.create_approval(
         ApprovalIn(
             kind="call_follow_up",
             title=f"Review follow-up for call {payload.call_id}",
-            draft=build_follow_up_draft(payload.transcript, transcript_score.score),
+            draft=analysis.follow_up_draft,
             context={
                 "customer_id": payload.customer_id,
                 "call_id": payload.call_id,
                 "score": transcript_score.score,
                 "signals": transcript_score.signals,
+                "risk_level": analysis.risk_level,
+                "missing_signals": analysis.missing_signals,
+                "objections": analysis.objections,
+                "next_action": analysis.next_action,
+                "crm_update": analysis.crm_update,
+                "knowledge_context_sources": [
+                    {
+                        "source": context.source,
+                        "score": context.score,
+                        "metadata": context.metadata,
+                    }
+                    for context in knowledge_context
+                ],
             },
         )
     )
@@ -125,16 +172,20 @@ def call_transcript_webhook(payload: TranscriptWebhookIn) -> TranscriptWebhookOu
         customer_id=payload.customer_id,
         score=transcript_score.score,
         signals=transcript_score.signals,
+        analysis=analysis,
         approval=approval,
     )
 
 
-def build_follow_up_draft(transcript: str, score: int) -> str:
-    excerpt = transcript.strip().replace("\n", " ")[:500]
-    return (
-        f"Call score: {score}/100.\n\n"
-        "Suggested next action: confirm unresolved buying criteria, send a concise recap, "
-        "and ask for a dated next step.\n\n"
-        f"Transcript excerpt: {excerpt}"
+def queue_crm_handoff_if_needed(approval: ApprovalOut) -> None:
+    crm_update = approval.context.get("crm_update")
+    if approval.kind != "call_follow_up" or not isinstance(crm_update, dict):
+        return
+    adapter_key = str(crm_update.get("adapter") or "bitrix24.mock")
+    operation = str(crm_update.get("operation") or "upsert_lead_follow_up")
+    store.create_integration_event(
+        adapter_key=adapter_key,
+        operation=operation,
+        payload=crm_update,
+        source_approval_id=approval.id,
     )
-

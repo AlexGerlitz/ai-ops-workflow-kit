@@ -30,6 +30,17 @@ class RetrievedContext(BaseModel):
     score: float
 
 
+class CallAnalysisOut(BaseModel):
+    summary: str
+    risk_level: str
+    missing_signals: list[str]
+    objections: list[str]
+    next_action: str
+    follow_up_draft: str
+    crm_update: dict[str, Any]
+    knowledge_context: list[RetrievedContext]
+
+
 class QueryOut(BaseModel):
     answer: str
     contexts: list[RetrievedContext]
@@ -40,6 +51,12 @@ class ApprovalStatus(str, Enum):
     pending = "pending"
     approved = "approved"
     rejected = "rejected"
+
+
+class IntegrationEventStatus(str, Enum):
+    queued = "queued"
+    sent = "sent"
+    failed = "failed"
 
 
 class ApprovalIn(BaseModel):
@@ -79,5 +96,16 @@ class TranscriptWebhookOut(BaseModel):
     customer_id: str
     score: int
     signals: dict[str, bool]
+    analysis: CallAnalysisOut
     approval: ApprovalOut
 
+
+class IntegrationEventOut(BaseModel):
+    id: UUID
+    adapter_key: str
+    operation: str
+    status: IntegrationEventStatus
+    payload: dict[str, Any]
+    source_approval_id: UUID | None = None
+    created_at: datetime
+    updated_at: datetime

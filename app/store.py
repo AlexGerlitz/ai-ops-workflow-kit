@@ -10,7 +10,14 @@ import psycopg
 from psycopg.rows import dict_row
 
 from app.embeddings import vector_literal
-from app.schemas import ApprovalIn, ApprovalOut, ApprovalStatus, RetrievedContext
+from app.schemas import (
+    ApprovalIn,
+    ApprovalOut,
+    ApprovalStatus,
+    IntegrationEventOut,
+    IntegrationEventStatus,
+    RetrievedContext,
+)
 
 
 @dataclass
@@ -33,9 +40,24 @@ class Store(Protocol):
 
     def create_approval(self, item: ApprovalIn) -> ApprovalOut: ...
 
+    def get_approval(self, item_id: UUID) -> ApprovalOut: ...
+
+    def list_approvals(self, status: ApprovalStatus | None = None) -> list[ApprovalOut]: ...
+
     def approve(self, item_id: UUID, reviewer: str, notes: str) -> ApprovalOut: ...
 
     def reject(self, item_id: UUID, reviewer: str, notes: str) -> ApprovalOut: ...
+
+    def create_integration_event(
+        self,
+        *,
+        adapter_key: str,
+        operation: str,
+        payload: dict[str, Any],
+        source_approval_id: UUID | None = None,
+    ) -> IntegrationEventOut: ...
+
+    def list_integration_events(self, adapter_key: str | None = None) -> list[IntegrationEventOut]: ...
 
 
 class InMemoryStore:
@@ -44,6 +66,7 @@ class InMemoryStore:
     def __init__(self) -> None:
         self.chunks: list[ChunkRecord] = []
         self.approvals: dict[UUID, ApprovalOut] = {}
+        self.integration_events: dict[UUID, IntegrationEventOut] = {}
 
     def init(self) -> None:
         return None
@@ -83,6 +106,15 @@ class InMemoryStore:
         self.approvals[approval.id] = approval
         return approval
 
+    def get_approval(self, item_id: UUID) -> ApprovalOut:
+        return self.approvals[item_id]
+
+    def list_approvals(self, status: ApprovalStatus | None = None) -> list[ApprovalOut]:
+        approvals = list(self.approvals.values())
+        if status is not None:
+            approvals = [approval for approval in approvals if approval.status == status]
+        return sorted(approvals, key=lambda approval: approval.created_at)
+
     def approve(self, item_id: UUID, reviewer: str, notes: str) -> ApprovalOut:
         return self._transition(item_id, ApprovalStatus.approved, reviewer, notes)
 
@@ -103,6 +135,34 @@ class InMemoryStore:
         )
         self.approvals[item_id] = updated
         return updated
+
+    def create_integration_event(
+        self,
+        *,
+        adapter_key: str,
+        operation: str,
+        payload: dict[str, Any],
+        source_approval_id: UUID | None = None,
+    ) -> IntegrationEventOut:
+        now = datetime.now(UTC)
+        event = IntegrationEventOut(
+            id=uuid4(),
+            adapter_key=adapter_key,
+            operation=operation,
+            status=IntegrationEventStatus.queued,
+            payload=payload,
+            source_approval_id=source_approval_id,
+            created_at=now,
+            updated_at=now,
+        )
+        self.integration_events[event.id] = event
+        return event
+
+    def list_integration_events(self, adapter_key: str | None = None) -> list[IntegrationEventOut]:
+        events = list(self.integration_events.values())
+        if adapter_key is not None:
+            events = [event for event in events if event.adapter_key == adapter_key]
+        return sorted(events, key=lambda event: event.created_at)
 
 
 class PostgresVectorStore:
@@ -138,6 +198,20 @@ class PostgresVectorStore:
                     status text NOT NULL,
                     reviewer text,
                     notes text,
+                    created_at timestamptz NOT NULL DEFAULT now(),
+                    updated_at timestamptz NOT NULL DEFAULT now()
+                )
+                """
+            )
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS integration_events (
+                    id uuid PRIMARY KEY,
+                    adapter_key text NOT NULL,
+                    operation text NOT NULL,
+                    status text NOT NULL,
+                    payload jsonb NOT NULL DEFAULT '{}',
+                    source_approval_id uuid,
                     created_at timestamptz NOT NULL DEFAULT now(),
                     updated_at timestamptz NOT NULL DEFAULT now()
                 )
@@ -204,6 +278,29 @@ class PostgresVectorStore:
             ).fetchone()
         return self._approval_from_row(row)
 
+    def get_approval(self, item_id: UUID) -> ApprovalOut:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT * FROM approval_items WHERE id = %s",
+                (item_id,),
+            ).fetchone()
+        if row is None:
+            raise KeyError(str(item_id))
+        return self._approval_from_row(row)
+
+    def list_approvals(self, status: ApprovalStatus | None = None) -> list[ApprovalOut]:
+        with self._connect() as conn:
+            if status is None:
+                rows = conn.execute(
+                    "SELECT * FROM approval_items ORDER BY created_at ASC",
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT * FROM approval_items WHERE status = %s ORDER BY created_at ASC",
+                    (status.value,),
+                ).fetchall()
+        return [self._approval_from_row(row) for row in rows]
+
     def approve(self, item_id: UUID, reviewer: str, notes: str) -> ApprovalOut:
         return self._transition(item_id, ApprovalStatus.approved, reviewer, notes)
 
@@ -239,6 +336,59 @@ class PostgresVectorStore:
             updated_at=row["updated_at"],
         )
 
+    def create_integration_event(
+        self,
+        *,
+        adapter_key: str,
+        operation: str,
+        payload: dict[str, Any],
+        source_approval_id: UUID | None = None,
+    ) -> IntegrationEventOut:
+        event_id = uuid4()
+        with self._connect() as conn:
+            row = conn.execute(
+                """
+                INSERT INTO integration_events
+                    (id, adapter_key, operation, status, payload, source_approval_id)
+                VALUES (%s, %s, %s, %s, %s::jsonb, %s)
+                RETURNING *
+                """,
+                (
+                    event_id,
+                    adapter_key,
+                    operation,
+                    IntegrationEventStatus.queued.value,
+                    json.dumps(payload),
+                    source_approval_id,
+                ),
+            ).fetchone()
+        return self._event_from_row(row)
+
+    def list_integration_events(self, adapter_key: str | None = None) -> list[IntegrationEventOut]:
+        with self._connect() as conn:
+            if adapter_key is None:
+                rows = conn.execute(
+                    "SELECT * FROM integration_events ORDER BY created_at ASC",
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT * FROM integration_events WHERE adapter_key = %s ORDER BY created_at ASC",
+                    (adapter_key,),
+                ).fetchall()
+        return [self._event_from_row(row) for row in rows]
+
+    def _event_from_row(self, row: dict[str, Any]) -> IntegrationEventOut:
+        return IntegrationEventOut(
+            id=row["id"],
+            adapter_key=row["adapter_key"],
+            operation=row["operation"],
+            status=IntegrationEventStatus(row["status"]),
+            payload=row["payload"],
+            source_approval_id=row["source_approval_id"],
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
+        )
+
     def _connect(self) -> psycopg.Connection:
         return psycopg.connect(self.database_url, row_factory=dict_row)
 
@@ -247,4 +397,3 @@ def build_store(database_url: str | None, embedding_dim: int) -> Store:
     if database_url:
         return PostgresVectorStore(database_url, embedding_dim)
     return InMemoryStore()
-

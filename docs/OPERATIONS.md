@@ -51,8 +51,26 @@ curl -fsS -X POST http://127.0.0.1:8080/query \
   -d '{"question":"What routing is mentioned?","top_k":2}'
 ```
 
+## Offer Demo
+
+Run the complete reviewer demo without Docker or API keys:
+
+```bash
+python scripts/run_offer_demo.py
+```
+
+The demo uses the synthetic files in `demo/` and proves:
+
+- playbook ingestion;
+- RAG query with source context;
+- transcript webhook analysis;
+- approval creation;
+- approval transition;
+- mock Bitrix24 integration event queued after approval.
+
+See `docs/OFFER_DEMO.md` for the expected output shape.
+
 ## n8n Import
 
 Import `infra/n8n/call-transcript-approval.json` into n8n, then set the API URL in the HTTP Request node.
 The workflow accepts a transcript webhook, sends it to the FastAPI service, and returns the approval item.
-

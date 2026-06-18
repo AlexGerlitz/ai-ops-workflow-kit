@@ -29,6 +29,38 @@
     },
     {
       "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "approval_id",
+              "name": "approval_id",
+              "value": "={{ $json.approval.id }}",
+              "type": "string"
+            },
+            {
+              "id": "telegram_text",
+              "name": "telegram_text",
+              "value": "={{ 'Approve follow-up for ' + $json.customer_id + '\\nScore: ' + $json.score + '/100\\nRisk: ' + $json.analysis.risk_level + '\\nNext action: ' + $json.analysis.next_action + '\\nApproval ID: ' + $json.approval.id }}",
+              "type": "string"
+            },
+            {
+              "id": "crm_operation",
+              "name": "crm_operation",
+              "value": "={{ $json.analysis.crm_update.adapter + '/' + $json.analysis.crm_update.operation }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "BuildTelegramApprovalPayload",
+      "name": "Build Telegram Approval Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [820, 260]
+    },
+    {
+      "parameters": {
         "respondWith": "json",
         "responseBody": "={{ $json }}"
       },
@@ -36,7 +68,7 @@
       "name": "Return Approval Item",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [860, 260]
+      "position": [1080, 260]
     }
   ],
   "connections": {
@@ -55,6 +87,17 @@
       "main": [
         [
           {
+            "node": "Build Telegram Approval Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Telegram Approval Payload": {
+      "main": [
+        [
+          {
             "node": "Return Approval Item",
             "type": "main",
             "index": 0
@@ -69,4 +112,3 @@
   },
   "versionId": "ai-ops-workflow-kit"
 }
-

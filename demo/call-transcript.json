@@ -1,0 +1,10 @@
+{
+  "call_id": "CALL-2026-001",
+  "customer_id": "LEAD-ACME-42",
+  "transcript": "Manager: What problem are you trying to solve this month? Client: We need a workflow that stops leads from being lost after calls. Price is important, but our director already approved the budget if the first version works. Manager: Can we agree on the next step? Client: Yes, send a recap today and let's have a short meeting tomorrow. We need this this month.",
+  "metadata": {
+    "source": "demo",
+    "channel": "telephony",
+    "manager": "sales-demo"
+  }
+}
