@@ -15,6 +15,7 @@ grep -q "Telegram callback approval" <<<"$home_payload"
 grep -q "Outbox drain" <<<"$home_payload"
 grep -q "Worker state" <<<"$home_payload"
 runtime_payload="$(curl -fsS "$BASE_URL/runtime")"
+llm_runtime_payload="$(curl -fsS "$BASE_URL/llm/runtime")"
 metrics_payload="$(curl -fsS "$BASE_URL/metrics")"
 payload="$(curl -fsS -X POST "$BASE_URL/demo/run")"
 approval_payload="$(curl -fsS -X POST "$BASE_URL/approvals" \
@@ -47,7 +48,7 @@ telegram_callback_response="$(curl -fsS -X POST "$BASE_URL/webhooks/telegram/app
   -H "content-type: application/json" \
   -d "$telegram_callback_payload")"
 drain_response="$(curl -fsS -X POST "$BASE_URL/integrations/bitrix24/drain?limit=100")"
-RUNTIME_PAYLOAD="$runtime_payload" METRICS_PAYLOAD="$metrics_payload" PAYLOAD="$payload" TELEGRAM_CALLBACK_RESPONSE="$telegram_callback_response" DRAIN_RESPONSE="$drain_response" python3 - "$BASE_URL" "$CALLBACK_BASE_URL" <<'PY'
+RUNTIME_PAYLOAD="$runtime_payload" LLM_RUNTIME_PAYLOAD="$llm_runtime_payload" METRICS_PAYLOAD="$metrics_payload" PAYLOAD="$payload" TELEGRAM_CALLBACK_RESPONSE="$telegram_callback_response" DRAIN_RESPONSE="$drain_response" python3 - "$BASE_URL" "$CALLBACK_BASE_URL" <<'PY'
 import json
 import os
 import sys
@@ -56,17 +57,31 @@ expected_base_url = sys.argv[1].rstrip("/")
 expected_callback_base_url = sys.argv[2].rstrip("/")
 payload = json.loads(os.environ["PAYLOAD"])
 runtime_payload = json.loads(os.environ["RUNTIME_PAYLOAD"])
+llm_runtime_payload = json.loads(os.environ["LLM_RUNTIME_PAYLOAD"])
 metrics_payload = os.environ["METRICS_PAYLOAD"]
 telegram_callback_response = json.loads(os.environ["TELEGRAM_CALLBACK_RESPONSE"])
 drain_response = json.loads(os.environ["DRAIN_RESPONSE"])
 
 assert runtime_payload["ok"] is True
 assert runtime_payload["public_base_url"] == expected_callback_base_url
+assert runtime_payload["llm"]["selected_provider"] in {"local", "openai", "claude", "gemini"}
+assert set(runtime_payload["llm"]["supported_providers"]) == {
+    "local",
+    "openai",
+    "claude",
+    "gemini",
+}
+assert llm_runtime_payload["selected_provider"] == runtime_payload["llm"]["selected_provider"]
+required_env = {
+    env for provider in llm_runtime_payload["providers"] for env in provider["required_env"]
+}
+assert {"OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"} <= required_env
 assert "demo_runs_total" in runtime_payload["counters"]
 assert runtime_payload["workers"]["bitrix24_outbox"]["enabled"] is False
 assert runtime_payload["workers"]["bitrix24_outbox"]["active"] is False
 assert "aiops_runtime_info" in metrics_payload
 assert payload["runtime"]["ok"] is True
+assert payload["runtime"]["llm"]["selected_provider"] == runtime_payload["llm"]["selected_provider"]
 assert payload["google_drive_import"]["adapter_key"] == "google_drive"
 assert payload["google_drive_import"]["source"].startswith("gdrive://")
 assert payload["call_analysis"]["score"] >= 80
@@ -96,6 +111,7 @@ print(f"base_url={expected_base_url}")
 print(f"callback_base_url={expected_callback_base_url}")
 print(f"version={runtime_payload['version']}")
 print(f"git_sha={runtime_payload['git_sha']}")
+print(f"llm={runtime_payload['llm']['selected_provider']}")
 print(f"score={payload['call_analysis']['score']}")
 print(f"google_drive={payload['google_drive_import']['source']}")
 print(f"approval={payload['approval']['status']}")

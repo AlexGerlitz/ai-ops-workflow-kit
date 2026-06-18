@@ -30,6 +30,7 @@ https://leadscore.duckdns.org/
 ```bash
 curl http://127.0.0.1:8080/health
 curl http://127.0.0.1:8080/runtime
+curl http://127.0.0.1:8080/llm/runtime
 curl http://127.0.0.1:8080/metrics
 ```
 
@@ -55,12 +56,45 @@ development, not for production.
 - deploy environment;
 - storage mode;
 - public callback base URL;
+- selected LLM provider and configured provider names;
 - integration readiness;
 - worker readiness;
 - workflow counters.
 
+`GET /llm/runtime` reports the provider boundary in more detail: requested provider, selected
+provider, supported providers, required env vars, and whether each provider is configured. It does
+not return API keys.
+
 `GET /metrics` exposes the same runtime identity and workflow counters in Prometheus text format.
 This is intentionally dependency-light so it works in local review, Docker, and the public demo.
+
+## LLM Providers
+
+The default mode is deterministic and review-safe:
+
+```env
+LLM_PROVIDER=auto
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+GEMINI_API_KEY=
+```
+
+With no provider key configured, `/query` uses the local extractive fallback from retrieved context.
+When a key is configured, `LLM_PROVIDER=auto` selects providers in this order: OpenAI, Claude/Anthropic,
+Gemini. A provider can also be forced explicitly:
+
+```env
+LLM_PROVIDER=openai
+OPENAI_MODEL=gpt-4.1-mini
+
+LLM_PROVIDER=claude
+ANTHROPIC_MODEL=claude-sonnet-4-20250514
+
+LLM_PROVIDER=gemini
+GEMINI_MODEL=gemini-2.5-flash
+```
+
+Provider API keys stay in deployment configuration and are never committed.
 
 ## Logs
 
@@ -116,6 +150,7 @@ The demo uses synthetic sales payloads and proves:
 
 - playbook ingestion;
 - RAG query with source context;
+- LLM provider runtime and local fallback state;
 - transcript webhook analysis;
 - approval creation;
 - approval transition;
@@ -172,7 +207,8 @@ bash scripts/verify_public.sh
 ```
 
 The gate runs tests, runs the offer demo, and validates that Google Drive import, RAG retrieval,
-approval, mock Bitrix24 handoff, runtime metrics, and outbox dispatch state are present in the output.
+LLM provider boundary, approval, mock Bitrix24 handoff, runtime metrics, and outbox dispatch state
+are present in the output.
 
 ## Live Deployment Smoke
 
@@ -183,7 +219,7 @@ bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 
 This verifies the public Caddy/HAProxy route, browser demo HTML, `/demo/run`, Google Drive import,
 approval callback base URL, Telegram callback webhook, runtime evidence, metrics endpoint, and
-dry-run integration contracts.
+dry-run integration contracts. It also checks `/llm/runtime`.
 
 ## n8n Import
 

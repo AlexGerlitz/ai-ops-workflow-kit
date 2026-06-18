@@ -9,7 +9,7 @@ AI Ops Workflow Kit separates orchestration from durable application logic.
 | n8n | Webhooks, connector routing, scheduling, Telegram notifications, and external workflow edges. |
 | FastAPI service | Google Drive import, RAG ingestion/query, transcript scoring, approval state, integration contracts. |
 | PostgreSQL + pgvector | Durable document chunks, metadata, vector search, approval records. |
-| LLM adapter | Optional generation layer with a deterministic fallback for local operation. |
+| LLM adapter | Provider boundary for OpenAI, Claude/Anthropic, Gemini, and deterministic local fallback. |
 | Integration event store | Idempotent outbox boundary for CRM handoff after human approval. |
 | Integration adapters | Dry-run or real Google Drive import, Telegram approval, and Bitrix24 dispatch clients. |
 
@@ -29,8 +29,12 @@ AI Ops Workflow Kit separates orchestration from durable application logic.
 1. A caller sends `POST /query`.
 2. The API embeds the question.
 3. The vector store returns top matching chunks.
-4. The LLM adapter receives only the selected context.
+4. The LLM adapter receives only the selected context and routes it through the selected provider boundary.
 5. The response includes the answer draft and source context for review.
+
+`GET /llm/runtime` exposes the requested provider, selected provider, configured provider names, and
+required environment variables without exposing secrets. This keeps provider wiring inspectable in
+public demos while API keys stay in deployment configuration.
 
 ### Call Transcript Review
 
@@ -73,7 +77,7 @@ inspectable without accidentally consuming synthetic events.
 
 ## Production Concerns
 
-- Keep prompts versioned and observable.
+- Keep prompts and provider payload contracts versioned and observable.
 - Maintain a small evaluation set for retrieval quality.
 - Track approval outcomes to improve scoring and prompt behavior.
 - Keep API contracts stable; change n8n workflows at the edge.

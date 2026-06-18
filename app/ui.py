@@ -118,7 +118,7 @@ DEMO_PAGE_HTML = """
     <header>
       <div>
         <h1>AI Sales Ops Control Tower</h1>
-        <p class="subtitle">Google Drive import, RAG-backed transcript analysis, Telegram callback approval, idempotent Bitrix24 outbox drain, and worker-visible CRM handoff in one reproducible workflow.</p>
+        <p class="subtitle">Google Drive import, RAG-backed transcript analysis, OpenAI/Claude/Gemini provider boundary, Telegram callback approval, idempotent Bitrix24 outbox drain, and worker-visible CRM handoff in one reproducible workflow.</p>
       </div>
       <button id="run">Run demo workflow</button>
     </header>
@@ -128,6 +128,11 @@ DEMO_PAGE_HTML = """
         <div class="label">Runtime</div>
         <div id="runtime" class="value">Ready</div>
         <div id="runtime-sub" class="small">Waiting for demo run</div>
+      </div>
+      <div class="panel span-2">
+        <div class="label">LLM</div>
+        <div id="llm" class="value">--</div>
+        <div id="llm-sub" class="small">Provider boundary pending</div>
       </div>
       <div class="panel span-2">
         <div class="label">Lead score</div>
@@ -158,6 +163,7 @@ DEMO_PAGE_HTML = """
       <div class="panel span-7">
         <div class="row">
           <span class="pill">Google Drive</span>
+          <span class="pill">OpenAI/Claude/Gemini</span>
           <span class="pill">Transcript</span>
           <span class="pill">RAG</span>
           <span class="pill">Approval</span>
@@ -197,6 +203,12 @@ DEMO_PAGE_HTML = """
       setText("worker-sub", worker.dry_run ? "Public dry-run keeps worker disabled" : `Interval ${worker.interval_seconds}s`);
     }
 
+    function renderLlmState(runtime) {
+      const llm = runtime.llm;
+      setText("llm", llm.selected_provider);
+      setText("llm-sub", llm.supported_providers.join(" / "));
+    }
+
     function renderIntegrations(runtime) {
       const target = document.getElementById("integrations");
       target.innerHTML = "";
@@ -215,6 +227,7 @@ DEMO_PAGE_HTML = """
     async function loadRuntime() {
       const runtimeResponse = await fetch("/runtime");
       const runtimeState = await runtimeResponse.json();
+      renderLlmState(runtimeState);
       renderWorkerState(runtimeState);
       const response = await fetch("/integrations/runtime");
       const runtime = await response.json();
@@ -238,6 +251,7 @@ DEMO_PAGE_HTML = """
 
         setText("runtime", data.runtime.storage);
         setText("runtime-sub", data.integrations.public_base_url);
+        renderLlmState(runtimeState);
         setText("score", `${data.call_analysis.score}/100`);
         setText("risk", `Risk: ${data.call_analysis.risk_level}`);
         setText("approval", data.approval.status);

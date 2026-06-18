@@ -10,8 +10,14 @@ class Settings(BaseSettings):
     deploy_environment: str = "local"
     embedding_dim: int = 64
     top_k: int = 5
+    llm_provider: str = "auto"
+    llm_timeout_seconds: float = 30.0
     openai_api_key: str | None = None
     openai_model: str = "gpt-4.1-mini"
+    anthropic_api_key: str | None = None
+    anthropic_model: str = "claude-sonnet-4-20250514"
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.5-flash"
     public_base_url: str = "http://127.0.0.1:8080"
     telegram_bot_token: str | None = None
     telegram_approval_chat_id: str | None = None

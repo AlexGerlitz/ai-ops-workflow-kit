@@ -19,8 +19,14 @@ services:
     build: .
     environment:
       DATABASE_URL: postgresql://aiops:aiops@postgres:5432/aiops
+      LLM_PROVIDER: ${LLM_PROVIDER:-auto}
+      LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-30}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4.1-mini}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-4-20250514}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.5-flash}
       EMBEDDING_DIM: ${EMBEDDING_DIM:-64}
       TOP_K: ${TOP_K:-5}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://127.0.0.1:8080}

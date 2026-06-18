@@ -16,6 +16,13 @@ payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 
 assert payload["runtime"]["ok"] is True
 assert payload["runtime"]["storage"] == "memory"
+assert payload["runtime"]["llm"]["selected_provider"] in {"local", "openai", "claude", "gemini"}
+assert set(payload["runtime"]["llm"]["supported_providers"]) == {
+    "local",
+    "openai",
+    "claude",
+    "gemini",
+}
 assert payload["ingestion"]["chunks"] >= 1
 assert payload["google_drive_import"]["adapter_key"] == "google_drive"
 assert payload["google_drive_import"]["source"].startswith("gdrive://")
@@ -114,9 +121,24 @@ with TestClient(app) as client:
         for context in drive_query.json()["contexts"]
     )
     runtime = client.get("/runtime").json()
+    llm_runtime_response = client.get("/llm/runtime")
+    assert llm_runtime_response.status_code == 200
+    llm_runtime = llm_runtime_response.json()
     metrics = client.get("/metrics").text
 
 assert runtime["ok"] is True
+assert runtime["llm"]["selected_provider"] in {"local", "openai", "claude", "gemini"}
+assert set(runtime["llm"]["supported_providers"]) == {"local", "openai", "claude", "gemini"}
+assert llm_runtime["selected_provider"] == runtime["llm"]["selected_provider"]
+assert "OPENAI_API_KEY" in {
+    env for provider in llm_runtime["providers"] for env in provider["required_env"]
+}
+assert "ANTHROPIC_API_KEY" in {
+    env for provider in llm_runtime["providers"] for env in provider["required_env"]
+}
+assert "GEMINI_API_KEY" in {
+    env for provider in llm_runtime["providers"] for env in provider["required_env"]
+}
 assert runtime["counters"]["demo_runs_total"] >= 1
 assert runtime["counters"]["crm_handoffs_queued_total"] >= 1
 assert runtime["counters"]["telegram_callbacks_total"] >= 1

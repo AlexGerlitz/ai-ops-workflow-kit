@@ -9,7 +9,7 @@ generic AI claims.
 | Role requirement | Evidence in this repo | How to verify | Production boundary |
 | --- | --- | --- | --- |
 | AI workflow orchestration | `POST /webhooks/n8n/call-transcript`, `infra/n8n/call-transcript-approval.json`, `infra/n8n/google-drive-sales-ops-approval.json`, `docs/N8N_APPROVAL_FLOW.md` | Open the n8n workflow JSON files, then run `bash scripts/verify_public.sh`. | n8n owns routing, Drive export, and notifications; the backend owns state, scoring, retrieval, approvals, and integration contracts. |
-| LLM API integration boundary | `app/llm.py`, `app/sales_workflow.py`, `docs/OFFER_DEMO.md` | Run `python3 scripts/run_offer_demo.py` and inspect the structured call analysis output. | The demo uses deterministic local behavior for public review; the provider boundary is isolated so OpenAI, Claude, Gemini, or another model can be connected without moving workflow state into prompts. |
+| LLM API integration boundary | `app/llm.py`, `GET /llm/runtime`, `tests/test_api.py`, `docs/OFFER_DEMO.md` | Run `bash scripts/verify_public.sh`, then inspect `/llm/runtime`. | The demo uses deterministic local behavior for public review; OpenAI, Claude/Anthropic, and Gemini payload contracts are isolated behind one provider boundary without moving workflow state into prompts. |
 | RAG and embeddings | `app/chunking.py`, `app/embeddings.py`, `app/store.py`, `POST /documents`, `POST /query` | Run `bash scripts/verify_public.sh` and inspect the demo output for `rag_context_sources`. | Deterministic local embeddings keep tests repeatable; PostgreSQL/pgvector is the durable runtime path. |
 | Google Drive API / document intake | `POST /integrations/google-drive/import`, `GoogleDriveImportIn`, `infra/n8n/google-drive-sales-ops-approval.json`, `app/integrations.py`, `docs/INTEGRATION_SKELETON.md` | Run `bash scripts/verify_public.sh` and inspect `google_drive_import` in the offer demo output. | Public mode accepts exported Drive document text without credentials; production mode connects OAuth/service-account export in n8n or a connector and sends normalized text to the backend. |
 | PostgreSQL, Supabase, pgvector readiness | `docker-compose.yml`, `app/store.py`, `docs/ARCHITECTURE.md`, `docs/OPERATIONS.md` | Run `docker compose up --build`, then open `/runtime`, `/documents`, and `/query`. | The public demo can run in memory for inspectability; the storage boundary is designed around PostgreSQL with pgvector. |
@@ -30,12 +30,13 @@ bash scripts/verify_public.sh
 bash scripts/smoke_live_demo.sh https://saleops.duckdns.org
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 curl -fsS https://saleops.duckdns.org/runtime
+curl -fsS https://saleops.duckdns.org/llm/runtime
 ```
 
 Expected local gate result:
 
 ```text
-20 passed
+24 passed
 public verification passed
 ```
 
@@ -43,6 +44,7 @@ Expected live smoke signals:
 
 ```text
 live demo smoke passed
+llm=local
 score=100
 google_drive=gdrive://demo-sales-playbook
 approval=approved
@@ -57,10 +59,12 @@ bitrix24_drain=<positive dry-run drain count>
 - The public demo does not store real customer calls, CRM data, bot tokens, or Google credentials.
 - The Bitrix24 outbox worker is visible but disabled in the public dry-run deployment.
 - Local deterministic embeddings are intentional for repeatable review; PostgreSQL/pgvector is the durable storage path.
+- `LLM_PROVIDER=auto` selects a configured OpenAI, Claude/Anthropic, or Gemini API key; without keys the public demo uses the local extractive fallback.
 - Production integrations require server-side secrets, webhook verification, rollout notes, and real CRM field mapping.
 
 ## What A Reviewer Should Conclude
 
 This is not a ChatGPT wrapper. The repository demonstrates an AI workflow system with backend-owned
 state, Google Drive document intake, RAG boundaries, approval transitions, Telegram callback handling,
-CRM outbox semantics, runtime evidence, Docker deployment, CI, and public smoke checks.
+OpenAI/Claude/Gemini provider boundaries, CRM outbox semantics, runtime evidence, Docker deployment,
+CI, and public smoke checks.

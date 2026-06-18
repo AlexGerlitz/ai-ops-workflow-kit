@@ -12,7 +12,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-20 passed
+24 passed
 public verification passed
 ```
 
@@ -21,6 +21,7 @@ workflow produced:
 
 - RAG context sources;
 - Google Drive import into the same RAG store;
+- OpenAI, Claude/Anthropic, Gemini, and local fallback provider boundary;
 - transcript score;
 - structured call analysis;
 - approved human review item;
@@ -83,6 +84,7 @@ Then open:
 
 - API health: http://127.0.0.1:8080/health
 - Runtime evidence: http://127.0.0.1:8080/runtime
+- LLM provider evidence: http://127.0.0.1:8080/llm/runtime
 - Metrics: http://127.0.0.1:8080/metrics
 - FastAPI docs: http://127.0.0.1:8080/docs
 - n8n UI: http://127.0.0.1:5678
@@ -106,12 +108,13 @@ Then open:
 - AI workflow logic is backend-owned and testable.
 - The project has a browser-visible demo, not only README claims.
 - n8n is used as orchestration glue and connector routing, not as hidden domain logic.
-- LLM/RAG behavior has deterministic local fallbacks for repeatable review.
+- LLM/RAG behavior has deterministic local fallbacks and OpenAI/Claude/Gemini provider contracts for repeatable review.
 - CRM mutation is queued only after explicit human approval.
 - CRM dispatch failures become retry/dead-letter state with `next_retry_at`, not invisible log-only errors.
 - Google Drive, Telegram, and Bitrix24 adapters expose dry-run contracts before credentials are connected.
 - Telegram inline callbacks have a backend endpoint that applies approve/reject state transitions.
 - Production Telegram callbacks can be protected with `X-Telegram-Bot-Api-Secret-Token`.
 - Runtime and metrics endpoints expose deploy identity and workflow counters.
+- `/llm/runtime` exposes provider state without exposing secrets.
 - Runtime exposes whether the Bitrix24 outbox worker is enabled and active.
 - The project has a public verification command and CI gate.

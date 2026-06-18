@@ -35,7 +35,7 @@ prompt demo.
 
 Best-fit evidence:
 
-- RAG/backend ownership: Google Drive import, ingestion, chunking, retrieval, pgvector-ready storage, and LLM boundary;
+- RAG/backend ownership: Google Drive import, ingestion, chunking, retrieval, pgvector-ready storage, and OpenAI/Claude/Gemini LLM boundary;
 - human-in-the-loop workflow ownership: approval queue, explicit state transitions, and Telegram/n8n
   integration shape;
 - business automation ownership: transcript webhook, scoring, context capture, and review routing;
@@ -137,6 +137,7 @@ API:
 ```bash
 curl http://127.0.0.1:8080/health
 curl http://127.0.0.1:8080/runtime
+curl http://127.0.0.1:8080/llm/runtime
 curl http://127.0.0.1:8080/metrics
 ```
 
@@ -170,8 +171,9 @@ curl -X POST http://127.0.0.1:8080/approvals \
 | --- | --- |
 | `GET /` | Browser-visible Sales Ops Control Tower demo. |
 | `GET /health` | Runtime health and active storage mode. |
-| `GET /runtime` | Runtime version, build SHA, deploy environment, public callback URL, integrations, worker state, and counters. |
+| `GET /runtime` | Runtime version, build SHA, deploy environment, public callback URL, LLM provider state, integrations, worker state, and counters. |
 | `GET /metrics` | Prometheus-style runtime and workflow counters. |
+| `GET /llm/runtime` | Inspect the OpenAI, Claude, Gemini, and local fallback provider boundary without exposing secrets. |
 | `GET /integrations/runtime` | Inspect Google Drive, Telegram, and Bitrix24 adapter configuration/dry-run status. |
 | `POST /demo/run` | Run the synthetic Google Drive import -> transcript -> RAG -> approval -> Telegram/Bitrix dry-run demo. |
 | `POST /documents` | Chunk and ingest text into the vector store. |
@@ -212,7 +214,7 @@ bash scripts/verify_public.sh
 ## Design Notes
 
 - The default local embedding provider is deterministic, so tests and development runs are stable without API keys.
-- LLM calls are isolated behind a client boundary. Without `OPENAI_API_KEY`, the API returns an extractive draft from retrieved context.
+- LLM calls are isolated behind a provider boundary. `LLM_PROVIDER=auto` can select OpenAI, Claude/Anthropic, or Gemini when the matching API key is configured; otherwise the API returns an extractive draft from retrieved context.
 - Postgres/pgvector owns durable retrieval data; n8n owns workflow routing and external connectors.
 - Approval transitions are explicit and narrow: `pending -> approved` or `pending -> rejected`.
 - The webhook contract is structured so Bitrix, telephony, Google Drive, or Telegram can be connected without rewriting RAG logic.

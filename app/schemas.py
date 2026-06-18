@@ -197,6 +197,24 @@ class IntegrationRuntimeOut(BaseModel):
     capabilities: list[IntegrationCapabilityOut]
 
 
+class LLMProviderRuntimeOut(BaseModel):
+    provider: str
+    model: str
+    configured: bool
+    selected: bool
+    required_env: list[str]
+    notes: str
+
+
+class LLMRuntimeOut(BaseModel):
+    requested_provider: str
+    selected_provider: str
+    fallback: bool
+    configured_providers: list[str]
+    supported_providers: list[str]
+    providers: list[LLMProviderRuntimeOut]
+
+
 class IntegrationDispatchOut(BaseModel):
     adapter_key: str
     operation: str

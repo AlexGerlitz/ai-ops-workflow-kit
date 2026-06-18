@@ -36,6 +36,7 @@ from app.schemas import (
     IntegrationEventOut,
     IntegrationEventStatus,
     IntegrationRuntimeOut,
+    LLMRuntimeOut,
     OfferDemoRunOut,
     QueryIn,
     QueryOut,
@@ -51,7 +52,16 @@ from app.ui import DEMO_PAGE_HTML
 
 embedding_provider = HashEmbeddingProvider(settings.embedding_dim)
 store = build_store(settings.database_url, settings.embedding_dim)
-llm = LLMClient(api_key=settings.openai_api_key, model=settings.openai_model)
+llm = LLMClient(
+    provider=settings.llm_provider,
+    openai_api_key=settings.openai_api_key,
+    openai_model=settings.openai_model,
+    anthropic_api_key=settings.anthropic_api_key,
+    anthropic_model=settings.anthropic_model,
+    gemini_api_key=settings.gemini_api_key,
+    gemini_model=settings.gemini_model,
+    timeout_seconds=settings.llm_timeout_seconds,
+)
 runtime_stats = RuntimeStats()
 logger = logging.getLogger("aiops.integration_worker")
 
@@ -104,6 +114,7 @@ def runtime() -> dict[str, object]:
         "storage": store.name,
         "embedding_dim": settings.embedding_dim,
         "public_base_url": settings.public_base_url,
+        "llm": get_llm_runtime(),
         "integrations": get_integration_runtime(),
         "workers": integration_workers_runtime(),
         "counters": runtime_stats.snapshot(),
@@ -127,6 +138,11 @@ def metrics() -> PlainTextResponse:
 @app.get("/integrations/runtime", response_model=IntegrationRuntimeOut)
 def get_integration_runtime() -> IntegrationRuntimeOut:
     return integration_runtime(settings)
+
+
+@app.get("/llm/runtime", response_model=LLMRuntimeOut)
+def get_llm_runtime() -> LLMRuntimeOut:
+    return LLMRuntimeOut(**llm.runtime())
 
 
 def integration_workers_runtime() -> dict[str, object]:
@@ -180,7 +196,7 @@ async def run_demo_workflow() -> OfferDemoRunOut:
     crm_event = events[-1]
     bitrix24 = dispatch_event_to_bitrix24(crm_event.id)
     return OfferDemoRunOut(
-        runtime=health(),
+        runtime=runtime(),
         integrations=get_integration_runtime(),
         ingestion=DocumentOut(source=drive_import.source, chunks=drive_import.chunks),
         google_drive_import=drive_import,

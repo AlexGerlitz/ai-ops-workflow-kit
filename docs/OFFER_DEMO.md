@@ -6,13 +6,14 @@ The demo proves an end-to-end AI workflow automation scenario:
 
 1. import an exported Google Drive sales playbook into the RAG store;
 2. query the knowledge base with source context;
-3. accept a call transcript through the n8n-facing webhook;
-4. score the lead and build a structured call analysis;
-5. create a human approval item for the follow-up draft;
-6. build a dry-run Telegram approval payload;
-7. approve the item;
-8. queue a mock Bitrix24 CRM handoff event;
-9. build a dry-run Bitrix24 dispatch payload with idempotent outbox event state.
+3. expose the LLM provider boundary and local fallback state;
+4. accept a call transcript through the n8n-facing webhook;
+5. score the lead and build a structured call analysis;
+6. create a human approval item for the follow-up draft;
+7. build a dry-run Telegram approval payload;
+8. approve the item;
+9. queue a mock Bitrix24 CRM handoff event;
+10. build a dry-run Bitrix24 dispatch payload with idempotent outbox event state.
 
 The point is not to show a prompt wrapper. The point is to show the production
 boundary: n8n routes events, while the backend owns retrieval, scoring, state,
@@ -58,7 +59,7 @@ The output contains these sections:
 
 | Section | What it proves |
 | --- | --- |
-| `runtime` | API booted and reported the active storage mode. |
+| `runtime` | API booted and reported active storage, LLM provider state, deployment identity, workers, and counters. |
 | `integrations` | Google Drive, Telegram, and Bitrix24 adapter readiness and public callback base URL. |
 | `ingestion` | Sales playbook was chunked and stored. |
 | `google_drive_import` | Exported Google Drive document text was normalized and imported into the RAG store. |
@@ -73,6 +74,13 @@ Example high-level result:
 
 ```json
 {
+  "runtime": {
+    "storage": "memory",
+    "llm": {
+      "selected_provider": "local",
+      "supported_providers": ["local", "openai", "claude", "gemini"]
+    }
+  },
   "google_drive_import": {
     "adapter_key": "google_drive",
     "source": "gdrive://demo-sales-playbook",
@@ -122,6 +130,7 @@ That maps directly to real AI automation work:
 - call analysis;
 - Google Drive knowledge intake;
 - RAG-backed generation;
+- OpenAI/Claude/Gemini provider boundary with local fallback;
 - lead scoring;
 - Telegram-style approval;
 - Bitrix/CRM integration;
@@ -137,5 +146,6 @@ That maps directly to real AI automation work:
 - Connect Google Drive OAuth/service-account export before the import endpoint.
 - Disable dry-run after adding Telegram Bot API and Bitrix24 webhook credentials.
 - Replace deterministic local embeddings with OpenAI or another embedding API.
+- Set `LLM_PROVIDER=openai`, `LLM_PROVIDER=claude`, or `LLM_PROVIDER=gemini` with the matching API key.
 - Add Deepgram/Whisper before the transcript webhook.
 - Move the outbox worker into a separate process if the deployment needs independent scaling.

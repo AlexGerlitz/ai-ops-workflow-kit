@@ -5,7 +5,17 @@ from uuid import UUID
 
 from fastapi.testclient import TestClient
 
+from app.llm import (
+    LLMClient,
+    build_claude_payload,
+    build_gemini_payload,
+    build_openai_payload,
+    parse_claude_response,
+    parse_gemini_response,
+    parse_openai_response,
+)
 from app.main import app, queue_crm_handoff_if_needed, settings, store
+from app.schemas import RetrievedContext
 
 
 def test_health_endpoint_reports_runtime() -> None:
@@ -28,9 +38,85 @@ def test_runtime_and_metrics_endpoints_expose_operational_evidence() -> None:
     assert "demo_runs_total" in body["counters"]
     assert body["workers"]["bitrix24_outbox"]["enabled"] is False
     assert body["workers"]["bitrix24_outbox"]["active"] is False
+    assert body["llm"]["selected_provider"] in {"local", "openai", "claude", "gemini"}
+    assert set(body["llm"]["supported_providers"]) == {"local", "openai", "claude", "gemini"}
     assert metrics.status_code == 200
     assert "aiops_runtime_info" in metrics.text
     assert "aiops_demo_runs_total" in metrics.text
+
+
+def test_llm_runtime_endpoint_exposes_provider_boundary_without_secrets() -> None:
+    with TestClient(app) as client:
+        response = client.get("/llm/runtime")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["requested_provider"] in {"auto", "local", "openai", "claude", "gemini"}
+    assert body["selected_provider"] in {"local", "openai", "claude", "gemini"}
+    provider_names = {provider["provider"] for provider in body["providers"]}
+    assert provider_names == {"local", "openai", "claude", "gemini"}
+    required_env = {
+        provider["provider"]: provider["required_env"] for provider in body["providers"]
+    }
+    assert required_env["openai"] == ["OPENAI_API_KEY"]
+    assert required_env["claude"] == ["ANTHROPIC_API_KEY"]
+    assert required_env["gemini"] == ["GEMINI_API_KEY"]
+    serialized = json.dumps(body)
+    assert "sk-" not in serialized
+    assert "AAG" not in serialized
+
+
+def test_llm_client_selects_configured_provider_and_falls_back_locally() -> None:
+    local_client = LLMClient(provider="auto")
+    assert local_client.selected_provider == "local"
+    assert local_client.runtime()["fallback"] is True
+
+    openai_client = LLMClient(provider="auto", openai_api_key="openai-test-key")
+    assert openai_client.selected_provider == "openai"
+    assert openai_client.runtime()["configured_providers"] == ["openai"]
+
+    claude_client = LLMClient(provider="anthropic", anthropic_api_key="anthropic-test-key")
+    assert claude_client.selected_provider == "claude"
+
+    gemini_client = LLMClient(provider="gemini", gemini_api_key="gemini-test-key")
+    assert gemini_client.selected_provider == "gemini"
+
+    missing_key_client = LLMClient(provider="openai")
+    assert missing_key_client.selected_provider == "local"
+    assert missing_key_client.runtime()["fallback"] is True
+
+
+def test_llm_provider_payloads_and_response_parsers_are_contract_tested() -> None:
+    context = RetrievedContext(
+        id=UUID("00000000-0000-0000-0000-000000000001"),
+        source="gdrive://sales-playbook",
+        text="Discovery should confirm budget and next step.",
+        metadata={"team": "sales"},
+        score=0.91,
+    )
+
+    openai_payload = build_openai_payload("What should discovery confirm?", [context], "gpt-x")
+    claude_payload = build_claude_payload("What should discovery confirm?", [context], "claude-x")
+    gemini_payload = build_gemini_payload("What should discovery confirm?", [context], "gemini-x")
+
+    assert openai_payload["model"] == "gpt-x"
+    assert openai_payload["messages"][0]["role"] == "system"
+    assert "gdrive://sales-playbook" in openai_payload["messages"][1]["content"]
+    assert claude_payload["model"] == "claude-x"
+    assert claude_payload["max_tokens"] > 0
+    assert claude_payload["messages"][0]["role"] == "user"
+    assert gemini_payload["contents"][0]["parts"][0]["text"].startswith("Answer from")
+    assert gemini_payload["generationConfig"]["temperature"] == 0.2
+
+    assert (
+        parse_openai_response({"choices": [{"message": {"content": "OpenAI answer"}}]})
+        == "OpenAI answer"
+    )
+    assert parse_claude_response({"content": [{"type": "text", "text": "Claude answer"}]}) == (
+        "Claude answer"
+    )
+    assert parse_gemini_response(
+        {"candidates": [{"content": {"parts": [{"text": "Gemini answer"}]}}]}
+    ) == "Gemini answer"
 
 
 def test_public_demo_page_is_available() -> None:

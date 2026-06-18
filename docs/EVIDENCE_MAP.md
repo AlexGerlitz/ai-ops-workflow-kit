@@ -8,6 +8,7 @@ For a vacancy-style checklist with verification commands and production boundari
 | --- | --- |
 | AI workflow orchestration | `app/main.py`, `infra/n8n/call-transcript-approval.json`, `infra/n8n/google-drive-sales-ops-approval.json`, `docs/N8N_APPROVAL_FLOW.md` |
 | Google Drive intake | `POST /integrations/google-drive/import`, `GoogleDriveImportIn`, `docs/INTEGRATION_SKELETON.md` |
+| LLM API provider boundary | `app/llm.py`, `GET /llm/runtime`, OpenAI, Claude/Anthropic, Gemini payload tests |
 | RAG and embeddings | `app/chunking.py`, `app/embeddings.py`, `app/store.py`, `POST /documents`, `POST /query` |
 | pgvector-ready persistence | `app/store.py`, `docker-compose.yml`, `docs/ARCHITECTURE.md` |
 | Transcript analysis and scoring | `app/scoring.py`, `app/sales_workflow.py`, `demo/call-transcript.json` |
@@ -25,7 +26,8 @@ For a vacancy-style checklist with verification commands and production boundari
 - The backend owns retrieval, scoring, approvals, and integration contracts.
 - External integrations are dry-run by default, so a public reviewer can inspect payloads without secrets.
 - Google Drive import is normalized before RAG storage, so connector code does not own retrieval logic.
-- Local embeddings are deterministic, so tests and demo output are repeatable without API keys.
+- Local embeddings and LLM fallback are deterministic, so tests and demo output are repeatable without API keys.
+- OpenAI, Claude/Anthropic, and Gemini provider wiring is contract-tested without committing secrets.
 - CRM handoff is queued only after an explicit approval transition.
 - Bitrix24 handoff is modeled as an outbox event with idempotency keys, attempt counters, `next_retry_at`, retry-safe drain, and `dead_letter` state.
 - Runtime identity, worker state, and counters are public, so a reviewer can verify the deployed build without server access.
@@ -35,6 +37,7 @@ For a vacancy-style checklist with verification commands and production boundari
 
 1. Open the live demo: `https://saleops.duckdns.org/`.
 2. Run `bash scripts/smoke_live_demo.sh`.
-3. Run `bash scripts/verify_public.sh`.
-4. Read `docs/ARCHITECTURE.md`.
-5. Read `docs/INTEGRATION_SKELETON.md`.
+3. Open `https://saleops.duckdns.org/llm/runtime`.
+4. Run `bash scripts/verify_public.sh`.
+5. Read `docs/ARCHITECTURE.md`.
+6. Read `docs/INTEGRATION_SKELETON.md`.
