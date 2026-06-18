@@ -206,15 +206,17 @@ python3 -m pip install -r requirements.txt
 bash scripts/verify_public.sh
 ```
 
-The gate runs tests, runs the offer demo, and validates that Google Drive import, RAG retrieval,
-LLM provider boundary, approval, mock Bitrix24 handoff, runtime metrics, and outbox dispatch state
-are present in the output.
+The gate runs tests, runs the offer demo, runs the production readiness drill, and validates that
+Google Drive import, RAG retrieval, LLM provider boundary, approval, mock Bitrix24 handoff, runtime
+metrics, outbox dispatch state, webhook auth, retry/dead-letter behavior, retry scheduling,
+idempotency, and worker dry-run guard are present in the output.
 
 ## Live Deployment Smoke
 
 ```bash
 python3 scripts/capture_reviewer_evidence.py
 python3 scripts/reviewer_snapshot.py
+python3 scripts/production_readiness_drill.py
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 ```
@@ -238,6 +240,15 @@ python3 scripts/capture_reviewer_evidence.py
 This writes `docs/evidence/reviewer-snapshot.sanitized.json` and
 `docs/evidence/reviewer-snapshot.txt`. The capture script validates the live workflow before writing
 the files.
+
+For deterministic local failure-mode evidence:
+
+```bash
+python3 scripts/production_readiness_drill.py
+```
+
+This writes `docs/evidence/production-readiness-drill.sanitized.json` and
+`docs/evidence/production-readiness-drill.txt`.
 
 ## n8n Import
 

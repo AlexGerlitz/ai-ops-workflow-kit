@@ -22,6 +22,7 @@ prompt demo.
 | [Live demo](https://saleops.duckdns.org/) | Public one-click proof of the deployed Sales Ops workflow. |
 | [Technical review packet](docs/TECHNICAL_REVIEW_PACKET.md) | 10-15 minute reviewer route covering live snapshot, architecture decisions, failure modes, and rollout boundaries. |
 | [Reviewer evidence pack](docs/REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live snapshot plus the command that regenerates it from the public deployment. |
+| [Production readiness drill](docs/PRODUCTION_READINESS_DRILL.md) | Deterministic failure-mode proof for webhook auth, retry/dead-letter, drain scheduling, idempotency, and worker dry-run guard. |
 | [Evidence map](docs/EVIDENCE_MAP.md) | Maps the repo to AI automation, RAG, approval flow, Bitrix24, Telegram, and self-hosting requirements. |
 | [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Maps common AI automation vacancy requirements to exact files, endpoints, verification commands, and production boundaries. |
 | [Offer demo](docs/OFFER_DEMO.md) | One-command proof of Google Drive import -> RAG -> transcript scoring -> Telegram approval -> idempotent outbox drain -> mock Bitrix CRM handoff. |
@@ -48,11 +49,12 @@ Fast evaluation path:
 1. Open `https://saleops.duckdns.org/` and run the browser demo.
 2. Open `docs/REVIEWER_EVIDENCE_PACK.md`.
 3. Run `python3 scripts/reviewer_snapshot.py`.
-4. Run `bash scripts/smoke_live_demo.sh`.
-5. Run `bash scripts/verify_public.sh`.
-6. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-7. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
-8. Review `infra/n8n/` to see the external workflow boundary.
+4. Run `python3 scripts/production_readiness_drill.py`.
+5. Run `bash scripts/smoke_live_demo.sh`.
+6. Run `bash scripts/verify_public.sh`.
+7. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+8. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
+9. Review `infra/n8n/` to see the external workflow boundary.
 
 ## System Shape
 
@@ -113,6 +115,7 @@ Live deployment smoke:
 ```bash
 python3 scripts/capture_reviewer_evidence.py
 python3 scripts/reviewer_snapshot.py
+python3 scripts/production_readiness_drill.py
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 ```

@@ -1,0 +1,65 @@
+{
+  "evidence_schema": "production_readiness_drill_v1",
+  "ok": true,
+  "storage": "memory",
+  "checks": {
+    "telegram_secret": {
+      "unsigned_callback_status_code": 403,
+      "signed_callback_status_code": 200,
+      "approval_status": "rejected",
+      "auth_failure_counter_present": true
+    },
+    "bitrix_retry_dead_letter": {
+      "first_dispatch": {
+        "status": "not_configured",
+        "event_status": "retry",
+        "attempt_count": 1
+      },
+      "second_dispatch": {
+        "status": "not_configured",
+        "event_status": "dead_letter",
+        "attempt_count": 2
+      },
+      "stored_event": {
+        "status": "dead_letter",
+        "attempt_count": 2,
+        "last_error_contains": "Bitrix24 webhook URL is not configured"
+      }
+    },
+    "drain_retry_schedule": {
+      "first_drain": {
+        "selected": 1,
+        "retry": 1,
+        "event_was_selected": true
+      },
+      "retry_event": {
+        "status": "retry",
+        "attempt_count": 1,
+        "next_retry_at": "<scheduled-retry-timestamp>"
+      },
+      "second_drain": {
+        "event_was_skipped_until_retry_time": true,
+        "selected": 0
+      }
+    },
+    "crm_handoff_idempotency": {
+      "source_approval_id": "<approval-id>",
+      "matching_event_count": 1,
+      "idempotency_key": "<generated-idempotency-key>",
+      "status": "queued"
+    },
+    "worker_guard": {
+      "enabled": true,
+      "dry_run": true,
+      "active": false,
+      "guard": "worker remains inactive while Bitrix24 dry-run is enabled"
+    }
+  },
+  "runtime_counters": {
+    "telegram_callback_auth_failures_total": 1,
+    "bitrix24_dispatch_failures_total": 3,
+    "integration_dead_letters_total": 1,
+    "integration_retries_scheduled_total": 2,
+    "crm_handoffs_queued_total": 5
+  }
+}

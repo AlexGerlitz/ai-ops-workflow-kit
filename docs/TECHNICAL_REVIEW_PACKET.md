@@ -36,6 +36,8 @@ public verification passed
 
 For a committed evidence artifact plus the regeneration command, read
 [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
+For deterministic failure-mode evidence, read
+[Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
 
 ## What The Snapshot Proves
 
@@ -51,6 +53,7 @@ For a committed evidence artifact plus the regeneration command, read
 | Public mode is safe | Google Drive, Telegram, and Bitrix24 stay dry-run until production credentials are configured. |
 | Operations are visible | `/runtime`, `/metrics`, smoke scripts, Docker, CI, and docs give a reviewer reproducible evidence. |
 | Evidence is reproducible | `scripts/capture_reviewer_evidence.py` writes a sanitized live snapshot to `docs/evidence/`. |
+| Failure behavior is testable | `scripts/production_readiness_drill.py` proves webhook auth, retry/dead-letter, retry scheduling, idempotency, and worker dry-run guard. |
 
 ## Architecture Decisions
 
@@ -116,6 +119,7 @@ Before connecting real business data:
 ```bash
 python3 scripts/capture_reviewer_evidence.py
 python3 scripts/reviewer_snapshot.py
+python3 scripts/production_readiness_drill.py
 python3 scripts/reviewer_snapshot.py https://leadscore.duckdns.org
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org

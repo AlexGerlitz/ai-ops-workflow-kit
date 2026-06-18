@@ -11,6 +11,7 @@ that regenerates it.
 | [`docs/evidence/reviewer-snapshot.txt`](./evidence/reviewer-snapshot.txt) | Human-readable summary of the same live snapshot. |
 | [`scripts/capture_reviewer_evidence.py`](../scripts/capture_reviewer_evidence.py) | Rebuilds the evidence from `/runtime`, `/llm/runtime`, `/integrations/runtime`, `/metrics`, and `/demo/run`. |
 | [`scripts/reviewer_snapshot.py`](../scripts/reviewer_snapshot.py) | Fails fast if the public workflow, RAG context, approval state, dry-run integrations, worker state, or metrics are inconsistent. |
+| [`docs/PRODUCTION_READINESS_DRILL.md`](./PRODUCTION_READINESS_DRILL.md) | Complements the live snapshot with deterministic failure-mode evidence. |
 
 ## Regenerate
 

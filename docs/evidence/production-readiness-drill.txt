@@ -1,0 +1,14 @@
+production readiness drill passed
+schema=production_readiness_drill_v1
+storage=memory
+telegram_secret=unsigned=403 signed=200 approval=rejected
+bitrix_retry_dead_letter=first=retry second=dead_letter attempts=2
+drain_retry_schedule=first_selected=True second_skipped=True
+crm_handoff_idempotency=matching_events=1 key=<generated-idempotency-key>
+worker_guard=enabled=True dry_run=True active=False
+runtime_counters:
+  - telegram_callback_auth_failures_total=1
+  - bitrix24_dispatch_failures_total=3
+  - integration_dead_letters_total=1
+  - integration_retries_scheduled_total=2
+  - crm_handoffs_queued_total=5

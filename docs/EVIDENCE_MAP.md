@@ -20,6 +20,7 @@ read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 | Runtime observability | `GET /runtime`, `GET /metrics`, worker state, `app/observability.py`, `scripts/smoke_live_demo.sh` |
 | Technical reviewer snapshot | `scripts/reviewer_snapshot.py`, `docs/TECHNICAL_REVIEW_PACKET.md`, `GET /runtime`, `GET /llm/runtime`, `POST /demo/run` |
 | Reviewer evidence pack | `docs/REVIEWER_EVIDENCE_PACK.md`, `docs/evidence/reviewer-snapshot.sanitized.json`, `scripts/capture_reviewer_evidence.py` |
+| Failure-mode evidence | `docs/PRODUCTION_READINESS_DRILL.md`, `docs/evidence/production-readiness-drill.sanitized.json`, `scripts/production_readiness_drill.py` |
 | Public proof | `https://saleops.duckdns.org/`, `scripts/reviewer_snapshot.py`, `scripts/smoke_live_demo.sh` |
 | Verification discipline | `scripts/verify_public.sh`, `.github/workflows/ci.yml`, `tests/` |
 
@@ -35,6 +36,8 @@ read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 - Bitrix24 handoff is modeled as an outbox event with idempotency keys, attempt counters, `next_retry_at`, retry-safe drain, and `dead_letter` state.
 - Runtime identity, worker state, and counters are public, so a reviewer can verify the deployed build without server access.
 - Telegram callbacks can be verified with Telegram's webhook secret header in production.
+- Failure-mode evidence is captured without external credentials, so reviewers can inspect retry,
+  dead-letter, drain scheduling, idempotency, and worker guard behavior locally or in CI.
 
 ## Review Order
 
@@ -42,9 +45,10 @@ read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 2. Open `docs/REVIEWER_EVIDENCE_PACK.md`.
 3. Run `python3 scripts/capture_reviewer_evidence.py`.
 4. Run `python3 scripts/reviewer_snapshot.py`.
-5. Run `bash scripts/smoke_live_demo.sh`.
-6. Open `https://saleops.duckdns.org/llm/runtime`.
-7. Run `bash scripts/verify_public.sh`.
-8. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-9. Read `docs/ARCHITECTURE.md`.
-10. Read `docs/INTEGRATION_SKELETON.md`.
+5. Run `python3 scripts/production_readiness_drill.py`.
+6. Run `bash scripts/smoke_live_demo.sh`.
+7. Open `https://saleops.duckdns.org/llm/runtime`.
+8. Run `bash scripts/verify_public.sh`.
+9. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+10. Read `docs/ARCHITECTURE.md`.
+11. Read `docs/INTEGRATION_SKELETON.md`.
