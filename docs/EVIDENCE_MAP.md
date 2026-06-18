@@ -10,7 +10,7 @@ This map connects the repository to the work expected from an AI automation engi
 | Transcript analysis and scoring | `app/scoring.py`, `app/sales_workflow.py`, `demo/call-transcript.json` |
 | Human approval flow | `POST /approvals`, `POST /approvals/{id}/approve`, `tests/test_core.py` |
 | Telegram approval contract | `app/integrations.py`, `POST /approvals/{id}/notify/telegram`, `POST /webhooks/telegram/approval`, `scripts/configure_telegram_webhook.sh`, `docs/INTEGRATION_SKELETON.md` |
-| Bitrix24 handoff contract | `app/integrations.py`, `app/store.py`, `POST /integration-events/{id}/dispatch/bitrix24` |
+| Bitrix24 handoff contract | `app/integrations.py`, `app/store.py`, `POST /integration-events/{id}/dispatch/bitrix24`, `POST /integrations/bitrix24/drain` |
 | Self-hosted runtime | `Dockerfile`, `docker-compose.yml`, `docs/LIVE_DEMO.md`, `docs/OPERATIONS.md` |
 | Runtime observability | `GET /runtime`, `GET /metrics`, `app/observability.py`, `scripts/smoke_live_demo.sh` |
 | Public proof | `https://saleops.duckdns.org/`, `scripts/smoke_live_demo.sh` |
@@ -23,7 +23,7 @@ This map connects the repository to the work expected from an AI automation engi
 - External integrations are dry-run by default, so a public reviewer can inspect payloads without secrets.
 - Local embeddings are deterministic, so tests and demo output are repeatable without API keys.
 - CRM handoff is queued only after an explicit approval transition.
-- Bitrix24 handoff is modeled as an outbox event with attempt counters, last error, retry-safe dispatch, and `dead_letter` state.
+- Bitrix24 handoff is modeled as an outbox event with idempotency keys, attempt counters, `next_retry_at`, retry-safe drain, and `dead_letter` state.
 - Runtime identity and counters are public, so a reviewer can verify the deployed build without server access.
 - Telegram callbacks can be verified with Telegram's webhook secret header in production.
 

@@ -26,8 +26,10 @@ assert "approve" in payload["telegram_approval"]["callback_contract"]
 assert payload["crm_handoff"]["adapter_key"] == "bitrix24.mock"
 assert payload["crm_handoff"]["operation"] == "upsert_lead_follow_up"
 assert payload["crm_handoff"]["status"] == "queued"
+assert payload["crm_handoff"]["idempotency_key"]
 assert payload["crm_handoff"]["attempt_count"] == 0
 assert payload["crm_handoff"]["last_error"] is None
+assert payload["crm_handoff"]["next_retry_at"] is None
 assert payload["bitrix24_dispatch"]["adapter_key"] == "bitrix24"
 assert payload["bitrix24_dispatch"]["status"] == "dry_run"
 assert payload["bitrix24_dispatch"]["event_status"] == "queued"
@@ -41,6 +43,12 @@ from app.main import app
 with TestClient(app) as client:
     demo_response = client.post("/demo/run")
     assert demo_response.status_code == 200
+    drain_response = client.post("/integrations/bitrix24/drain", params={"limit": 100})
+    assert drain_response.status_code == 200
+    drain_body = drain_response.json()
+    assert drain_body["adapter_key"] == "bitrix24"
+    assert drain_body["selected"] >= 1
+    assert drain_body["dry_run"] >= 1
     approval_response = client.post(
         "/approvals",
         json={
@@ -74,6 +82,8 @@ assert runtime["counters"]["crm_handoffs_queued_total"] >= 1
 assert runtime["counters"]["telegram_callbacks_total"] >= 1
 assert "bitrix24_dispatch_failures_total" in runtime["counters"]
 assert "integration_dead_letters_total" in runtime["counters"]
+assert "integration_events_drained_total" in runtime["counters"]
+assert "integration_retries_scheduled_total" in runtime["counters"]
 assert "aiops_runtime_info" in metrics
 assert "aiops_demo_runs_total" in metrics
 

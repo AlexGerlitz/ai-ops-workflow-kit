@@ -21,11 +21,17 @@ class RuntimeStats:
             "bitrix24_dispatch_failures_total": 0,
             "crm_handoffs_queued_total": 0,
             "integration_dead_letters_total": 0,
+            "integration_events_drained_total": 0,
+            "integration_retries_scheduled_total": 0,
         }
 
     def increment(self, key: str) -> None:
         with self._lock:
             self._counters[key] = self._counters.get(key, 0) + 1
+
+    def increment_by(self, key: str, amount: int) -> None:
+        with self._lock:
+            self._counters[key] = self._counters.get(key, 0) + amount
 
     def snapshot(self) -> dict[str, int]:
         with self._lock:

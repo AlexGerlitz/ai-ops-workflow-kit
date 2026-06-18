@@ -54,12 +54,25 @@ class Store(Protocol):
         adapter_key: str,
         operation: str,
         payload: dict[str, Any],
+        idempotency_key: str,
         source_approval_id: UUID | None = None,
     ) -> IntegrationEventOut: ...
 
     def get_integration_event(self, event_id: UUID) -> IntegrationEventOut: ...
 
-    def list_integration_events(self, adapter_key: str | None = None) -> list[IntegrationEventOut]: ...
+    def list_integration_events(
+        self,
+        adapter_key: str | None = None,
+        status: IntegrationEventStatus | None = None,
+    ) -> list[IntegrationEventOut]: ...
+
+    def list_due_integration_events(
+        self,
+        *,
+        adapter_key: str,
+        now: datetime,
+        limit: int,
+    ) -> list[IntegrationEventOut]: ...
 
     def record_integration_dispatch_result(
         self,
@@ -67,6 +80,7 @@ class Store(Protocol):
         *,
         status: IntegrationEventStatus,
         last_error: str | None,
+        next_retry_at: datetime | None,
         increment_attempt: bool,
     ) -> IntegrationEventOut: ...
 
@@ -153,8 +167,12 @@ class InMemoryStore:
         adapter_key: str,
         operation: str,
         payload: dict[str, Any],
+        idempotency_key: str,
         source_approval_id: UUID | None = None,
     ) -> IntegrationEventOut:
+        for existing in self.integration_events.values():
+            if existing.idempotency_key == idempotency_key:
+                return existing
         now = datetime.now(UTC)
         event = IntegrationEventOut(
             id=uuid4(),
@@ -163,8 +181,10 @@ class InMemoryStore:
             status=IntegrationEventStatus.queued,
             payload=payload,
             source_approval_id=source_approval_id,
+            idempotency_key=idempotency_key,
             attempt_count=0,
             last_error=None,
+            next_retry_at=None,
             created_at=now,
             updated_at=now,
         )
@@ -174,11 +194,33 @@ class InMemoryStore:
     def get_integration_event(self, event_id: UUID) -> IntegrationEventOut:
         return self.integration_events[event_id]
 
-    def list_integration_events(self, adapter_key: str | None = None) -> list[IntegrationEventOut]:
+    def list_integration_events(
+        self,
+        adapter_key: str | None = None,
+        status: IntegrationEventStatus | None = None,
+    ) -> list[IntegrationEventOut]:
         events = list(self.integration_events.values())
         if adapter_key is not None:
             events = [event for event in events if event.adapter_key == adapter_key]
+        if status is not None:
+            events = [event for event in events if event.status == status]
         return sorted(events, key=lambda event: event.created_at)
+
+    def list_due_integration_events(
+        self,
+        *,
+        adapter_key: str,
+        now: datetime,
+        limit: int,
+    ) -> list[IntegrationEventOut]:
+        events = [
+            event
+            for event in self.integration_events.values()
+            if event.adapter_key == adapter_key
+            and event.status in {IntegrationEventStatus.queued, IntegrationEventStatus.retry}
+            and (event.next_retry_at is None or event.next_retry_at <= now)
+        ]
+        return sorted(events, key=lambda event: event.created_at)[:limit]
 
     def record_integration_dispatch_result(
         self,
@@ -186,6 +228,7 @@ class InMemoryStore:
         *,
         status: IntegrationEventStatus,
         last_error: str | None,
+        next_retry_at: datetime | None,
         increment_attempt: bool,
     ) -> IntegrationEventOut:
         current = self.integration_events[event_id]
@@ -194,6 +237,7 @@ class InMemoryStore:
                 "status": status,
                 "attempt_count": current.attempt_count + int(increment_attempt),
                 "last_error": last_error,
+                "next_retry_at": next_retry_at,
                 "updated_at": datetime.now(UTC),
             }
         )
@@ -245,21 +289,32 @@ class PostgresVectorStore:
                     id uuid PRIMARY KEY,
                     adapter_key text NOT NULL,
                     operation text NOT NULL,
+                    idempotency_key text NOT NULL,
                     status text NOT NULL,
                     payload jsonb NOT NULL DEFAULT '{}',
                     source_approval_id uuid,
                     attempt_count integer NOT NULL DEFAULT 0,
                     last_error text,
+                    next_retry_at timestamptz,
                     created_at timestamptz NOT NULL DEFAULT now(),
                     updated_at timestamptz NOT NULL DEFAULT now()
                 )
                 """
+            )
+            conn.execute("ALTER TABLE integration_events ADD COLUMN IF NOT EXISTS idempotency_key text")
+            conn.execute("UPDATE integration_events SET idempotency_key = id::text WHERE idempotency_key IS NULL")
+            conn.execute("ALTER TABLE integration_events ALTER COLUMN idempotency_key SET NOT NULL")
+            conn.execute(
+                "CREATE UNIQUE INDEX IF NOT EXISTS integration_events_idempotency_key_idx ON integration_events (idempotency_key)"
             )
             conn.execute(
                 "ALTER TABLE integration_events ADD COLUMN IF NOT EXISTS attempt_count integer NOT NULL DEFAULT 0"
             )
             conn.execute(
                 "ALTER TABLE integration_events ADD COLUMN IF NOT EXISTS last_error text"
+            )
+            conn.execute(
+                "ALTER TABLE integration_events ADD COLUMN IF NOT EXISTS next_retry_at timestamptz"
             )
 
     def add_chunks(self, chunks: list[ChunkRecord]) -> None:
@@ -386,6 +441,7 @@ class PostgresVectorStore:
         adapter_key: str,
         operation: str,
         payload: dict[str, Any],
+        idempotency_key: str,
         source_approval_id: UUID | None = None,
     ) -> IntegrationEventOut:
         event_id = uuid4()
@@ -393,14 +449,17 @@ class PostgresVectorStore:
             row = conn.execute(
                 """
                 INSERT INTO integration_events
-                    (id, adapter_key, operation, status, payload, source_approval_id)
-                VALUES (%s, %s, %s, %s, %s::jsonb, %s)
+                    (id, adapter_key, operation, idempotency_key, status, payload, source_approval_id)
+                VALUES (%s, %s, %s, %s, %s, %s::jsonb, %s)
+                ON CONFLICT (idempotency_key) DO UPDATE
+                SET idempotency_key = EXCLUDED.idempotency_key
                 RETURNING *
                 """,
                 (
                     event_id,
                     adapter_key,
                     operation,
+                    idempotency_key,
                     IntegrationEventStatus.queued.value,
                     json.dumps(payload),
                     source_approval_id,
@@ -418,17 +477,56 @@ class PostgresVectorStore:
             raise KeyError(str(event_id))
         return self._event_from_row(row)
 
-    def list_integration_events(self, adapter_key: str | None = None) -> list[IntegrationEventOut]:
+    def list_integration_events(
+        self,
+        adapter_key: str | None = None,
+        status: IntegrationEventStatus | None = None,
+    ) -> list[IntegrationEventOut]:
         with self._connect() as conn:
-            if adapter_key is None:
+            if adapter_key is None and status is None:
                 rows = conn.execute(
                     "SELECT * FROM integration_events ORDER BY created_at ASC",
                 ).fetchall()
-            else:
+            elif status is None:
                 rows = conn.execute(
                     "SELECT * FROM integration_events WHERE adapter_key = %s ORDER BY created_at ASC",
                     (adapter_key,),
                 ).fetchall()
+            elif adapter_key is None:
+                rows = conn.execute(
+                    "SELECT * FROM integration_events WHERE status = %s ORDER BY created_at ASC",
+                    (status.value,),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    """
+                    SELECT * FROM integration_events
+                    WHERE adapter_key = %s AND status = %s
+                    ORDER BY created_at ASC
+                    """,
+                    (adapter_key, status.value),
+                ).fetchall()
+        return [self._event_from_row(row) for row in rows]
+
+    def list_due_integration_events(
+        self,
+        *,
+        adapter_key: str,
+        now: datetime,
+        limit: int,
+    ) -> list[IntegrationEventOut]:
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT * FROM integration_events
+                WHERE adapter_key = %s
+                  AND status IN ('queued', 'retry')
+                  AND (next_retry_at IS NULL OR next_retry_at <= %s)
+                ORDER BY created_at ASC
+                LIMIT %s
+                """,
+                (adapter_key, now, limit),
+            ).fetchall()
         return [self._event_from_row(row) for row in rows]
 
     def record_integration_dispatch_result(
@@ -437,6 +535,7 @@ class PostgresVectorStore:
         *,
         status: IntegrationEventStatus,
         last_error: str | None,
+        next_retry_at: datetime | None,
         increment_attempt: bool,
     ) -> IntegrationEventOut:
         with self._connect() as conn:
@@ -447,11 +546,12 @@ class PostgresVectorStore:
                     status = %s,
                     attempt_count = attempt_count + %s,
                     last_error = %s,
+                    next_retry_at = %s,
                     updated_at = now()
                 WHERE id = %s
                 RETURNING *
                 """,
-                (status.value, int(increment_attempt), last_error, event_id),
+                (status.value, int(increment_attempt), last_error, next_retry_at, event_id),
             ).fetchone()
         if row is None:
             raise KeyError(str(event_id))
@@ -465,8 +565,10 @@ class PostgresVectorStore:
             status=IntegrationEventStatus(row["status"]),
             payload=row["payload"],
             source_approval_id=row["source_approval_id"],
+            idempotency_key=row["idempotency_key"],
             attempt_count=row["attempt_count"],
             last_error=row["last_error"],
+            next_retry_at=row["next_retry_at"],
             created_at=row["created_at"],
             updated_at=row["updated_at"],
         )

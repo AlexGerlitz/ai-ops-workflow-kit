@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
+from uuid import UUID
 
-from app.main import app, settings
+from app.main import app, queue_crm_handoff_if_needed, settings, store
 
 
 def test_health_endpoint_reports_runtime() -> None:
@@ -58,6 +59,8 @@ def test_public_demo_run_proves_workflow_contract() -> None:
     assert body["telegram_approval"]["status"] == "dry_run"
     assert body["telegram_approval"]["callback_contract"]["approve"]["url"].endswith("/approve")
     assert body["crm_handoff"]["status"] == "queued"
+    assert body["crm_handoff"]["idempotency_key"]
+    assert body["crm_handoff"]["next_retry_at"] is None
     assert body["bitrix24_dispatch"]["status"] == "dry_run"
     runtime = client.get("/runtime").json()
     assert runtime["counters"]["demo_runs_total"] >= 1
@@ -262,6 +265,7 @@ def test_offer_demo_call_transcript_queues_crm_handoff_after_approval() -> None:
         assert matching_events
         assert matching_events[0]["operation"] == "upsert_lead_follow_up"
         assert matching_events[0]["payload"]["customer_id"] == "LEAD-42"
+        assert matching_events[0]["idempotency_key"]
 
         dispatch = client.post(
             f"/integration-events/{matching_events[0]['id']}/dispatch/bitrix24"
@@ -316,7 +320,7 @@ def test_bitrix24_dispatch_records_retry_state_and_dead_letter(monkeypatch) -> N
         assert first_dispatch.status_code == 200
         first_body = first_dispatch.json()
         assert first_body["status"] == "not_configured"
-        assert first_body["event_status"] == "failed"
+        assert first_body["event_status"] == "retry"
         assert first_body["attempt_count"] == 1
         assert first_body["max_attempts"] == 2
 
@@ -337,7 +341,92 @@ def test_bitrix24_dispatch_records_retry_state_and_dead_letter(monkeypatch) -> N
         assert updated_event["status"] == "dead_letter"
         assert updated_event["attempt_count"] == 2
         assert "Bitrix24 webhook URL is not configured" in updated_event["last_error"]
+        assert updated_event["next_retry_at"] is None
 
         runtime = client.get("/runtime").json()
         assert runtime["counters"]["bitrix24_dispatch_failures_total"] >= 2
         assert runtime["counters"]["integration_dead_letters_total"] >= 1
+
+
+def test_crm_handoff_is_idempotent_per_approval() -> None:
+    with TestClient(app) as client:
+        webhook = client.post(
+            "/webhooks/n8n/call-transcript",
+            json={
+                "call_id": "CALL-IDEMPOTENT-1",
+                "customer_id": "LEAD-IDEMPOTENT",
+                "transcript": (
+                    "The buyer confirmed budget and authority. They need the result this "
+                    "month and agreed the next step is a technical review tomorrow."
+                ),
+                "metadata": {"source": "idempotency-test"},
+            },
+        )
+        assert webhook.status_code == 200
+        approval_id = webhook.json()["approval"]["id"]
+
+        approved = client.post(
+            f"/approvals/{approval_id}/approve",
+            json={"reviewer": "sales-lead", "notes": "Approved once"},
+        )
+        assert approved.status_code == 200
+        approval = store.get_approval(UUID(approval_id))
+        queue_crm_handoff_if_needed(approval)
+
+        events = client.get("/integration-events", params={"adapter_key": "bitrix24.mock"})
+        assert events.status_code == 200
+        matching_events = [
+            item for item in events.json() if item["source_approval_id"] == approval_id
+        ]
+        assert len(matching_events) == 1
+        assert matching_events[0]["idempotency_key"]
+
+
+def test_bitrix24_drain_respects_next_retry_at(monkeypatch) -> None:
+    monkeypatch.setattr(settings, "bitrix24_dry_run", False)
+    monkeypatch.setattr(settings, "bitrix24_webhook_url", None)
+    monkeypatch.setattr(settings, "integration_max_attempts", 3)
+    monkeypatch.setattr(settings, "integration_retry_delay_seconds", 300)
+
+    with TestClient(app) as client:
+        webhook = client.post(
+            "/webhooks/n8n/call-transcript",
+            json={
+                "call_id": "CALL-DRAIN-RETRY-1",
+                "customer_id": "LEAD-DRAIN-RETRY",
+                "transcript": (
+                    "The client has budget and authority. They need launch this month "
+                    "and accepted the next step as an implementation review."
+                ),
+                "metadata": {"source": "drain-retry-test"},
+            },
+        )
+        assert webhook.status_code == 200
+        approval_id = webhook.json()["approval"]["id"]
+        approved = client.post(
+            f"/approvals/{approval_id}/approve",
+            json={"reviewer": "sales-lead", "notes": "Queue for drain"},
+        )
+        assert approved.status_code == 200
+
+        first_drain = client.post("/integrations/bitrix24/drain", params={"limit": 100})
+        assert first_drain.status_code == 200
+        first_body = first_drain.json()
+        assert first_body["selected"] >= 1
+        assert first_body["retry"] >= 1
+
+        events = client.get(
+            "/integration-events",
+            params={"adapter_key": "bitrix24.mock", "status": "retry"},
+        )
+        assert events.status_code == 200
+        event = next(
+            item for item in events.json() if item["source_approval_id"] == approval_id
+        )
+        assert event["attempt_count"] == 1
+        assert event["next_retry_at"] is not None
+
+        second_drain = client.post("/integrations/bitrix24/drain", params={"limit": 100})
+        assert second_drain.status_code == 200
+        second_body = second_drain.json()
+        assert event["id"] not in second_body["event_ids"]

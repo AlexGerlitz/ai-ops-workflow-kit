@@ -119,7 +119,7 @@ The demo uses synthetic sales payloads and proves:
 - approval creation;
 - approval transition;
 - mock Bitrix24 integration event queued after approval.
-- Bitrix24 dispatch state with attempts, last error, and dead-letter handling.
+- Bitrix24 dispatch state with idempotency, attempts, retry timing, last error, and dead-letter handling.
 - browser-visible control tower at `/`.
 
 See `docs/OFFER_DEMO.md` for the expected output shape.
@@ -139,11 +139,12 @@ showing the exact payloads that will be sent after credentials are configured:
 curl http://127.0.0.1:8080/integrations/runtime
 curl -X POST http://127.0.0.1:8080/approvals/{approval_id}/notify/telegram
 curl -X POST http://127.0.0.1:8080/integration-events/{event_id}/dispatch/bitrix24
+curl -X POST http://127.0.0.1:8080/integrations/bitrix24/drain
 ```
 
 When `BITRIX24_DRY_RUN=false`, the Bitrix24 dispatch endpoint records each send attempt on the
-integration event. Failed attempts increment `attempt_count`, update `last_error`, and move the event
-to `dead_letter` after `INTEGRATION_MAX_ATTEMPTS`.
+integration event. Failed attempts increment `attempt_count`, update `last_error`, set `next_retry_at`,
+and move the event to `dead_letter` after `INTEGRATION_MAX_ATTEMPTS`.
 
 See `docs/INTEGRATION_SKELETON.md`.
 

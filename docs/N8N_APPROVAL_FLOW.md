@@ -117,7 +117,7 @@ That separation is intentional:
 
 - the transcript webhook can be retried without mutating CRM state;
 - the reviewer decision is auditable;
-- the CRM adapter records attempts, last error, retry state, and `dead_letter` safely;
+- the CRM adapter records idempotency, attempts, last error, retry timing, and `dead_letter` safely;
 - n8n can notify people without owning backend state.
 
 ## Production Adapter Shape
@@ -140,5 +140,9 @@ curl -X POST http://127.0.0.1:8080/integration-events/{event_id}/dispatch/bitrix
 ```
 
 When Bitrix24 dry-run is disabled, the same endpoint records each production send attempt. Failed
-dispatches set the event to `failed`, and repeated failures move it to `dead_letter` after the
-configured attempt limit.
+dispatches set the event to `retry` with `next_retry_at`, and repeated failures move it to
+`dead_letter` after the configured attempt limit. A worker can drain due events through:
+
+```bash
+curl -X POST http://127.0.0.1:8080/integrations/bitrix24/drain
+```

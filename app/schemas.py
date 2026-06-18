@@ -55,6 +55,7 @@ class ApprovalStatus(str, Enum):
 
 class IntegrationEventStatus(str, Enum):
     queued = "queued"
+    retry = "retry"
     sent = "sent"
     failed = "failed"
     dead_letter = "dead_letter"
@@ -153,8 +154,10 @@ class IntegrationEventOut(BaseModel):
     status: IntegrationEventStatus
     payload: dict[str, Any]
     source_approval_id: UUID | None = None
+    idempotency_key: str
     attempt_count: int = 0
     last_error: str | None = None
+    next_retry_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -182,6 +185,17 @@ class IntegrationDispatchOut(BaseModel):
     event_status: IntegrationEventStatus | None = None
     attempt_count: int | None = None
     max_attempts: int | None = None
+
+
+class IntegrationDrainOut(BaseModel):
+    adapter_key: str
+    selected: int
+    dispatched: int
+    sent: int
+    retry: int
+    dead_letter: int
+    dry_run: int
+    event_ids: list[UUID]
 
 
 class OfferDemoRunOut(BaseModel):

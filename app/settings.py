@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     bitrix24_webhook_url: str | None = None
     bitrix24_dry_run: bool = True
     integration_max_attempts: int = 3
+    integration_retry_delay_seconds: int = 300
 
 
 settings = Settings()

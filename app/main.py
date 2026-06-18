@@ -1,4 +1,6 @@
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime, timedelta
+from hashlib import sha256
 from hmac import compare_digest
 from uuid import UUID, uuid4
 
@@ -23,6 +25,7 @@ from app.schemas import (
     ApprovalStatus,
     DocumentIn,
     DocumentOut,
+    IntegrationDrainOut,
     IntegrationDispatchStatus,
     IntegrationDispatchOut,
     IntegrationEventOut,
@@ -175,8 +178,10 @@ async def run_demo_workflow() -> OfferDemoRunOut:
             "adapter_key": crm_event.adapter_key,
             "operation": crm_event.operation,
             "status": crm_event.status.value,
+            "idempotency_key": crm_event.idempotency_key,
             "attempt_count": crm_event.attempt_count,
             "last_error": crm_event.last_error,
+            "next_retry_at": crm_event.next_retry_at.isoformat() if crm_event.next_retry_at else None,
             "target_stage": crm_event.payload["target_stage"],
             "task": crm_event.payload["task"],
         },
@@ -328,8 +333,52 @@ def telegram_approval_webhook(
 
 
 @app.get("/integration-events", response_model=list[IntegrationEventOut])
-def list_integration_events(adapter_key: str | None = None) -> list[IntegrationEventOut]:
-    return store.list_integration_events(adapter_key)
+def list_integration_events(
+    adapter_key: str | None = None,
+    status: IntegrationEventStatus | None = None,
+) -> list[IntegrationEventOut]:
+    return store.list_integration_events(adapter_key, status)
+
+
+@app.post("/integrations/bitrix24/drain", response_model=IntegrationDrainOut)
+def drain_bitrix24_events(limit: int = 10) -> IntegrationDrainOut:
+    selected_events = store.list_due_integration_events(
+        adapter_key="bitrix24.mock",
+        now=datetime.now(UTC),
+        limit=max(min(limit, 100), 1),
+    )
+    result = {
+        "sent": 0,
+        "retry": 0,
+        "dead_letter": 0,
+        "dry_run": 0,
+    }
+    event_ids = []
+    for event in selected_events:
+        dispatch = dispatch_bitrix24_event(event, settings)
+        runtime_stats.increment("bitrix24_dispatches_total")
+        updated_event = record_bitrix24_dispatch_result(event, dispatch)
+        event_ids.append(updated_event.id)
+        if dispatch.status == IntegrationDispatchStatus.dry_run:
+            result["dry_run"] += 1
+        elif updated_event.status == IntegrationEventStatus.sent:
+            result["sent"] += 1
+        elif updated_event.status == IntegrationEventStatus.dead_letter:
+            result["dead_letter"] += 1
+        elif updated_event.status == IntegrationEventStatus.retry:
+            result["retry"] += 1
+
+    runtime_stats.increment_by("integration_events_drained_total", len(event_ids))
+    return IntegrationDrainOut(
+        adapter_key="bitrix24",
+        selected=len(selected_events),
+        dispatched=len(event_ids),
+        sent=result["sent"],
+        retry=result["retry"],
+        dead_letter=result["dead_letter"],
+        dry_run=result["dry_run"],
+        event_ids=event_ids,
+    )
 
 
 @app.post("/integration-events/{event_id}/dispatch/bitrix24", response_model=IntegrationDispatchOut)
@@ -418,10 +467,12 @@ def queue_crm_handoff_if_needed(approval: ApprovalOut) -> None:
         return
     adapter_key = str(crm_update.get("adapter") or "bitrix24.mock")
     operation = str(crm_update.get("operation") or "upsert_lead_follow_up")
+    idempotency_key = build_integration_idempotency_key(approval, adapter_key, operation)
     store.create_integration_event(
         adapter_key=adapter_key,
         operation=operation,
         payload=crm_update,
+        idempotency_key=idempotency_key,
         source_approval_id=approval.id,
     )
     runtime_stats.increment("crm_handoffs_queued_total")
@@ -439,6 +490,7 @@ def record_bitrix24_dispatch_result(
             event.id,
             status=IntegrationEventStatus.sent,
             last_error=None,
+            next_retry_at=None,
             increment_attempt=True,
         )
 
@@ -448,14 +500,31 @@ def record_bitrix24_dispatch_result(
     next_status = (
         IntegrationEventStatus.dead_letter
         if next_attempt_count >= max_attempts
-        else IntegrationEventStatus.failed
+        else IntegrationEventStatus.retry
     )
+    next_retry_at = None
+    if next_status == IntegrationEventStatus.retry:
+        next_retry_at = datetime.now(UTC) + timedelta(
+            seconds=max(settings.integration_retry_delay_seconds, 0)
+        )
     updated = store.record_integration_dispatch_result(
         event.id,
         status=next_status,
         last_error=dispatch.detail,
+        next_retry_at=next_retry_at,
         increment_attempt=True,
     )
     if next_status == IntegrationEventStatus.dead_letter and event.status != IntegrationEventStatus.dead_letter:
         runtime_stats.increment("integration_dead_letters_total")
+    if next_status == IntegrationEventStatus.retry:
+        runtime_stats.increment("integration_retries_scheduled_total")
     return updated
+
+
+def build_integration_idempotency_key(
+    approval: ApprovalOut,
+    adapter_key: str,
+    operation: str,
+) -> str:
+    raw_key = f"{approval.id}:{adapter_key}:{operation}"
+    return sha256(raw_key.encode("utf-8")).hexdigest()

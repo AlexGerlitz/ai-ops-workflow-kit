@@ -41,7 +41,8 @@ PY
 telegram_callback_response="$(curl -fsS -X POST "$BASE_URL/webhooks/telegram/approval" \
   -H "content-type: application/json" \
   -d "$telegram_callback_payload")"
-RUNTIME_PAYLOAD="$runtime_payload" METRICS_PAYLOAD="$metrics_payload" PAYLOAD="$payload" TELEGRAM_CALLBACK_RESPONSE="$telegram_callback_response" python3 - "$BASE_URL" "$CALLBACK_BASE_URL" <<'PY'
+drain_response="$(curl -fsS -X POST "$BASE_URL/integrations/bitrix24/drain?limit=100")"
+RUNTIME_PAYLOAD="$runtime_payload" METRICS_PAYLOAD="$metrics_payload" PAYLOAD="$payload" TELEGRAM_CALLBACK_RESPONSE="$telegram_callback_response" DRAIN_RESPONSE="$drain_response" python3 - "$BASE_URL" "$CALLBACK_BASE_URL" <<'PY'
 import json
 import os
 import sys
@@ -52,6 +53,7 @@ payload = json.loads(os.environ["PAYLOAD"])
 runtime_payload = json.loads(os.environ["RUNTIME_PAYLOAD"])
 metrics_payload = os.environ["METRICS_PAYLOAD"]
 telegram_callback_response = json.loads(os.environ["TELEGRAM_CALLBACK_RESPONSE"])
+drain_response = json.loads(os.environ["DRAIN_RESPONSE"])
 
 assert runtime_payload["ok"] is True
 assert runtime_payload["public_base_url"] == expected_callback_base_url
@@ -63,10 +65,15 @@ assert payload["approval"]["status"] == "approved"
 assert payload["telegram_approval"]["status"] == "dry_run"
 assert payload["bitrix24_dispatch"]["status"] == "dry_run"
 assert payload["crm_handoff"]["status"] == "queued"
+assert payload["crm_handoff"]["idempotency_key"]
 assert payload["crm_handoff"]["attempt_count"] == 0
+assert payload["crm_handoff"]["next_retry_at"] is None
 assert payload["bitrix24_dispatch"]["event_status"] == "queued"
 assert payload["bitrix24_dispatch"]["attempt_count"] == 0
 assert payload["bitrix24_dispatch"]["max_attempts"] >= 1
+assert drain_response["adapter_key"] == "bitrix24"
+assert drain_response["selected"] >= 1
+assert drain_response["dry_run"] >= 1
 approve_url = payload["telegram_approval"]["callback_contract"]["approve"]["url"]
 assert approve_url.startswith(expected_callback_base_url + "/approvals/"), approve_url
 telegram_webhook_url = payload["telegram_approval"]["callback_contract"]["telegram_webhook"]["url"]
@@ -86,4 +93,5 @@ print(f"telegram_callback={telegram_callback_response['approval_status']}")
 print(f"telegram={payload['telegram_approval']['status']}")
 print(f"bitrix24={payload['bitrix24_dispatch']['status']}")
 print(f"crm_event_status={payload['bitrix24_dispatch']['event_status']}")
+print(f"bitrix24_drain={drain_response['dry_run']}")
 PY
