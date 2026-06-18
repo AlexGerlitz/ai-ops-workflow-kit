@@ -1,11 +1,42 @@
 # AI Ops Workflow Kit
 
+[![CI](https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml)
+
 Production-minded reference implementation for AI workflow orchestration around business operations:
 document ingestion, RAG retrieval, transcript analysis, approval queues, and n8n/Telegram integration surfaces.
 
 The project keeps the workflow engine thin and moves stateful logic into a backend service. n8n can own
 webhooks, retries, notifications, and human-in-the-loop routing while the API owns RAG, scoring, audit-friendly
 state transitions, and integration contracts.
+
+## 60-Second Reviewer Snapshot
+
+This repository is public proof for AI workflow automation work where the output must be more than a
+prompt demo.
+
+| What to check | Why it matters |
+| --- | --- |
+| [Architecture notes](docs/ARCHITECTURE.md) | Shows the FastAPI/n8n/PostgreSQL boundary and why stateful logic stays in the backend. |
+| [Operations notes](docs/OPERATIONS.md) | Shows how the system is run, checked, and handed off. |
+| [Tests](tests/) | Shows deterministic coverage around chunking, retrieval, approvals, and API behavior. |
+| [CI workflow](.github/workflows/ci.yml) | Shows the public verification gate. |
+| `infra/n8n/` | Shows how automation/workflow tooling connects without taking over core domain state. |
+
+Best-fit evidence:
+
+- RAG/backend ownership: ingestion, chunking, retrieval, pgvector-ready storage, and LLM boundary;
+- human-in-the-loop workflow ownership: approval queue, explicit state transitions, and Telegram/n8n
+  integration shape;
+- business automation ownership: transcript webhook, scoring, context capture, and review routing;
+- engineering discipline: deterministic local embeddings, tests, Docker runtime, docs, and CI.
+
+Fast evaluation path:
+
+1. Read `docs/ARCHITECTURE.md`.
+2. Run `pytest -q`.
+3. Start `docker compose up --build`.
+4. Try `POST /documents`, `POST /query`, and `POST /approvals`.
+5. Review `infra/n8n/` to see the external workflow boundary.
 
 ## System Shape
 
@@ -104,4 +135,3 @@ pytest -q
 - Postgres/pgvector owns durable retrieval data; n8n owns workflow routing and external connectors.
 - Approval transitions are explicit and narrow: `pending -> approved` or `pending -> rejected`.
 - The webhook contract is structured so Bitrix, telephony, Google Drive, or Telegram can be connected without rewriting RAG logic.
-
