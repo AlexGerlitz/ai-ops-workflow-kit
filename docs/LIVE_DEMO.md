@@ -45,6 +45,7 @@ approval=approved
 telegram_callback=rejected
 telegram=dry_run
 bitrix24=dry_run
+crm_event_status=queued
 ```
 
 The smoke check proves that the public edge route, FastAPI runtime, workflow endpoint,
@@ -62,6 +63,7 @@ The `leadscore` alias intentionally keeps approval callbacks on the primary `sal
 - `/runtime` exposes deployed version, Git SHA, public callback base URL, integration readiness, and counters.
 - `/metrics` exposes Prometheus-style runtime and workflow counters.
 - Telegram and Bitrix24 remain in dry-run mode until credentials are configured.
+- Bitrix24 dry-run leaves CRM events queued; production mode records attempts, `last_error`, and `dead_letter`.
 
 ## Local Fallback
 

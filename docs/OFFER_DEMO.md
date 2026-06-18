@@ -12,7 +12,7 @@ The demo proves an end-to-end AI workflow automation scenario:
 6. build a dry-run Telegram approval payload;
 7. approve the item;
 8. queue a mock Bitrix24 CRM handoff event;
-9. build a dry-run Bitrix24 dispatch payload.
+9. build a dry-run Bitrix24 dispatch payload with outbox event state.
 
 The point is not to show a prompt wrapper. The point is to show the production
 boundary: n8n routes events, while the backend owns retrieval, scoring, state,
@@ -65,8 +65,8 @@ The output contains these sections:
 | `call_analysis` | Transcript was scored and converted into structured business action. |
 | `approval` | Human-in-the-loop state transition happened before CRM handoff. |
 | `telegram_approval` | Telegram approval payload and approve/reject callback contract were built in dry-run mode. |
-| `crm_handoff` | A mock Bitrix24 adapter event was queued after approval. |
-| `bitrix24_dispatch` | Bitrix24 dispatch payload was built in dry-run mode for the queued event. |
+| `crm_handoff` | A mock Bitrix24 adapter event was queued after approval, with attempt count and last error state. |
+| `bitrix24_dispatch` | Bitrix24 dispatch payload was built in dry-run mode for the queued event and reports event state. |
 
 Example high-level result:
 
@@ -89,11 +89,14 @@ Example high-level result:
   "crm_handoff": {
     "adapter_key": "bitrix24.mock",
     "operation": "upsert_lead_follow_up",
-    "status": "queued"
+    "status": "queued",
+    "attempt_count": 0
   },
   "bitrix24_dispatch": {
     "adapter_key": "bitrix24",
     "status": "dry_run",
+    "event_status": "queued",
+    "attempt_count": 0,
     "method": "crm.lead.update"
   }
 }
@@ -113,6 +116,7 @@ That maps directly to real AI automation work:
 - lead scoring;
 - Telegram-style approval;
 - Bitrix/CRM integration;
+- retry/dead-letter integration state;
 - dry-run integration contracts before credentials are connected;
 - browser-visible control tower for a one-click review path;
 - audit-friendly state transitions;
@@ -123,4 +127,4 @@ That maps directly to real AI automation work:
 - Disable dry-run after adding Telegram Bot API and Bitrix24 webhook credentials.
 - Replace deterministic local embeddings with OpenAI or another embedding API.
 - Add Deepgram/Whisper before the transcript webhook.
-- Add metrics for approval outcomes and failed integration events.
+- Add a scheduler or worker loop to drain queued integration events automatically.

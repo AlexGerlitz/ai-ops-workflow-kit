@@ -119,6 +119,7 @@ The demo uses synthetic sales payloads and proves:
 - approval creation;
 - approval transition;
 - mock Bitrix24 integration event queued after approval.
+- Bitrix24 dispatch state with attempts, last error, and dead-letter handling.
 - browser-visible control tower at `/`.
 
 See `docs/OFFER_DEMO.md` for the expected output shape.
@@ -140,6 +141,10 @@ curl -X POST http://127.0.0.1:8080/approvals/{approval_id}/notify/telegram
 curl -X POST http://127.0.0.1:8080/integration-events/{event_id}/dispatch/bitrix24
 ```
 
+When `BITRIX24_DRY_RUN=false`, the Bitrix24 dispatch endpoint records each send attempt on the
+integration event. Failed attempts increment `attempt_count`, update `last_error`, and move the event
+to `dead_letter` after `INTEGRATION_MAX_ATTEMPTS`.
+
 See `docs/INTEGRATION_SKELETON.md`.
 
 ## Public Verification Gate
@@ -149,8 +154,8 @@ python3 -m pip install -r requirements.txt
 bash scripts/verify_public.sh
 ```
 
-The gate runs tests, runs the offer demo, and validates that RAG retrieval, approval, and mock
-Bitrix24 handoff are present in the output.
+The gate runs tests, runs the offer demo, and validates that RAG retrieval, approval, mock Bitrix24
+handoff, runtime metrics, and outbox dispatch state are present in the output.
 
 ## Live Deployment Smoke
 

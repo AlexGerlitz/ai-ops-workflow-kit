@@ -57,6 +57,7 @@ class IntegrationEventStatus(str, Enum):
     queued = "queued"
     sent = "sent"
     failed = "failed"
+    dead_letter = "dead_letter"
 
 
 class IntegrationDispatchStatus(str, Enum):
@@ -152,6 +153,8 @@ class IntegrationEventOut(BaseModel):
     status: IntegrationEventStatus
     payload: dict[str, Any]
     source_approval_id: UUID | None = None
+    attempt_count: int = 0
+    last_error: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -176,6 +179,9 @@ class IntegrationDispatchOut(BaseModel):
     status: IntegrationDispatchStatus
     payload: dict[str, Any]
     detail: str = ""
+    event_status: IntegrationEventStatus | None = None
+    attempt_count: int | None = None
+    max_attempts: int | None = None
 
 
 class OfferDemoRunOut(BaseModel):

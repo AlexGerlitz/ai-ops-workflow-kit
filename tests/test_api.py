@@ -270,4 +270,74 @@ def test_offer_demo_call_transcript_queues_crm_handoff_after_approval() -> None:
         dispatch_body = dispatch.json()
         assert dispatch_body["adapter_key"] == "bitrix24"
         assert dispatch_body["status"] == "dry_run"
+        assert dispatch_body["event_status"] == "queued"
+        assert dispatch_body["attempt_count"] == 0
         assert dispatch_body["payload"]["method"] == "crm.lead.update"
+
+
+def test_bitrix24_dispatch_records_retry_state_and_dead_letter(monkeypatch) -> None:
+    monkeypatch.setattr(settings, "bitrix24_dry_run", False)
+    monkeypatch.setattr(settings, "bitrix24_webhook_url", None)
+    monkeypatch.setattr(settings, "integration_max_attempts", 2)
+
+    with TestClient(app) as client:
+        webhook = client.post(
+            "/webhooks/n8n/call-transcript",
+            json={
+                "call_id": "CALL-BITRIX-RETRY-1",
+                "customer_id": "LEAD-BITRIX-RETRY",
+                "transcript": (
+                    "The client confirmed budget and authority. They need rollout this "
+                    "month and agreed that the next step is a technical call tomorrow."
+                ),
+                "metadata": {"source": "bitrix-retry-test"},
+            },
+        )
+        assert webhook.status_code == 200
+        approval_id = webhook.json()["approval"]["id"]
+
+        approved = client.post(
+            f"/approvals/{approval_id}/approve",
+            json={"reviewer": "sales-lead", "notes": "Queue CRM handoff"},
+        )
+        assert approved.status_code == 200
+
+        events = client.get("/integration-events", params={"adapter_key": "bitrix24.mock"})
+        assert events.status_code == 200
+        event = next(
+            item for item in events.json() if item["source_approval_id"] == approval_id
+        )
+        assert event["attempt_count"] == 0
+        assert event["last_error"] is None
+
+        first_dispatch = client.post(
+            f"/integration-events/{event['id']}/dispatch/bitrix24"
+        )
+        assert first_dispatch.status_code == 200
+        first_body = first_dispatch.json()
+        assert first_body["status"] == "not_configured"
+        assert first_body["event_status"] == "failed"
+        assert first_body["attempt_count"] == 1
+        assert first_body["max_attempts"] == 2
+
+        second_dispatch = client.post(
+            f"/integration-events/{event['id']}/dispatch/bitrix24"
+        )
+        assert second_dispatch.status_code == 200
+        second_body = second_dispatch.json()
+        assert second_body["status"] == "not_configured"
+        assert second_body["event_status"] == "dead_letter"
+        assert second_body["attempt_count"] == 2
+
+        updated_events = client.get("/integration-events", params={"adapter_key": "bitrix24.mock"})
+        assert updated_events.status_code == 200
+        updated_event = next(
+            item for item in updated_events.json() if item["id"] == event["id"]
+        )
+        assert updated_event["status"] == "dead_letter"
+        assert updated_event["attempt_count"] == 2
+        assert "Bitrix24 webhook URL is not configured" in updated_event["last_error"]
+
+        runtime = client.get("/runtime").json()
+        assert runtime["counters"]["bitrix24_dispatch_failures_total"] >= 2
+        assert runtime["counters"]["integration_dead_letters_total"] >= 1

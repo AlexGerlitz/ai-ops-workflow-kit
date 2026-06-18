@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     telegram_dry_run: bool = True
     bitrix24_webhook_url: str | None = None
     bitrix24_dry_run: bool = True
+    integration_max_attempts: int = 3
 
 
 settings = Settings()

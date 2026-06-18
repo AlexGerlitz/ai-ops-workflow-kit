@@ -26,8 +26,13 @@ assert "approve" in payload["telegram_approval"]["callback_contract"]
 assert payload["crm_handoff"]["adapter_key"] == "bitrix24.mock"
 assert payload["crm_handoff"]["operation"] == "upsert_lead_follow_up"
 assert payload["crm_handoff"]["status"] == "queued"
+assert payload["crm_handoff"]["attempt_count"] == 0
+assert payload["crm_handoff"]["last_error"] is None
 assert payload["bitrix24_dispatch"]["adapter_key"] == "bitrix24"
 assert payload["bitrix24_dispatch"]["status"] == "dry_run"
+assert payload["bitrix24_dispatch"]["event_status"] == "queued"
+assert payload["bitrix24_dispatch"]["attempt_count"] == 0
+assert payload["bitrix24_dispatch"]["max_attempts"] >= 1
 assert payload["bitrix24_dispatch"]["method"] == "crm.lead.update"
 
 from fastapi.testclient import TestClient
@@ -67,6 +72,8 @@ assert runtime["ok"] is True
 assert runtime["counters"]["demo_runs_total"] >= 1
 assert runtime["counters"]["crm_handoffs_queued_total"] >= 1
 assert runtime["counters"]["telegram_callbacks_total"] >= 1
+assert "bitrix24_dispatch_failures_total" in runtime["counters"]
+assert "integration_dead_letters_total" in runtime["counters"]
 assert "aiops_runtime_info" in metrics
 assert "aiops_demo_runs_total" in metrics
 

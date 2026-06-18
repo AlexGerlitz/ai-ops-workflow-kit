@@ -18,7 +18,9 @@ class RuntimeStats:
             "telegram_callbacks_total": 0,
             "telegram_callback_auth_failures_total": 0,
             "bitrix24_dispatches_total": 0,
+            "bitrix24_dispatch_failures_total": 0,
             "crm_handoffs_queued_total": 0,
+            "integration_dead_letters_total": 0,
         }
 
     def increment(self, key: str) -> None:

@@ -61,6 +61,15 @@ class Store(Protocol):
 
     def list_integration_events(self, adapter_key: str | None = None) -> list[IntegrationEventOut]: ...
 
+    def record_integration_dispatch_result(
+        self,
+        event_id: UUID,
+        *,
+        status: IntegrationEventStatus,
+        last_error: str | None,
+        increment_attempt: bool,
+    ) -> IntegrationEventOut: ...
+
 
 class InMemoryStore:
     name = "memory"
@@ -154,6 +163,8 @@ class InMemoryStore:
             status=IntegrationEventStatus.queued,
             payload=payload,
             source_approval_id=source_approval_id,
+            attempt_count=0,
+            last_error=None,
             created_at=now,
             updated_at=now,
         )
@@ -168,6 +179,26 @@ class InMemoryStore:
         if adapter_key is not None:
             events = [event for event in events if event.adapter_key == adapter_key]
         return sorted(events, key=lambda event: event.created_at)
+
+    def record_integration_dispatch_result(
+        self,
+        event_id: UUID,
+        *,
+        status: IntegrationEventStatus,
+        last_error: str | None,
+        increment_attempt: bool,
+    ) -> IntegrationEventOut:
+        current = self.integration_events[event_id]
+        updated = current.model_copy(
+            update={
+                "status": status,
+                "attempt_count": current.attempt_count + int(increment_attempt),
+                "last_error": last_error,
+                "updated_at": datetime.now(UTC),
+            }
+        )
+        self.integration_events[event_id] = updated
+        return updated
 
 
 class PostgresVectorStore:
@@ -217,10 +248,18 @@ class PostgresVectorStore:
                     status text NOT NULL,
                     payload jsonb NOT NULL DEFAULT '{}',
                     source_approval_id uuid,
+                    attempt_count integer NOT NULL DEFAULT 0,
+                    last_error text,
                     created_at timestamptz NOT NULL DEFAULT now(),
                     updated_at timestamptz NOT NULL DEFAULT now()
                 )
                 """
+            )
+            conn.execute(
+                "ALTER TABLE integration_events ADD COLUMN IF NOT EXISTS attempt_count integer NOT NULL DEFAULT 0"
+            )
+            conn.execute(
+                "ALTER TABLE integration_events ADD COLUMN IF NOT EXISTS last_error text"
             )
 
     def add_chunks(self, chunks: list[ChunkRecord]) -> None:
@@ -392,6 +431,32 @@ class PostgresVectorStore:
                 ).fetchall()
         return [self._event_from_row(row) for row in rows]
 
+    def record_integration_dispatch_result(
+        self,
+        event_id: UUID,
+        *,
+        status: IntegrationEventStatus,
+        last_error: str | None,
+        increment_attempt: bool,
+    ) -> IntegrationEventOut:
+        with self._connect() as conn:
+            row = conn.execute(
+                """
+                UPDATE integration_events
+                SET
+                    status = %s,
+                    attempt_count = attempt_count + %s,
+                    last_error = %s,
+                    updated_at = now()
+                WHERE id = %s
+                RETURNING *
+                """,
+                (status.value, int(increment_attempt), last_error, event_id),
+            ).fetchone()
+        if row is None:
+            raise KeyError(str(event_id))
+        return self._event_from_row(row)
+
     def _event_from_row(self, row: dict[str, Any]) -> IntegrationEventOut:
         return IntegrationEventOut(
             id=row["id"],
@@ -400,6 +465,8 @@ class PostgresVectorStore:
             status=IntegrationEventStatus(row["status"]),
             payload=row["payload"],
             source_approval_id=row["source_approval_id"],
+            attempt_count=row["attempt_count"],
+            last_error=row["last_error"],
             created_at=row["created_at"],
             updated_at=row["updated_at"],
         )

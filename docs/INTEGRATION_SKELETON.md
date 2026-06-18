@@ -28,6 +28,7 @@ TELEGRAM_WEBHOOK_SECRET=
 TELEGRAM_DRY_RUN=true
 BITRIX24_WEBHOOK_URL=
 BITRIX24_DRY_RUN=true
+INTEGRATION_MAX_ATTEMPTS=3
 ```
 
 The default is dry-run. In dry-run mode the API returns the exact outgoing payload but does not call
@@ -120,7 +121,24 @@ Production behavior after dry-run is disabled:
 1. approved CRM event is loaded from the backend queue;
 2. adapter maps the internal `upsert_lead_follow_up` operation to a Bitrix24 REST method;
 3. adapter sends the payload through `BITRIX24_WEBHOOK_URL`;
-4. failed sends can later be retried or dead-lettered without changing the approval contract.
+4. successful sends mark the integration event as `sent`;
+5. failed sends increment `attempt_count` and record `last_error`;
+6. repeated failures move the event to `dead_letter` after `INTEGRATION_MAX_ATTEMPTS`.
+
+The endpoint response includes the adapter result plus the backend event state:
+
+```json
+{
+  "adapter_key": "bitrix24",
+  "status": "not_configured",
+  "event_status": "failed",
+  "attempt_count": 1,
+  "max_attempts": 3
+}
+```
+
+Dry-run mode leaves the event queued and does not consume attempts. That keeps public checks safe
+while preserving the same payload contract a production deployment would send.
 
 ## Why This Shape
 
@@ -128,3 +146,4 @@ Production behavior after dry-run is disabled:
 - External calls are explicit and inspectable.
 - Telegram and Bitrix24 credentials stay in `.env` or server secret storage.
 - Approval and CRM mutation remain separate auditable steps.
+- Integration failures are visible as state, not hidden in logs.

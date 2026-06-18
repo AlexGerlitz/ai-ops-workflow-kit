@@ -62,6 +62,11 @@ assert payload["call_analysis"]["score"] >= 80
 assert payload["approval"]["status"] == "approved"
 assert payload["telegram_approval"]["status"] == "dry_run"
 assert payload["bitrix24_dispatch"]["status"] == "dry_run"
+assert payload["crm_handoff"]["status"] == "queued"
+assert payload["crm_handoff"]["attempt_count"] == 0
+assert payload["bitrix24_dispatch"]["event_status"] == "queued"
+assert payload["bitrix24_dispatch"]["attempt_count"] == 0
+assert payload["bitrix24_dispatch"]["max_attempts"] >= 1
 approve_url = payload["telegram_approval"]["callback_contract"]["approve"]["url"]
 assert approve_url.startswith(expected_callback_base_url + "/approvals/"), approve_url
 telegram_webhook_url = payload["telegram_approval"]["callback_contract"]["telegram_webhook"]["url"]
@@ -80,4 +85,5 @@ print(f"approval={payload['approval']['status']}")
 print(f"telegram_callback={telegram_callback_response['approval_status']}")
 print(f"telegram={payload['telegram_approval']['status']}")
 print(f"bitrix24={payload['bitrix24_dispatch']['status']}")
+print(f"crm_event_status={payload['bitrix24_dispatch']['event_status']}")
 PY

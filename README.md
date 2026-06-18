@@ -26,7 +26,7 @@ prompt demo.
 | [Architecture notes](docs/ARCHITECTURE.md) | Shows the FastAPI/n8n/PostgreSQL boundary and why stateful logic stays in the backend. |
 | [Operations notes](docs/OPERATIONS.md) | Shows how the system is run, checked, and handed off. |
 | [n8n approval flow](docs/N8N_APPROVAL_FLOW.md) | Shows the webhook, Telegram payload, approval callback, and CRM handoff boundary. |
-| [Integration skeleton](docs/INTEGRATION_SKELETON.md) | Shows dry-run Telegram and Bitrix24 contracts before credentials are connected. |
+| [Integration skeleton](docs/INTEGRATION_SKELETON.md) | Shows dry-run Telegram, Bitrix24, retry, and dead-letter contracts before credentials are connected. |
 | [Tests](tests/) | Shows deterministic coverage around chunking, retrieval, approvals, and API behavior. |
 | [CI workflow](.github/workflows/ci.yml) | Shows the public verification gate. |
 | `infra/n8n/` | Shows how automation/workflow tooling connects without taking over core domain state. |
@@ -69,6 +69,7 @@ flowchart LR
 - pgvector-ready schema and Docker Compose runtime.
 - Transcript webhook that produces a structured analysis and a human approval item.
 - Mock Bitrix24 CRM handoff event queued only after human approval.
+- CRM outbox retry state with attempt counters, last error, and dead-letter handling.
 - Dry-run Telegram approval and Bitrix24 dispatch contracts ready for real credentials.
 - Telegram callback webhook for inline approve/reject decisions.
 - Optional Telegram webhook secret verification for production callbacks.
@@ -178,7 +179,7 @@ curl -X POST http://127.0.0.1:8080/approvals \
 | `POST /approvals/{id}/approve` | Approve an item and attach reviewer notes. |
 | `POST /approvals/{id}/reject` | Reject an item and attach reviewer notes. |
 | `GET /integration-events` | Inspect queued CRM/integration handoff events. |
-| `POST /integration-events/{id}/dispatch/bitrix24` | Dry-run or send a queued CRM event through Bitrix24. |
+| `POST /integration-events/{id}/dispatch/bitrix24` | Dry-run or send a queued CRM event through Bitrix24, recording attempts and dead-letter state outside dry-run mode. |
 | `POST /webhooks/n8n/call-transcript` | Accept a transcript event, score it, ingest it, and create approval work. |
 
 ## Repository Layout
@@ -209,4 +210,5 @@ bash scripts/verify_public.sh
 - Approval transitions are explicit and narrow: `pending -> approved` or `pending -> rejected`.
 - The webhook contract is structured so Bitrix, telephony, Google Drive, or Telegram can be connected without rewriting RAG logic.
 - Telegram and Bitrix24 are dry-run by default, so public checks prove payload shape without exposing secrets.
+- Real Bitrix24 dispatches are recorded as integration attempts; repeated failures move the event to `dead_letter` with `last_error`.
 - `/runtime` and `/metrics` expose deploy evidence without requiring log access.

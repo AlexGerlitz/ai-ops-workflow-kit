@@ -12,7 +12,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-14 passed
+16 passed
 public verification passed
 ```
 
@@ -28,6 +28,7 @@ workflow produced:
 - optional Telegram webhook secret verification;
 - queued `bitrix24.mock` CRM handoff.
 - dry-run Bitrix24 dispatch payload.
+- Bitrix24 retry/dead-letter state for failed production dispatches.
 - runtime identity and metrics surface.
 
 ## 2. Inspect The Offer Demo
@@ -96,7 +97,7 @@ Then open:
 | [Operations](./OPERATIONS.md) | Local runtime, health checks, smoke test, logs, and handoff. |
 | [n8n Approval Flow](./N8N_APPROVAL_FLOW.md) | How webhook routing, Telegram payloads, and approval callbacks connect. |
 | [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Telegram and Bitrix24 dry-run contracts become real credentials later. |
-| [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, and CRM handoff. |
+| [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, CRM handoff, and integration retry/dead-letter behavior. |
 
 ## 7. What This Proves
 
@@ -105,6 +106,7 @@ Then open:
 - n8n is used as orchestration glue, not as hidden domain logic.
 - LLM/RAG behavior has deterministic local fallbacks for repeatable review.
 - CRM mutation is queued only after explicit human approval.
+- CRM dispatch failures become retry/dead-letter state, not invisible log-only errors.
 - Telegram and Bitrix24 adapters expose dry-run contracts before credentials are connected.
 - Telegram inline callbacks have a backend endpoint that applies approve/reject state transitions.
 - Production Telegram callbacks can be protected with `X-Telegram-Bot-Api-Secret-Token`.

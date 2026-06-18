@@ -23,8 +23,10 @@ from app.schemas import (
     ApprovalStatus,
     DocumentIn,
     DocumentOut,
+    IntegrationDispatchStatus,
     IntegrationDispatchOut,
     IntegrationEventOut,
+    IntegrationEventStatus,
     IntegrationRuntimeOut,
     OfferDemoRunOut,
     QueryIn,
@@ -173,6 +175,8 @@ async def run_demo_workflow() -> OfferDemoRunOut:
             "adapter_key": crm_event.adapter_key,
             "operation": crm_event.operation,
             "status": crm_event.status.value,
+            "attempt_count": crm_event.attempt_count,
+            "last_error": crm_event.last_error,
             "target_stage": crm_event.payload["target_stage"],
             "task": crm_event.payload["task"],
         },
@@ -180,6 +184,9 @@ async def run_demo_workflow() -> OfferDemoRunOut:
             "adapter_key": bitrix24.adapter_key,
             "operation": bitrix24.operation,
             "status": bitrix24.status.value,
+            "event_status": bitrix24.event_status.value if bitrix24.event_status else None,
+            "attempt_count": bitrix24.attempt_count,
+            "max_attempts": bitrix24.max_attempts,
             "method": bitrix24.payload["method"],
         },
     )
@@ -333,7 +340,14 @@ def dispatch_event_to_bitrix24(event_id: UUID) -> IntegrationDispatchOut:
         raise HTTPException(status_code=404, detail="integration event not found") from exc
     dispatch = dispatch_bitrix24_event(event, settings)
     runtime_stats.increment("bitrix24_dispatches_total")
-    return dispatch
+    updated_event = record_bitrix24_dispatch_result(event, dispatch)
+    return dispatch.model_copy(
+        update={
+            "event_status": updated_event.status,
+            "attempt_count": updated_event.attempt_count,
+            "max_attempts": settings.integration_max_attempts,
+        }
+    )
 
 
 @app.post("/webhooks/n8n/call-transcript", response_model=TranscriptWebhookOut)
@@ -411,3 +425,37 @@ def queue_crm_handoff_if_needed(approval: ApprovalOut) -> None:
         source_approval_id=approval.id,
     )
     runtime_stats.increment("crm_handoffs_queued_total")
+
+
+def record_bitrix24_dispatch_result(
+    event: IntegrationEventOut,
+    dispatch: IntegrationDispatchOut,
+) -> IntegrationEventOut:
+    if dispatch.status == IntegrationDispatchStatus.dry_run:
+        return event
+
+    if dispatch.status == IntegrationDispatchStatus.sent:
+        return store.record_integration_dispatch_result(
+            event.id,
+            status=IntegrationEventStatus.sent,
+            last_error=None,
+            increment_attempt=True,
+        )
+
+    runtime_stats.increment("bitrix24_dispatch_failures_total")
+    next_attempt_count = event.attempt_count + 1
+    max_attempts = max(settings.integration_max_attempts, 1)
+    next_status = (
+        IntegrationEventStatus.dead_letter
+        if next_attempt_count >= max_attempts
+        else IntegrationEventStatus.failed
+    )
+    updated = store.record_integration_dispatch_result(
+        event.id,
+        status=next_status,
+        last_error=dispatch.detail,
+        increment_attempt=True,
+    )
+    if next_status == IntegrationEventStatus.dead_letter and event.status != IntegrationEventStatus.dead_letter:
+        runtime_stats.increment("integration_dead_letters_total")
+    return updated
