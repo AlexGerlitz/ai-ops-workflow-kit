@@ -52,7 +52,8 @@ worker_active=False
 
 The smoke check proves that the public edge route, FastAPI runtime, workflow endpoint,
 approval callback base URL, runtime evidence, metrics endpoint, and integration dry-run
-contracts are aligned.
+contracts are aligned. It also verifies that the browser UI exposes the current reviewer proof
+labels: Telegram callback approval, outbox drain, and worker state.
 The `leadscore` alias intentionally keeps approval callbacks on the primary `saleops` URL.
 
 ## What Is Real

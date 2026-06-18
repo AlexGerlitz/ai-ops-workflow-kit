@@ -8,7 +8,11 @@ if [[ "$BASE_URL" == "https://leadscore.duckdns.org" && "$CALLBACK_BASE_URL" == 
   CALLBACK_BASE_URL="https://saleops.duckdns.org"
 fi
 
-curl -fsS "$BASE_URL/" | grep -q "AI Sales Ops Control Tower"
+home_payload="$(curl -fsS "$BASE_URL/")"
+grep -q "AI Sales Ops Control Tower" <<<"$home_payload"
+grep -q "Telegram callback approval" <<<"$home_payload"
+grep -q "Outbox drain" <<<"$home_payload"
+grep -q "Worker state" <<<"$home_payload"
 runtime_payload="$(curl -fsS "$BASE_URL/runtime")"
 metrics_payload="$(curl -fsS "$BASE_URL/metrics")"
 payload="$(curl -fsS -X POST "$BASE_URL/demo/run")"
