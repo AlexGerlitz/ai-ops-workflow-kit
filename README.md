@@ -72,6 +72,7 @@ flowchart LR
 - Dry-run Telegram approval and Bitrix24 dispatch contracts ready for real credentials.
 - Approval state machine for Telegram, CRM, or internal review loops.
 - n8n workflow example for webhook-to-API-to-approval routing.
+- Runtime evidence endpoints for version, deploy environment, counters, and Prometheus-style metrics.
 - Tests around chunking, embeddings, retrieval, and approval state transitions.
 
 ## Offer Demo
@@ -127,6 +128,8 @@ API:
 
 ```bash
 curl http://127.0.0.1:8080/health
+curl http://127.0.0.1:8080/runtime
+curl http://127.0.0.1:8080/metrics
 ```
 
 Ingest a document:
@@ -159,6 +162,8 @@ curl -X POST http://127.0.0.1:8080/approvals \
 | --- | --- |
 | `GET /` | Browser-visible Sales Ops Control Tower demo. |
 | `GET /health` | Runtime health and active storage mode. |
+| `GET /runtime` | Runtime version, build SHA, deploy environment, public callback URL, integrations, and counters. |
+| `GET /metrics` | Prometheus-style runtime and workflow counters. |
 | `GET /integrations/runtime` | Inspect Telegram and Bitrix24 adapter configuration/dry-run status. |
 | `POST /demo/run` | Run the synthetic transcript -> RAG -> approval -> Telegram/Bitrix dry-run demo. |
 | `POST /documents` | Chunk and ingest text into the vector store. |
@@ -201,3 +206,4 @@ bash scripts/verify_public.sh
 - Approval transitions are explicit and narrow: `pending -> approved` or `pending -> rejected`.
 - The webhook contract is structured so Bitrix, telephony, Google Drive, or Telegram can be connected without rewriting RAG logic.
 - Telegram and Bitrix24 are dry-run by default, so public checks prove payload shape without exposing secrets.
+- `/runtime` and `/metrics` expose deploy evidence without requiring log access.

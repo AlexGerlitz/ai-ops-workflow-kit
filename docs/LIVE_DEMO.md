@@ -38,6 +38,8 @@ Expected output:
 live demo smoke passed
 base_url=https://saleops.duckdns.org
 callback_base_url=https://saleops.duckdns.org
+version=0.2.0
+git_sha=<deployed-sha>
 score=100
 approval=approved
 telegram=dry_run
@@ -45,7 +47,8 @@ bitrix24=dry_run
 ```
 
 The smoke check proves that the public edge route, FastAPI runtime, workflow endpoint,
-approval callback base URL, and integration dry-run contracts are aligned.
+approval callback base URL, runtime evidence, metrics endpoint, and integration dry-run
+contracts are aligned.
 The `leadscore` alias intentionally keeps approval callbacks on the primary `saleops` URL.
 
 ## What Is Real
@@ -53,6 +56,8 @@ The `leadscore` alias intentionally keeps approval callbacks on the primary `sal
 - The API is a real deployed service, not a static mock.
 - The workflow runs through the same `/demo/run` endpoint used by local tests.
 - The callback contract uses the public HTTPS base URL.
+- `/runtime` exposes deployed version, Git SHA, public callback base URL, integration readiness, and counters.
+- `/metrics` exposes Prometheus-style runtime and workflow counters.
 - Telegram and Bitrix24 remain in dry-run mode until credentials are configured.
 
 ## Local Fallback

@@ -12,7 +12,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-12 passed
+13 passed
 public verification passed
 ```
 
@@ -26,6 +26,7 @@ workflow produced:
 - dry-run Telegram approval payload;
 - queued `bitrix24.mock` CRM handoff.
 - dry-run Bitrix24 dispatch payload.
+- runtime identity and metrics surface.
 
 ## 2. Inspect The Offer Demo
 
@@ -77,6 +78,8 @@ docker compose up --build
 Then open:
 
 - API health: http://127.0.0.1:8080/health
+- Runtime evidence: http://127.0.0.1:8080/runtime
+- Metrics: http://127.0.0.1:8080/metrics
 - FastAPI docs: http://127.0.0.1:8080/docs
 - n8n UI: http://127.0.0.1:5678
 
@@ -101,4 +104,5 @@ Then open:
 - LLM/RAG behavior has deterministic local fallbacks for repeatable review.
 - CRM mutation is queued only after explicit human approval.
 - Telegram and Bitrix24 adapters expose dry-run contracts before credentials are connected.
+- Runtime and metrics endpoints expose deploy identity and workflow counters.
 - The project has a public verification command and CI gate.

@@ -12,6 +12,7 @@ This map connects the repository to the work expected from an AI automation engi
 | Telegram approval contract | `app/integrations.py`, `POST /approvals/{id}/notify/telegram`, `docs/INTEGRATION_SKELETON.md` |
 | Bitrix24 handoff contract | `app/integrations.py`, `POST /integration-events/{id}/dispatch/bitrix24` |
 | Self-hosted runtime | `Dockerfile`, `docker-compose.yml`, `docs/LIVE_DEMO.md`, `docs/OPERATIONS.md` |
+| Runtime observability | `GET /runtime`, `GET /metrics`, `app/observability.py`, `scripts/smoke_live_demo.sh` |
 | Public proof | `https://saleops.duckdns.org/`, `scripts/smoke_live_demo.sh` |
 | Verification discipline | `scripts/verify_public.sh`, `.github/workflows/ci.yml`, `tests/` |
 
@@ -22,6 +23,7 @@ This map connects the repository to the work expected from an AI automation engi
 - External integrations are dry-run by default, so a public reviewer can inspect payloads without secrets.
 - Local embeddings are deterministic, so tests and demo output are repeatable without API keys.
 - CRM handoff is queued only after an explicit approval transition.
+- Runtime identity and counters are public, so a reviewer can verify the deployed build without server access.
 
 ## Review Order
 

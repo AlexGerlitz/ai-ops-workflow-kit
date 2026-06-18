@@ -10,6 +10,22 @@ def test_health_endpoint_reports_runtime() -> None:
     assert response.json()["ok"] is True
 
 
+def test_runtime_and_metrics_endpoints_expose_operational_evidence() -> None:
+    with TestClient(app) as client:
+        runtime = client.get("/runtime")
+        metrics = client.get("/metrics")
+    assert runtime.status_code == 200
+    body = runtime.json()
+    assert body["ok"] is True
+    assert body["version"]
+    assert body["git_sha"]
+    assert body["storage"] in {"memory", "postgres"}
+    assert "demo_runs_total" in body["counters"]
+    assert metrics.status_code == 200
+    assert "aiops_runtime_info" in metrics.text
+    assert "aiops_demo_runs_total" in metrics.text
+
+
 def test_public_demo_page_is_available() -> None:
     with TestClient(app) as client:
         response = client.get("/")
@@ -42,6 +58,9 @@ def test_public_demo_run_proves_workflow_contract() -> None:
     assert body["telegram_approval"]["callback_contract"]["approve"]["url"].endswith("/approve")
     assert body["crm_handoff"]["status"] == "queued"
     assert body["bitrix24_dispatch"]["status"] == "dry_run"
+    runtime = client.get("/runtime").json()
+    assert runtime["counters"]["demo_runs_total"] >= 1
+    assert runtime["counters"]["crm_handoffs_queued_total"] >= 1
 
 
 def test_ingest_query_and_approval_flow() -> None:

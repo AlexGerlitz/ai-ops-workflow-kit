@@ -30,5 +30,20 @@ assert payload["bitrix24_dispatch"]["adapter_key"] == "bitrix24"
 assert payload["bitrix24_dispatch"]["status"] == "dry_run"
 assert payload["bitrix24_dispatch"]["method"] == "crm.lead.update"
 
+from fastapi.testclient import TestClient
+from app.main import app
+
+with TestClient(app) as client:
+    demo_response = client.post("/demo/run")
+    assert demo_response.status_code == 200
+    runtime = client.get("/runtime").json()
+    metrics = client.get("/metrics").text
+
+assert runtime["ok"] is True
+assert runtime["counters"]["demo_runs_total"] >= 1
+assert runtime["counters"]["crm_handoffs_queued_total"] >= 1
+assert "aiops_runtime_info" in metrics
+assert "aiops_demo_runs_total" in metrics
+
 print("public verification passed")
 PY

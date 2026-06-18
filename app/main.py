@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from uuid import UUID, uuid4
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse
 
 from app.chunking import chunk_text
 from app.demo_payloads import DEMO_SALES_PLAYBOOK, DEMO_TRANSCRIPT
@@ -13,6 +13,7 @@ from app.integrations import (
     integration_runtime,
 )
 from app.llm import LLMClient
+from app.observability import RuntimeStats, prometheus_metrics
 from app.sales_workflow import build_call_analysis
 from app.schemas import (
     ApprovalDecision,
@@ -38,6 +39,7 @@ from app.ui import DEMO_PAGE_HTML
 embedding_provider = HashEmbeddingProvider(settings.embedding_dim)
 store = build_store(settings.database_url, settings.embedding_dim)
 llm = LLMClient(api_key=settings.openai_api_key, model=settings.openai_model)
+runtime_stats = RuntimeStats()
 
 
 @asynccontextmanager
@@ -48,7 +50,7 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title="AI Ops Workflow Kit",
-    version="0.1.0",
+    version=settings.app_version,
     lifespan=lifespan,
 )
 
@@ -67,6 +69,37 @@ def health() -> dict[str, object]:
     }
 
 
+@app.get("/runtime")
+def runtime() -> dict[str, object]:
+    return {
+        "ok": True,
+        "version": settings.app_version,
+        "git_sha": settings.git_sha,
+        "environment": settings.deploy_environment,
+        "started_at": runtime_stats.started_at.isoformat(),
+        "uptime_seconds": runtime_stats.uptime_seconds(),
+        "storage": store.name,
+        "embedding_dim": settings.embedding_dim,
+        "public_base_url": settings.public_base_url,
+        "integrations": get_integration_runtime(),
+        "counters": runtime_stats.snapshot(),
+    }
+
+
+@app.get("/metrics", response_class=PlainTextResponse)
+def metrics() -> PlainTextResponse:
+    return PlainTextResponse(
+        prometheus_metrics(
+            stats=runtime_stats,
+            app_version=settings.app_version,
+            git_sha=settings.git_sha,
+            deploy_environment=settings.deploy_environment,
+            storage=store.name,
+        ),
+        media_type="text/plain; version=0.0.4; charset=utf-8",
+    )
+
+
 @app.get("/integrations/runtime", response_model=IntegrationRuntimeOut)
 def get_integration_runtime() -> IntegrationRuntimeOut:
     return integration_runtime(settings)
@@ -74,6 +107,7 @@ def get_integration_runtime() -> IntegrationRuntimeOut:
 
 @app.post("/demo/run", response_model=OfferDemoRunOut)
 async def run_demo_workflow() -> OfferDemoRunOut:
+    runtime_stats.increment("demo_runs_total")
     document = ingest_document(
         DocumentIn(
             source="drive://demo/sales-playbook",
@@ -161,11 +195,13 @@ def ingest_document(document: DocumentIn) -> DocumentOut:
         for chunk in chunk_text(document.text)
     ]
     store.add_chunks(chunks)
+    runtime_stats.increment("documents_ingested_total")
     return DocumentOut(source=document.source, chunks=len(chunks))
 
 
 @app.post("/query", response_model=QueryOut)
 async def query(payload: QueryIn) -> QueryOut:
+    runtime_stats.increment("query_requests_total")
     embedding = embedding_provider.embed(payload.question)
     contexts = store.search(embedding, payload.top_k)
     answer = await llm.answer(payload.question, contexts)
@@ -174,7 +210,9 @@ async def query(payload: QueryIn) -> QueryOut:
 
 @app.post("/approvals", response_model=ApprovalOut)
 def create_approval(payload: ApprovalIn) -> ApprovalOut:
-    return store.create_approval(payload)
+    approval = store.create_approval(payload)
+    runtime_stats.increment("approvals_created_total")
+    return approval
 
 
 @app.get("/approvals", response_model=list[ApprovalOut])
@@ -196,6 +234,7 @@ def approve(item_id: UUID, decision: ApprovalDecision) -> ApprovalOut:
         approval = store.approve(item_id, decision.reviewer, decision.notes)
     except (KeyError, ValueError) as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+    runtime_stats.increment("approvals_approved_total")
     queue_crm_handoff_if_needed(approval)
     return approval
 
@@ -203,9 +242,11 @@ def approve(item_id: UUID, decision: ApprovalDecision) -> ApprovalOut:
 @app.post("/approvals/{item_id}/reject", response_model=ApprovalOut)
 def reject(item_id: UUID, decision: ApprovalDecision) -> ApprovalOut:
     try:
-        return store.reject(item_id, decision.reviewer, decision.notes)
+        rejected = store.reject(item_id, decision.reviewer, decision.notes)
     except (KeyError, ValueError) as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+    runtime_stats.increment("approvals_rejected_total")
+    return rejected
 
 
 @app.post("/approvals/{item_id}/notify/telegram", response_model=IntegrationDispatchOut)
@@ -214,7 +255,9 @@ def notify_approval_in_telegram(item_id: UUID) -> IntegrationDispatchOut:
         approval = store.get_approval(item_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="approval item not found") from exc
-    return dispatch_telegram_approval(approval, settings)
+    dispatch = dispatch_telegram_approval(approval, settings)
+    runtime_stats.increment("telegram_dispatches_total")
+    return dispatch
 
 
 @app.get("/integration-events", response_model=list[IntegrationEventOut])
@@ -228,11 +271,14 @@ def dispatch_event_to_bitrix24(event_id: UUID) -> IntegrationDispatchOut:
         event = store.get_integration_event(event_id)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="integration event not found") from exc
-    return dispatch_bitrix24_event(event, settings)
+    dispatch = dispatch_bitrix24_event(event, settings)
+    runtime_stats.increment("bitrix24_dispatches_total")
+    return dispatch
 
 
 @app.post("/webhooks/n8n/call-transcript", response_model=TranscriptWebhookOut)
 def call_transcript_webhook(payload: TranscriptWebhookIn) -> TranscriptWebhookOut:
+    runtime_stats.increment("transcript_webhooks_total")
     knowledge_context = store.search(
         embedding_provider.embed(payload.transcript),
         settings.top_k,
@@ -304,3 +350,4 @@ def queue_crm_handoff_if_needed(approval: ApprovalOut) -> None:
         payload=crm_update,
         source_approval_id=approval.id,
     )
+    runtime_stats.increment("crm_handoffs_queued_total")

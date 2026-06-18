@@ -5,6 +5,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     database_url: str | None = None
+    app_version: str = "0.2.0"
+    git_sha: str = "local"
+    deploy_environment: str = "local"
     embedding_dim: int = 64
     top_k: int = 5
     openai_api_key: str | None = None

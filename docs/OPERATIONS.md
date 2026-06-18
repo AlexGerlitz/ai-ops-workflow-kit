@@ -29,6 +29,8 @@ https://leadscore.duckdns.org/
 
 ```bash
 curl http://127.0.0.1:8080/health
+curl http://127.0.0.1:8080/runtime
+curl http://127.0.0.1:8080/metrics
 ```
 
 Expected response:
@@ -43,6 +45,21 @@ Expected response:
 
 If `DATABASE_URL` is unset, the API uses in-memory storage. That mode is useful for tests and contract
 development, not for production.
+
+## Runtime Evidence
+
+`GET /runtime` reports:
+
+- application version;
+- Git SHA supplied at deploy time;
+- deploy environment;
+- storage mode;
+- public callback base URL;
+- integration readiness;
+- workflow counters.
+
+`GET /metrics` exposes the same runtime identity and workflow counters in Prometheus text format.
+This is intentionally dependency-light so it works in local review, Docker, and the public demo.
 
 ## Logs
 
@@ -121,7 +138,7 @@ bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 ```
 
 This verifies the public Caddy/HAProxy route, browser demo HTML, `/demo/run`, approval callback
-base URL, and dry-run integration contracts.
+base URL, runtime evidence, metrics endpoint, and dry-run integration contracts.
 
 ## n8n Import
 
