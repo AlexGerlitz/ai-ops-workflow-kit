@@ -213,6 +213,7 @@ are present in the output.
 ## Live Deployment Smoke
 
 ```bash
+python3 scripts/capture_reviewer_evidence.py
 python3 scripts/reviewer_snapshot.py
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
@@ -227,6 +228,16 @@ For a concise live evidence report that reviewers can paste into an evaluation n
 ```bash
 python3 scripts/reviewer_snapshot.py --json
 ```
+
+For committed reviewer evidence, regenerate the sanitized pack:
+
+```bash
+python3 scripts/capture_reviewer_evidence.py
+```
+
+This writes `docs/evidence/reviewer-snapshot.sanitized.json` and
+`docs/evidence/reviewer-snapshot.txt`. The capture script validates the live workflow before writing
+the files.
 
 ## n8n Import
 

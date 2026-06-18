@@ -6,6 +6,7 @@ DEMO_OUTPUT="${DEMO_OUTPUT:-/tmp/aiops-offer-demo.json}"
 
 "$PYTHON_BIN" -m pytest -q
 "$PYTHON_BIN" -m py_compile scripts/reviewer_snapshot.py
+"$PYTHON_BIN" -m py_compile scripts/capture_reviewer_evidence.py
 "$PYTHON_BIN" scripts/run_offer_demo.py > "$DEMO_OUTPUT"
 
 "$PYTHON_BIN" - "$DEMO_OUTPUT" <<'PY'

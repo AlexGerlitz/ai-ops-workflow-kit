@@ -34,6 +34,9 @@ Expected result:
 public verification passed
 ```
 
+For a committed evidence artifact plus the regeneration command, read
+[Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
+
 ## What The Snapshot Proves
 
 | Signal | Evidence |
@@ -47,6 +50,7 @@ public verification passed
 | Bitrix24 handoff is safe | CRM writes are modeled as idempotent outbox events with attempt counters, retry timing, and dead-letter state. |
 | Public mode is safe | Google Drive, Telegram, and Bitrix24 stay dry-run until production credentials are configured. |
 | Operations are visible | `/runtime`, `/metrics`, smoke scripts, Docker, CI, and docs give a reviewer reproducible evidence. |
+| Evidence is reproducible | `scripts/capture_reviewer_evidence.py` writes a sanitized live snapshot to `docs/evidence/`. |
 
 ## Architecture Decisions
 
@@ -110,6 +114,7 @@ Before connecting real business data:
 ## Review Commands
 
 ```bash
+python3 scripts/capture_reviewer_evidence.py
 python3 scripts/reviewer_snapshot.py
 python3 scripts/reviewer_snapshot.py https://leadscore.duckdns.org
 bash scripts/smoke_live_demo.sh

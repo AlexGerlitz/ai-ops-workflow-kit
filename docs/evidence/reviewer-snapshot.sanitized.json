@@ -1,0 +1,117 @@
+{
+  "base_url": "https://saleops.duckdns.org",
+  "ok": true,
+  "version": "0.2.0",
+  "git_sha": "889717fbba247b5d12b8d98374f02089266c526e",
+  "storage": "memory",
+  "public_base_url": "https://saleops.duckdns.org",
+  "llm": {
+    "requested_provider": "auto",
+    "selected_provider": "local",
+    "fallback": true,
+    "supported_providers": [
+      "local",
+      "openai",
+      "claude",
+      "gemini"
+    ],
+    "providers": [
+      {
+        "provider": "local",
+        "configured": true,
+        "selected": true,
+        "required_env": []
+      },
+      {
+        "provider": "openai",
+        "configured": false,
+        "selected": false,
+        "required_env": [
+          "OPENAI_API_KEY"
+        ]
+      },
+      {
+        "provider": "claude",
+        "configured": false,
+        "selected": false,
+        "required_env": [
+          "ANTHROPIC_API_KEY"
+        ]
+      },
+      {
+        "provider": "gemini",
+        "configured": false,
+        "selected": false,
+        "required_env": [
+          "GEMINI_API_KEY"
+        ]
+      }
+    ]
+  },
+  "integrations": {
+    "google_drive": {
+      "configured": false,
+      "dry_run": true
+    },
+    "telegram": {
+      "configured": false,
+      "dry_run": true
+    },
+    "bitrix24": {
+      "configured": false,
+      "dry_run": true
+    }
+  },
+  "workflow": {
+    "google_drive_source": "gdrive://demo-sales-playbook",
+    "rag_context_sources": [
+      {
+        "source": "gdrive://demo-sales-playbook",
+        "score": 0.318727
+      },
+      {
+        "source": "gdrive://demo-sales-playbook",
+        "score": 0.318727
+      },
+      {
+        "source": "gdrive://demo-sales-playbook",
+        "score": 0.318727
+      }
+    ],
+    "score": 100,
+    "risk_level": "medium",
+    "approval_status": "approved",
+    "telegram_status": "dry_run",
+    "crm_event_status": "queued",
+    "crm_idempotency_key": "<generated-idempotency-key>",
+    "bitrix24_status": "dry_run",
+    "bitrix24_event_status": "queued"
+  },
+  "worker": {
+    "enabled": false,
+    "active": false,
+    "dry_run": true,
+    "interval_seconds": 60.0,
+    "batch_size": 10,
+    "notes": "Worker is active only when enabled and Bitrix24 dry-run is disabled; public demo keeps it disabled to avoid consuming synthetic events."
+  },
+  "metrics": {
+    "runtime_info": true,
+    "demo_runs_total": true
+  },
+  "reviewer_conclusion": [
+    "deployed API responds with runtime identity",
+    "LLM boundary exposes OpenAI, Claude, Gemini, and local fallback without secrets",
+    "demo imports Google Drive text into RAG and returns source context",
+    "transcript analysis produces a high lead score and approval item",
+    "Telegram and Bitrix24 remain dry-run in public mode",
+    "CRM handoff is queued with an idempotency key after approval",
+    "worker state and Prometheus-style metrics are inspectable"
+  ],
+  "evidence_schema": "reviewer_live_snapshot_v1",
+  "capture_command": "python3 scripts/capture_reviewer_evidence.py --base-url https://saleops.duckdns.org",
+  "sanitized": true,
+  "dynamic_fields_redacted": [
+    "workflow.crm_idempotency_key"
+  ]
+}

@@ -19,6 +19,7 @@ read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 | Self-hosted runtime | `Dockerfile`, `docker-compose.yml`, `docs/LIVE_DEMO.md`, `docs/OPERATIONS.md` |
 | Runtime observability | `GET /runtime`, `GET /metrics`, worker state, `app/observability.py`, `scripts/smoke_live_demo.sh` |
 | Technical reviewer snapshot | `scripts/reviewer_snapshot.py`, `docs/TECHNICAL_REVIEW_PACKET.md`, `GET /runtime`, `GET /llm/runtime`, `POST /demo/run` |
+| Reviewer evidence pack | `docs/REVIEWER_EVIDENCE_PACK.md`, `docs/evidence/reviewer-snapshot.sanitized.json`, `scripts/capture_reviewer_evidence.py` |
 | Public proof | `https://saleops.duckdns.org/`, `scripts/reviewer_snapshot.py`, `scripts/smoke_live_demo.sh` |
 | Verification discipline | `scripts/verify_public.sh`, `.github/workflows/ci.yml`, `tests/` |
 
@@ -38,10 +39,12 @@ read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 ## Review Order
 
 1. Open the live demo: `https://saleops.duckdns.org/`.
-2. Run `python3 scripts/reviewer_snapshot.py`.
-3. Run `bash scripts/smoke_live_demo.sh`.
-4. Open `https://saleops.duckdns.org/llm/runtime`.
-5. Run `bash scripts/verify_public.sh`.
-6. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-7. Read `docs/ARCHITECTURE.md`.
-8. Read `docs/INTEGRATION_SKELETON.md`.
+2. Open `docs/REVIEWER_EVIDENCE_PACK.md`.
+3. Run `python3 scripts/capture_reviewer_evidence.py`.
+4. Run `python3 scripts/reviewer_snapshot.py`.
+5. Run `bash scripts/smoke_live_demo.sh`.
+6. Open `https://saleops.duckdns.org/llm/runtime`.
+7. Run `bash scripts/verify_public.sh`.
+8. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+9. Read `docs/ARCHITECTURE.md`.
+10. Read `docs/INTEGRATION_SKELETON.md`.

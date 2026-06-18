@@ -1,0 +1,28 @@
+technical reviewer snapshot passed
+base_url=https://saleops.duckdns.org
+version=0.2.0
+git_sha=889717fbba247b5d12b8d98374f02089266c526e
+storage=memory
+public_base_url=https://saleops.duckdns.org
+llm=local requested=auto fallback=True
+providers:
+  - local: configured=True selected=True
+  - openai: configured=False selected=False
+  - claude: configured=False selected=False
+  - gemini: configured=False selected=False
+integrations:
+  - google_drive: configured=False dry_run=True
+  - telegram: configured=False dry_run=True
+  - bitrix24: configured=False dry_run=True
+workflow=source=gdrive://demo-sales-playbook score=100 risk=medium approval=approved telegram=dry_run bitrix24=dry_run crm=queued
+crm_idempotency_key=<generated-idempotency-key>
+worker=enabled=False active=False dry_run_blocked=True
+metrics=runtime_info=True demo_runs_total=True
+reviewer_conclusion:
+  - deployed API responds with runtime identity
+  - LLM boundary exposes OpenAI, Claude, Gemini, and local fallback without secrets
+  - demo imports Google Drive text into RAG and returns source context
+  - transcript analysis produces a high lead score and approval item
+  - Telegram and Bitrix24 remain dry-run in public mode
+  - CRM handoff is queued with an idempotency key after approval
+  - worker state and Prometheus-style metrics are inspectable

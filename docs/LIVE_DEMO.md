@@ -28,6 +28,7 @@ as a narrower alias for the scoring surface.
 ## Command-Line Smoke
 
 ```bash
+python3 scripts/capture_reviewer_evidence.py
 python3 scripts/reviewer_snapshot.py
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
@@ -69,6 +70,7 @@ outbox drain, and worker state.
 The `leadscore` alias intentionally keeps approval callbacks on the primary `saleops` URL.
 
 For the complete reviewer route, read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
+For committed live evidence, read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
 
 ## What Is Real
 

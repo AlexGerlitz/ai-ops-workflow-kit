@@ -21,7 +21,16 @@ state, CRM idempotency key, worker state, and metrics availability.
 
 Read: [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 
-## 2. Run The Public Gate
+## 2. Regenerate The Evidence Pack
+
+```bash
+python3 scripts/capture_reviewer_evidence.py
+```
+
+This writes a sanitized live snapshot to `docs/evidence/` and redacts only the per-run CRM
+idempotency key. Read: [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
+
+## 3. Run The Public Gate
 
 ```bash
 python3 -m pip install -r requirements.txt
@@ -52,7 +61,7 @@ workflow produced:
 - Bitrix24 idempotency, retry scheduling, drain, opt-in worker, and dead-letter state for failed production dispatches.
 - runtime identity and metrics surface.
 
-## 3. Inspect The Offer Demo
+## 4. Inspect The Offer Demo
 
 ```bash
 python3 scripts/run_offer_demo.py
@@ -63,7 +72,7 @@ in-memory storage so the reviewer can inspect the behavior quickly.
 
 Read: [Offer Demo](./OFFER_DEMO.md).
 
-## 4. Inspect The Live Demo
+## 5. Inspect The Live Demo
 
 Open:
 
@@ -79,7 +88,7 @@ bash scripts/smoke_live_demo.sh
 
 Read: [Live Demo](./LIVE_DEMO.md).
 
-## 5. Inspect The Browser Demo Locally
+## 6. Inspect The Browser Demo Locally
 
 Run the API and open the one-click demo surface:
 
@@ -91,7 +100,7 @@ Then open:
 
 - Sales Ops Control Tower: http://127.0.0.1:8080/
 
-## 6. Inspect The Runtime Boundary
+## 7. Inspect The Runtime Boundary
 
 Run the Docker stack when you want to inspect the API with PostgreSQL/pgvector and n8n:
 
@@ -109,12 +118,13 @@ Then open:
 - FastAPI docs: http://127.0.0.1:8080/docs
 - n8n UI: http://127.0.0.1:5678
 
-## 7. Review The Engineering Decisions
+## 8. Review The Engineering Decisions
 
 | File | What to check |
 | --- | --- |
 | [README](../README.md) | Reviewer snapshot, API surface, repository layout, and checks. |
 | [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md) | Live snapshot, architecture decisions, failure modes, production rollout checklist, and public demo boundary. |
+| [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live evidence and regeneration command. |
 | [Evidence Map](./EVIDENCE_MAP.md) | Requirement-by-requirement proof map for AI automation roles. |
 | [Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md) | Vacancy-style AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
 | [Live Demo](./LIVE_DEMO.md) | Public deployment URL and public smoke checks. |
@@ -124,7 +134,7 @@ Then open:
 | [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Google Drive, Telegram, and Bitrix24 dry-run contracts become real credentials later. |
 | [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, CRM handoff, idempotency, drain, background worker, and integration retry/dead-letter behavior. |
 
-## 8. What This Proves
+## 9. What This Proves
 
 - AI workflow logic is backend-owned and testable.
 - The project has a browser-visible demo, not only README claims.

@@ -18,7 +18,7 @@ generic AI claims.
 | Telegram approval bot flow | `POST /approvals/{id}/notify/telegram`, `POST /webhooks/telegram/approval`, `scripts/configure_telegram_webhook.sh`, `docs/INTEGRATION_SKELETON.md` | Run `bash scripts/smoke_live_demo.sh` and confirm `telegram_callback=rejected`. | Public mode builds dry-run Telegram payloads; production mode can require `X-Telegram-Bot-Api-Secret-Token` for webhook callbacks. |
 | Bitrix24 / CRM handoff | `POST /integration-events/{id}/dispatch/bitrix24`, `POST /integrations/bitrix24/drain`, `app/integrations.py`, `app/store.py` | Run the offer demo and inspect `crm_handoff`, `bitrix24_dispatch`, and outbox state. | CRM writes are queued after approval with idempotency keys, attempts, retry timing, last error, and dead-letter state. |
 | Approval flow and human review | `POST /approvals`, `POST /approvals/{id}/approve`, `POST /approvals/{id}/reject`, `tests/test_core.py` | Run `bash scripts/verify_public.sh`; inspect approval tests and API endpoints. | Risky external actions happen only after explicit state transitions. |
-| Production-ready deployment | `Dockerfile`, `docker-compose.yml`, `.github/workflows/ci.yml`, `scripts/verify_public.sh`, `scripts/smoke_live_demo.sh`, `docs/OPERATIONS.md` | Open the latest CI run and run the public smoke command against `https://saleops.duckdns.org`. | The app exposes health, runtime identity, metrics, public callback base URL, integration readiness, and worker state. |
+| Production-ready deployment | `Dockerfile`, `docker-compose.yml`, `.github/workflows/ci.yml`, `scripts/verify_public.sh`, `scripts/smoke_live_demo.sh`, `scripts/capture_reviewer_evidence.py`, `docs/OPERATIONS.md` | Open the latest CI run, run the public smoke command against `https://saleops.duckdns.org`, and regenerate `docs/evidence/reviewer-snapshot.sanitized.json`. | The app exposes health, runtime identity, metrics, public callback base URL, integration readiness, worker state, and a reproducible evidence pack. |
 | Self-host / cloud operation | `docs/LIVE_DEMO.md`, `docs/OPERATIONS.md`, `/runtime`, `/metrics` | Run `curl -fsS https://saleops.duckdns.org/runtime` and `curl -fsS https://saleops.duckdns.org/metrics`. | The live demo is deployed behind HTTPS; secrets are not committed and integrations stay dry-run until credentials are configured. |
 | AI architecture beyond node wiring | `docs/ARCHITECTURE.md`, `docs/EVIDENCE_MAP.md`, backend state model, outbox model | Review the architecture docs and source boundaries in `app/`. | Workflow tooling is kept thin. Durable state, audit, retries, validation, and integration contracts live in code with tests. |
 
@@ -27,6 +27,7 @@ generic AI claims.
 ```bash
 python3 -m pip install -r requirements.txt
 bash scripts/verify_public.sh
+python3 scripts/capture_reviewer_evidence.py
 bash scripts/smoke_live_demo.sh https://saleops.duckdns.org
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 curl -fsS https://saleops.duckdns.org/runtime
@@ -50,6 +51,14 @@ google_drive=gdrive://demo-sales-playbook
 approval=approved
 telegram_callback=rejected
 bitrix24_drain=<positive dry-run drain count>
+```
+
+Expected evidence capture signal:
+
+```text
+reviewer evidence captured
+json=docs/evidence/reviewer-snapshot.sanitized.json
+text=docs/evidence/reviewer-snapshot.txt
 ```
 
 ## Known Public Demo Boundaries
