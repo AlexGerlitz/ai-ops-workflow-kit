@@ -65,6 +65,10 @@ The worker-style endpoint `POST /integrations/bitrix24/drain` processes due `que
 events. Dry-run drain proves the queue surface without consuming attempts; production drain records
 attempt counts, last error, next retry time, and dead-letter state.
 
+An optional in-process worker can call the same drain path on an interval. It starts only when
+`INTEGRATION_WORKER_ENABLED=true` and `BITRIX24_DRY_RUN=false`, which keeps public/demo environments
+inspectable without accidentally consuming synthetic events.
+
 ## Production Concerns
 
 - Keep prompts versioned and observable.
@@ -74,3 +78,4 @@ attempt counts, last error, next retry time, and dead-letter state.
 - Prefer explicit state transitions over hidden node-level side effects.
 - Queue CRM handoffs after approval so idempotency, retry timing, dead-letter state, and audit can
   be handled outside the user-facing webhook.
+- Keep background workers explicit and observable through runtime metadata.

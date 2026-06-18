@@ -26,7 +26,7 @@ prompt demo.
 | [Architecture notes](docs/ARCHITECTURE.md) | Shows the FastAPI/n8n/PostgreSQL boundary and why stateful logic stays in the backend. |
 | [Operations notes](docs/OPERATIONS.md) | Shows how the system is run, checked, and handed off. |
 | [n8n approval flow](docs/N8N_APPROVAL_FLOW.md) | Shows the webhook, Telegram payload, approval callback, and CRM handoff boundary. |
-| [Integration skeleton](docs/INTEGRATION_SKELETON.md) | Shows dry-run Telegram, Bitrix24, idempotency, retry scheduling, drain, and dead-letter contracts before credentials are connected. |
+| [Integration skeleton](docs/INTEGRATION_SKELETON.md) | Shows dry-run Telegram, Bitrix24, idempotency, retry scheduling, drain, opt-in worker, and dead-letter contracts before credentials are connected. |
 | [Tests](tests/) | Shows deterministic coverage around chunking, retrieval, approvals, and API behavior. |
 | [CI workflow](.github/workflows/ci.yml) | Shows the public verification gate. |
 | `infra/n8n/` | Shows how automation/workflow tooling connects without taking over core domain state. |
@@ -70,6 +70,7 @@ flowchart LR
 - Transcript webhook that produces a structured analysis and a human approval item.
 - Mock Bitrix24 CRM handoff event queued only after human approval.
 - CRM outbox state with idempotency keys, attempt counters, retry scheduling, last error, and dead-letter handling.
+- Optional background worker for Bitrix24 outbox drain, disabled in public dry-run mode.
 - Dry-run Telegram approval and Bitrix24 dispatch contracts ready for real credentials.
 - Telegram callback webhook for inline approve/reject decisions.
 - Optional Telegram webhook secret verification for production callbacks.
@@ -165,7 +166,7 @@ curl -X POST http://127.0.0.1:8080/approvals \
 | --- | --- |
 | `GET /` | Browser-visible Sales Ops Control Tower demo. |
 | `GET /health` | Runtime health and active storage mode. |
-| `GET /runtime` | Runtime version, build SHA, deploy environment, public callback URL, integrations, and counters. |
+| `GET /runtime` | Runtime version, build SHA, deploy environment, public callback URL, integrations, worker state, and counters. |
 | `GET /metrics` | Prometheus-style runtime and workflow counters. |
 | `GET /integrations/runtime` | Inspect Telegram and Bitrix24 adapter configuration/dry-run status. |
 | `POST /demo/run` | Run the synthetic transcript -> RAG -> approval -> Telegram/Bitrix dry-run demo. |
@@ -212,4 +213,5 @@ bash scripts/verify_public.sh
 - The webhook contract is structured so Bitrix, telephony, Google Drive, or Telegram can be connected without rewriting RAG logic.
 - Telegram and Bitrix24 are dry-run by default, so public checks prove payload shape without exposing secrets.
 - Real Bitrix24 dispatches are recorded as integration attempts; retryable failures set `next_retry_at`, and repeated failures move the event to `dead_letter` with `last_error`.
+- The Bitrix24 worker is opt-in and starts only when dry-run is disabled, so public demos cannot accidentally consume synthetic events.
 - `/runtime` and `/metrics` expose deploy evidence without requiring log access.

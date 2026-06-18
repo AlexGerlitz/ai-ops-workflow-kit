@@ -58,6 +58,8 @@ drain_response = json.loads(os.environ["DRAIN_RESPONSE"])
 assert runtime_payload["ok"] is True
 assert runtime_payload["public_base_url"] == expected_callback_base_url
 assert "demo_runs_total" in runtime_payload["counters"]
+assert runtime_payload["workers"]["bitrix24_outbox"]["enabled"] is False
+assert runtime_payload["workers"]["bitrix24_outbox"]["active"] is False
 assert "aiops_runtime_info" in metrics_payload
 assert payload["runtime"]["ok"] is True
 assert payload["call_analysis"]["score"] >= 80
@@ -94,4 +96,5 @@ print(f"telegram={payload['telegram_approval']['status']}")
 print(f"bitrix24={payload['bitrix24_dispatch']['status']}")
 print(f"crm_event_status={payload['bitrix24_dispatch']['event_status']}")
 print(f"bitrix24_drain={drain_response['dry_run']}")
+print(f"worker_active={runtime_payload['workers']['bitrix24_outbox']['active']}")
 PY

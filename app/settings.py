@@ -21,6 +21,9 @@ class Settings(BaseSettings):
     bitrix24_dry_run: bool = True
     integration_max_attempts: int = 3
     integration_retry_delay_seconds: int = 300
+    integration_worker_enabled: bool = False
+    integration_worker_interval_seconds: float = 60.0
+    integration_worker_batch_size: int = 10
 
 
 settings = Settings()

@@ -12,7 +12,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-18 passed
+19 passed
 public verification passed
 ```
 
@@ -28,7 +28,7 @@ workflow produced:
 - optional Telegram webhook secret verification;
 - queued `bitrix24.mock` CRM handoff.
 - dry-run Bitrix24 dispatch payload.
-- Bitrix24 idempotency, retry scheduling, drain, and dead-letter state for failed production dispatches.
+- Bitrix24 idempotency, retry scheduling, drain, opt-in worker, and dead-letter state for failed production dispatches.
 - runtime identity and metrics surface.
 
 ## 2. Inspect The Offer Demo
@@ -97,7 +97,7 @@ Then open:
 | [Operations](./OPERATIONS.md) | Local runtime, health checks, smoke test, logs, and handoff. |
 | [n8n Approval Flow](./N8N_APPROVAL_FLOW.md) | How webhook routing, Telegram payloads, and approval callbacks connect. |
 | [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Telegram and Bitrix24 dry-run contracts become real credentials later. |
-| [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, CRM handoff, idempotency, drain, and integration retry/dead-letter behavior. |
+| [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, CRM handoff, idempotency, drain, background worker, and integration retry/dead-letter behavior. |
 
 ## 7. What This Proves
 
@@ -111,4 +111,5 @@ Then open:
 - Telegram inline callbacks have a backend endpoint that applies approve/reject state transitions.
 - Production Telegram callbacks can be protected with `X-Telegram-Bot-Api-Secret-Token`.
 - Runtime and metrics endpoints expose deploy identity and workflow counters.
+- Runtime exposes whether the Bitrix24 outbox worker is enabled and active.
 - The project has a public verification command and CI gate.

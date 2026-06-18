@@ -30,6 +30,9 @@ BITRIX24_WEBHOOK_URL=
 BITRIX24_DRY_RUN=true
 INTEGRATION_MAX_ATTEMPTS=3
 INTEGRATION_RETRY_DELAY_SECONDS=300
+INTEGRATION_WORKER_ENABLED=false
+INTEGRATION_WORKER_INTERVAL_SECONDS=60
+INTEGRATION_WORKER_BATCH_SIZE=10
 ```
 
 The default is dry-run. In dry-run mode the API returns the exact outgoing payload but does not call
@@ -133,6 +136,10 @@ Production behavior after dry-run is disabled:
 6. due `queued` and `retry` events can be drained by the worker-style endpoint;
 7. repeated failures move the event to `dead_letter` after `INTEGRATION_MAX_ATTEMPTS`.
 
+The optional background worker uses the same drain path. It starts only when
+`INTEGRATION_WORKER_ENABLED=true` and `BITRIX24_DRY_RUN=false`, so the public demo cannot
+accidentally consume synthetic dry-run events.
+
 The endpoint response includes the adapter result plus the backend event state:
 
 ```json
@@ -159,3 +166,4 @@ the approval handoff path returns the same event instead of creating duplicate C
 - Approval and CRM mutation remain separate auditable steps.
 - Integration failures are visible as state, not hidden in logs.
 - Retry timing is explicit through `next_retry_at`, so a worker can safely skip events that are not due.
+- Background execution is opt-in and visible through `GET /runtime`.

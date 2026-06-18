@@ -83,7 +83,11 @@ assert runtime["counters"]["telegram_callbacks_total"] >= 1
 assert "bitrix24_dispatch_failures_total" in runtime["counters"]
 assert "integration_dead_letters_total" in runtime["counters"]
 assert "integration_events_drained_total" in runtime["counters"]
+assert "integration_worker_ticks_total" in runtime["counters"]
+assert "integration_worker_errors_total" in runtime["counters"]
 assert "integration_retries_scheduled_total" in runtime["counters"]
+assert runtime["workers"]["bitrix24_outbox"]["enabled"] is False
+assert runtime["workers"]["bitrix24_outbox"]["active"] is False
 assert "aiops_runtime_info" in metrics
 assert "aiops_demo_runs_total" in metrics
 

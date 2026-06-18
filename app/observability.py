@@ -22,6 +22,8 @@ class RuntimeStats:
             "crm_handoffs_queued_total": 0,
             "integration_dead_letters_total": 0,
             "integration_events_drained_total": 0,
+            "integration_worker_errors_total": 0,
+            "integration_worker_ticks_total": 0,
             "integration_retries_scheduled_total": 0,
         }
 

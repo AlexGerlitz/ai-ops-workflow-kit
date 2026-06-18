@@ -56,6 +56,7 @@ development, not for production.
 - storage mode;
 - public callback base URL;
 - integration readiness;
+- worker readiness;
 - workflow counters.
 
 `GET /metrics` exposes the same runtime identity and workflow counters in Prometheus text format.
@@ -145,6 +146,18 @@ curl -X POST http://127.0.0.1:8080/integrations/bitrix24/drain
 When `BITRIX24_DRY_RUN=false`, the Bitrix24 dispatch endpoint records each send attempt on the
 integration event. Failed attempts increment `attempt_count`, update `last_error`, set `next_retry_at`,
 and move the event to `dead_letter` after `INTEGRATION_MAX_ATTEMPTS`.
+
+To run the outbox drain in the API process, explicitly enable the worker:
+
+```env
+INTEGRATION_WORKER_ENABLED=true
+BITRIX24_DRY_RUN=false
+INTEGRATION_WORKER_INTERVAL_SECONDS=60
+INTEGRATION_WORKER_BATCH_SIZE=10
+```
+
+The worker is intentionally disabled in the public demo and will not start while Bitrix24 dry-run is
+enabled. Its state is visible in `GET /runtime` under `workers.bitrix24_outbox`.
 
 See `docs/INTEGRATION_SKELETON.md`.
 

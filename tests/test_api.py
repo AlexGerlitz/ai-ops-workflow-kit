@@ -1,5 +1,7 @@
-from fastapi.testclient import TestClient
+import time
 from uuid import UUID
+
+from fastapi.testclient import TestClient
 
 from app.main import app, queue_crm_handoff_if_needed, settings, store
 
@@ -22,6 +24,8 @@ def test_runtime_and_metrics_endpoints_expose_operational_evidence() -> None:
     assert body["git_sha"]
     assert body["storage"] in {"memory", "postgres"}
     assert "demo_runs_total" in body["counters"]
+    assert body["workers"]["bitrix24_outbox"]["enabled"] is False
+    assert body["workers"]["bitrix24_outbox"]["active"] is False
     assert metrics.status_code == 200
     assert "aiops_runtime_info" in metrics.text
     assert "aiops_demo_runs_total" in metrics.text
@@ -430,3 +434,63 @@ def test_bitrix24_drain_respects_next_retry_at(monkeypatch) -> None:
         assert second_drain.status_code == 200
         second_body = second_drain.json()
         assert event["id"] not in second_body["event_ids"]
+
+
+def test_bitrix24_background_worker_drains_due_events(monkeypatch) -> None:
+    monkeypatch.setattr(settings, "integration_worker_enabled", True)
+    monkeypatch.setattr(settings, "integration_worker_interval_seconds", 1.0)
+    monkeypatch.setattr(settings, "integration_worker_batch_size", 100)
+    monkeypatch.setattr(settings, "bitrix24_dry_run", False)
+    monkeypatch.setattr(settings, "bitrix24_webhook_url", None)
+    monkeypatch.setattr(settings, "integration_max_attempts", 2)
+    monkeypatch.setattr(settings, "integration_retry_delay_seconds", 0)
+
+    with TestClient(app) as client:
+        runtime = client.get("/runtime")
+        assert runtime.status_code == 200
+        assert runtime.json()["workers"]["bitrix24_outbox"]["active"] is True
+
+        webhook = client.post(
+            "/webhooks/n8n/call-transcript",
+            json={
+                "call_id": "CALL-WORKER-1",
+                "customer_id": "LEAD-WORKER",
+                "transcript": (
+                    "The client approved budget and authority. They need launch this "
+                    "month and agreed the next step is an implementation call."
+                ),
+                "metadata": {"source": "worker-test"},
+            },
+        )
+        assert webhook.status_code == 200
+        approval_id = webhook.json()["approval"]["id"]
+
+        approved = client.post(
+            f"/approvals/{approval_id}/approve",
+            json={"reviewer": "sales-lead", "notes": "Queue for worker"},
+        )
+        assert approved.status_code == 200
+
+        deadline = time.time() + 4.0
+        worker_event = None
+        while time.time() < deadline:
+            events = client.get("/integration-events", params={"adapter_key": "bitrix24.mock"})
+            assert events.status_code == 200
+            worker_event = next(
+                (
+                    item
+                    for item in events.json()
+                    if item["source_approval_id"] == approval_id
+                ),
+                None,
+            )
+            if worker_event and worker_event["status"] == "dead_letter":
+                break
+            time.sleep(0.2)
+
+        assert worker_event is not None
+        assert worker_event["status"] == "dead_letter"
+        assert worker_event["attempt_count"] >= 2
+        runtime_after = client.get("/runtime").json()
+        assert runtime_after["counters"]["integration_worker_ticks_total"] >= 1
+        assert runtime_after["counters"]["integration_worker_errors_total"] == 0

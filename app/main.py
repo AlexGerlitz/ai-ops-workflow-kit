@@ -1,4 +1,6 @@
-from contextlib import asynccontextmanager
+import asyncio
+import logging
+from contextlib import asynccontextmanager, suppress
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from hmac import compare_digest
@@ -48,12 +50,22 @@ embedding_provider = HashEmbeddingProvider(settings.embedding_dim)
 store = build_store(settings.database_url, settings.embedding_dim)
 llm = LLMClient(api_key=settings.openai_api_key, model=settings.openai_model)
 runtime_stats = RuntimeStats()
+logger = logging.getLogger("aiops.integration_worker")
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     store.init()
-    yield
+    worker_task: asyncio.Task[None] | None = None
+    if bitrix24_worker_is_active():
+        worker_task = asyncio.create_task(bitrix24_outbox_worker_loop())
+    try:
+        yield
+    finally:
+        if worker_task is not None:
+            worker_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await worker_task
 
 
 app = FastAPI(
@@ -90,6 +102,7 @@ def runtime() -> dict[str, object]:
         "embedding_dim": settings.embedding_dim,
         "public_base_url": settings.public_base_url,
         "integrations": get_integration_runtime(),
+        "workers": integration_workers_runtime(),
         "counters": runtime_stats.snapshot(),
     }
 
@@ -111,6 +124,22 @@ def metrics() -> PlainTextResponse:
 @app.get("/integrations/runtime", response_model=IntegrationRuntimeOut)
 def get_integration_runtime() -> IntegrationRuntimeOut:
     return integration_runtime(settings)
+
+
+def integration_workers_runtime() -> dict[str, object]:
+    return {
+        "bitrix24_outbox": {
+            "enabled": settings.integration_worker_enabled,
+            "active": bitrix24_worker_is_active(),
+            "dry_run": settings.bitrix24_dry_run,
+            "interval_seconds": settings.integration_worker_interval_seconds,
+            "batch_size": settings.integration_worker_batch_size,
+            "notes": (
+                "Worker is active only when enabled and Bitrix24 dry-run is disabled; "
+                "public demo keeps it disabled to avoid consuming synthetic events."
+            ),
+        }
+    }
 
 
 @app.post("/demo/run", response_model=OfferDemoRunOut)
@@ -528,3 +557,20 @@ def build_integration_idempotency_key(
 ) -> str:
     raw_key = f"{approval.id}:{adapter_key}:{operation}"
     return sha256(raw_key.encode("utf-8")).hexdigest()
+
+
+def bitrix24_worker_is_active() -> bool:
+    return settings.integration_worker_enabled and not settings.bitrix24_dry_run
+
+
+async def bitrix24_outbox_worker_loop() -> None:
+    interval_seconds = max(settings.integration_worker_interval_seconds, 1.0)
+    batch_size = max(min(settings.integration_worker_batch_size, 100), 1)
+    while True:
+        await asyncio.sleep(interval_seconds)
+        try:
+            runtime_stats.increment("integration_worker_ticks_total")
+            drain_bitrix24_events(limit=batch_size)
+        except Exception:
+            runtime_stats.increment("integration_worker_errors_total")
+            logger.exception("bitrix24 outbox worker failed")

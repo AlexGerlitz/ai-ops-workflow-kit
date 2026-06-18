@@ -146,3 +146,6 @@ dispatches set the event to `retry` with `next_retry_at`, and repeated failures 
 ```bash
 curl -X POST http://127.0.0.1:8080/integrations/bitrix24/drain
 ```
+
+The same drain path can run as an opt-in background worker when `INTEGRATION_WORKER_ENABLED=true`
+and Bitrix24 dry-run is disabled.

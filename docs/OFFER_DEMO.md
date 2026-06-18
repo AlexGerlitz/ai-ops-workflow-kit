@@ -119,6 +119,7 @@ That maps directly to real AI automation work:
 - Bitrix/CRM integration;
 - idempotent retry/dead-letter integration state;
 - dry-run integration contracts before credentials are connected;
+- opt-in Bitrix24 outbox worker for due CRM events;
 - browser-visible control tower for a one-click review path;
 - audit-friendly state transitions;
 - repeatable local verification.
@@ -128,4 +129,4 @@ That maps directly to real AI automation work:
 - Disable dry-run after adding Telegram Bot API and Bitrix24 webhook credentials.
 - Replace deterministic local embeddings with OpenAI or another embedding API.
 - Add Deepgram/Whisper before the transcript webhook.
-- Add a scheduler or worker loop to drain queued integration events automatically.
+- Move the outbox worker into a separate process if the deployment needs independent scaling.

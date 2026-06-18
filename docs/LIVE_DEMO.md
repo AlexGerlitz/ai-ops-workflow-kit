@@ -47,6 +47,7 @@ telegram=dry_run
 bitrix24=dry_run
 crm_event_status=queued
 bitrix24_drain=<dry-run-count>
+worker_active=False
 ```
 
 The smoke check proves that the public edge route, FastAPI runtime, workflow endpoint,
@@ -66,6 +67,7 @@ The `leadscore` alias intentionally keeps approval callbacks on the primary `sal
 - Telegram and Bitrix24 remain in dry-run mode until credentials are configured.
 - Bitrix24 dry-run leaves CRM events queued; production mode records idempotency, attempts, `next_retry_at`, `last_error`, and `dead_letter`.
 - The live smoke also calls `POST /integrations/bitrix24/drain` to prove the worker-style queue drain surface.
+- `GET /runtime` shows the Bitrix24 outbox worker is disabled in the public dry-run demo.
 
 ## Local Fallback
 
