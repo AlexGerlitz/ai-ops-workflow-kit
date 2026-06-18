@@ -71,7 +71,22 @@ This checks webhook-secret rejection, Bitrix24 retry/dead-letter state, retry sc
 handoff idempotency, and worker dry-run guard without external credentials. Read:
 [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
 
-## 5. Inspect The Offer Demo
+## 5. Run The Credentialed Sandbox Preflight
+
+```bash
+python3 scripts/credentialed_sandbox_preflight.py
+```
+
+Public mode records skipped/no-secret evidence. With Telegram and Bitrix24 sandbox credentials, run:
+
+```bash
+python3 scripts/credentialed_sandbox_preflight.py --require-credentials
+```
+
+This performs read-only Telegram and Bitrix24 checks without printing tokens or writing CRM records.
+Read: [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
+
+## 6. Inspect The Offer Demo
 
 ```bash
 python3 scripts/run_offer_demo.py
@@ -82,7 +97,7 @@ in-memory storage so the reviewer can inspect the behavior quickly.
 
 Read: [Offer Demo](./OFFER_DEMO.md).
 
-## 6. Inspect The Live Demo
+## 7. Inspect The Live Demo
 
 Open:
 
@@ -98,7 +113,7 @@ bash scripts/smoke_live_demo.sh
 
 Read: [Live Demo](./LIVE_DEMO.md).
 
-## 7. Inspect The Browser Demo Locally
+## 8. Inspect The Browser Demo Locally
 
 Run the API and open the one-click demo surface:
 
@@ -110,7 +125,7 @@ Then open:
 
 - Sales Ops Control Tower: http://127.0.0.1:8080/
 
-## 8. Inspect The Runtime Boundary
+## 9. Inspect The Runtime Boundary
 
 Run the Docker stack when you want to inspect the API with PostgreSQL/pgvector and n8n:
 
@@ -128,7 +143,7 @@ Then open:
 - FastAPI docs: http://127.0.0.1:8080/docs
 - n8n UI: http://127.0.0.1:5678
 
-## 9. Review The Engineering Decisions
+## 10. Review The Engineering Decisions
 
 | File | What to check |
 | --- | --- |
@@ -136,6 +151,7 @@ Then open:
 | [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md) | Live snapshot, architecture decisions, failure modes, production rollout checklist, and public demo boundary. |
 | [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live evidence and regeneration command. |
 | [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md) | Failure-mode evidence for auth, retry/dead-letter, drain scheduling, idempotency, and worker guard. |
+| [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md) | Read-only real-credential boundary for Telegram and Bitrix24 sandbox checks. |
 | [Evidence Map](./EVIDENCE_MAP.md) | Requirement-by-requirement proof map for AI automation roles. |
 | [Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md) | Vacancy-style AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
 | [Live Demo](./LIVE_DEMO.md) | Public deployment URL and public smoke checks. |
@@ -145,7 +161,7 @@ Then open:
 | [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Google Drive, Telegram, and Bitrix24 dry-run contracts become real credentials later. |
 | [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, CRM handoff, idempotency, drain, background worker, and integration retry/dead-letter behavior. |
 
-## 10. What This Proves
+## 11. What This Proves
 
 - AI workflow logic is backend-owned and testable.
 - The project has a browser-visible demo, not only README claims.
@@ -154,6 +170,7 @@ Then open:
 - CRM mutation is queued only after explicit human approval.
 - CRM dispatch failures become retry/dead-letter state with `next_retry_at`, not invisible log-only errors.
 - Retry timing, webhook auth, idempotency, and worker dry-run guard are captured by a deterministic drill.
+- Real Telegram and Bitrix24 credentials can be checked through a read-only, token-redacted preflight.
 - Google Drive, Telegram, and Bitrix24 adapters expose dry-run contracts before credentials are connected.
 - Telegram inline callbacks have a backend endpoint that applies approve/reject state transitions.
 - Production Telegram callbacks can be protected with `X-Telegram-Bot-Api-Secret-Token`.

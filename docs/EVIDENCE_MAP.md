@@ -21,6 +21,7 @@ read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 | Technical reviewer snapshot | `scripts/reviewer_snapshot.py`, `docs/TECHNICAL_REVIEW_PACKET.md`, `GET /runtime`, `GET /llm/runtime`, `POST /demo/run` |
 | Reviewer evidence pack | `docs/REVIEWER_EVIDENCE_PACK.md`, `docs/evidence/reviewer-snapshot.sanitized.json`, `scripts/capture_reviewer_evidence.py` |
 | Failure-mode evidence | `docs/PRODUCTION_READINESS_DRILL.md`, `docs/evidence/production-readiness-drill.sanitized.json`, `scripts/production_readiness_drill.py` |
+| Credentialed sandbox boundary | `docs/CREDENTIALED_SANDBOX_PREFLIGHT.md`, `docs/evidence/credentialed-sandbox-preflight.sanitized.json`, `scripts/credentialed_sandbox_preflight.py` |
 | Public proof | `https://saleops.duckdns.org/`, `scripts/reviewer_snapshot.py`, `scripts/smoke_live_demo.sh` |
 | Verification discipline | `scripts/verify_public.sh`, `.github/workflows/ci.yml`, `tests/` |
 
@@ -38,6 +39,8 @@ read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 - Telegram callbacks can be verified with Telegram's webhook secret header in production.
 - Failure-mode evidence is captured without external credentials, so reviewers can inspect retry,
   dead-letter, drain scheduling, idempotency, and worker guard behavior locally or in CI.
+- Credentialed sandbox preflight uses read-only Telegram and Bitrix24 calls when secrets exist, and
+  records skipped/no-secret evidence in public mode without printing tokens.
 
 ## Review Order
 
@@ -46,9 +49,10 @@ read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 3. Run `python3 scripts/capture_reviewer_evidence.py`.
 4. Run `python3 scripts/reviewer_snapshot.py`.
 5. Run `python3 scripts/production_readiness_drill.py`.
-6. Run `bash scripts/smoke_live_demo.sh`.
-7. Open `https://saleops.duckdns.org/llm/runtime`.
-8. Run `bash scripts/verify_public.sh`.
-9. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-10. Read `docs/ARCHITECTURE.md`.
-11. Read `docs/INTEGRATION_SKELETON.md`.
+6. Run `python3 scripts/credentialed_sandbox_preflight.py`.
+7. Run `bash scripts/smoke_live_demo.sh`.
+8. Open `https://saleops.duckdns.org/llm/runtime`.
+9. Run `bash scripts/verify_public.sh`.
+10. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+11. Read `docs/ARCHITECTURE.md`.
+12. Read `docs/INTEGRATION_SKELETON.md`.

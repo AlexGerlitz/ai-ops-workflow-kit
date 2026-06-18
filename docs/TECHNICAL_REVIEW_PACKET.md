@@ -38,6 +38,8 @@ For a committed evidence artifact plus the regeneration command, read
 [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
 For deterministic failure-mode evidence, read
 [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
+For the real-credential boundary, read
+[Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
 
 ## What The Snapshot Proves
 
@@ -54,6 +56,7 @@ For deterministic failure-mode evidence, read
 | Operations are visible | `/runtime`, `/metrics`, smoke scripts, Docker, CI, and docs give a reviewer reproducible evidence. |
 | Evidence is reproducible | `scripts/capture_reviewer_evidence.py` writes a sanitized live snapshot to `docs/evidence/`. |
 | Failure behavior is testable | `scripts/production_readiness_drill.py` proves webhook auth, retry/dead-letter, retry scheduling, idempotency, and worker dry-run guard. |
+| Credential handoff is safe | `scripts/credentialed_sandbox_preflight.py` validates Telegram/Bitrix24 credentials through read-only calls and sanitized output. |
 
 ## Architecture Decisions
 
@@ -107,12 +110,13 @@ Before connecting real business data:
 4. Configure Google Drive export in n8n or a connector and send normalized text to `POST /integrations/google-drive/import`.
 5. Configure Telegram bot token and webhook secret; run `scripts/configure_telegram_webhook.sh`.
 6. Configure Bitrix24 webhook URL and field mapping.
-7. Keep `BITRIX24_DRY_RUN=true` for the first payload validation pass.
-8. Run `bash scripts/verify_public.sh`.
-9. Run `bash scripts/smoke_live_demo.sh <production-url>`.
-10. Disable dry-run only after the payload map, approval policy, and rollback path are reviewed.
-11. Enable the Bitrix24 outbox worker only after dry-run validation.
-12. Monitor `/runtime`, `/metrics`, API logs, and dead-letter counts during rollout.
+7. Run `python3 scripts/credentialed_sandbox_preflight.py --require-credentials`.
+8. Keep `BITRIX24_DRY_RUN=true` for the first payload validation pass.
+9. Run `bash scripts/verify_public.sh`.
+10. Run `bash scripts/smoke_live_demo.sh <production-url>`.
+11. Disable dry-run only after the payload map, approval policy, and rollback path are reviewed.
+12. Enable the Bitrix24 outbox worker only after dry-run validation.
+13. Monitor `/runtime`, `/metrics`, API logs, and dead-letter counts during rollout.
 
 ## Review Commands
 
@@ -120,6 +124,7 @@ Before connecting real business data:
 python3 scripts/capture_reviewer_evidence.py
 python3 scripts/reviewer_snapshot.py
 python3 scripts/production_readiness_drill.py
+python3 scripts/credentialed_sandbox_preflight.py
 python3 scripts/reviewer_snapshot.py https://leadscore.duckdns.org
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org

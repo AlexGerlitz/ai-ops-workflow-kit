@@ -217,6 +217,7 @@ idempotency, and worker dry-run guard are present in the output.
 python3 scripts/capture_reviewer_evidence.py
 python3 scripts/reviewer_snapshot.py
 python3 scripts/production_readiness_drill.py
+python3 scripts/credentialed_sandbox_preflight.py
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 ```
@@ -249,6 +250,17 @@ python3 scripts/production_readiness_drill.py
 
 This writes `docs/evidence/production-readiness-drill.sanitized.json` and
 `docs/evidence/production-readiness-drill.txt`.
+
+For read-only credentialed sandbox preflight:
+
+```bash
+python3 scripts/credentialed_sandbox_preflight.py
+```
+
+This writes `docs/evidence/credentialed-sandbox-preflight.sanitized.json` and
+`docs/evidence/credentialed-sandbox-preflight.txt`. In no-secret public mode it records skipped
+checks; with Telegram and Bitrix24 sandbox credentials it checks Telegram `getMe`,
+Telegram `getWebhookInfo`, and Bitrix24 `profile` without printing tokens or writing CRM records.
 
 ## n8n Import
 
