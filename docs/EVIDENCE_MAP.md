@@ -1,6 +1,8 @@
 # Evidence Map
 
 This map connects the repository to the work expected from an AI automation engineer.
+For a vacancy-style checklist with verification commands and production boundaries, read
+[AI Automation Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md).
 
 | Requirement | Evidence |
 | --- | --- |

@@ -20,6 +20,7 @@ prompt demo.
 | --- | --- |
 | [Live demo](https://saleops.duckdns.org/) | Public one-click proof of the deployed Sales Ops workflow. |
 | [Evidence map](docs/EVIDENCE_MAP.md) | Maps the repo to AI automation, RAG, approval flow, Bitrix24, Telegram, and self-hosting requirements. |
+| [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Maps common AI automation vacancy requirements to exact files, endpoints, verification commands, and production boundaries. |
 | [Offer demo](docs/OFFER_DEMO.md) | One-command proof of transcript -> RAG -> scoring -> Telegram approval -> idempotent outbox drain -> mock Bitrix CRM handoff. |
 | [Reviewer checklist](docs/REVIEWER_CHECKLIST.md) | Single public gate for tests, offer demo, and output validation. |
 | [Live demo notes](docs/LIVE_DEMO.md) | Public URLs and smoke checks for the deployed service. |
@@ -44,9 +45,10 @@ Fast evaluation path:
 1. Open `https://saleops.duckdns.org/` and run the browser demo.
 2. Run `bash scripts/smoke_live_demo.sh`.
 3. Run `bash scripts/verify_public.sh`.
-4. Read `docs/EVIDENCE_MAP.md`.
-5. Read `docs/OFFER_DEMO.md`.
-6. Review `infra/n8n/` to see the external workflow boundary.
+4. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
+5. Read `docs/EVIDENCE_MAP.md`.
+6. Read `docs/OFFER_DEMO.md`.
+7. Review `infra/n8n/` to see the external workflow boundary.
 
 ## System Shape
 
