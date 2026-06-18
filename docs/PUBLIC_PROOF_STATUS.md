@@ -6,21 +6,21 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 
 | Surface | Current proof |
 | --- | --- |
-| Repository commit | `1d1c727` |
-| CI run | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27793361935 |
+| Repository state | Current public `main` branch; this file is part of the reviewed tree |
+| CI workflow | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml |
 | Local public gate | `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `27 passed`, `public verification passed` |
 | Live smoke | `bash scripts/smoke_live_demo.sh https://saleops.duckdns.org` -> `live demo smoke passed`, `score=100`, `telegram_callback=rejected`, positive Bitrix24 drain counter |
 | Live demo | https://saleops.duckdns.org/ |
 | Lead score alias | https://leadscore.duckdns.org/ |
 | LLM runtime | https://saleops.duckdns.org/llm/runtime |
 | Credential preflight | Public no-secret evidence plus target-specific modes: `--require-target telegram` and `--require-target bitrix24` |
-| Profile Pages route | https://alexgerlitz.github.io/AlexGerlitz/ with Pages run `27793731617` |
-| Public resume PDF | Contains `target-specific credentialed sandbox preflight` and AI Ops CI `27793361935` |
+| Profile Pages route | https://alexgerlitz.github.io/AlexGerlitz/ |
+| Public resume PDF | Published from the profile repo and linked from the Pages route |
 
 ## Reviewer Route
 
 1. Open the live demo: https://saleops.duckdns.org/
-2. Open the CI run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27793361935
+2. Open the CI workflow: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml
 3. Read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 4. Read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
 5. Read [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
