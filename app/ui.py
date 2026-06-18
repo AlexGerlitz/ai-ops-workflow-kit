@@ -66,10 +66,19 @@ DEMO_PAGE_HTML = """
     .span-12 { grid-column: span 12; }
     .label { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
     .value { font-size: 28px; font-weight: 800; margin-top: 8px; word-break: break-word; }
-    .small { color: var(--muted); font-size: 13px; margin-top: 8px; }
+    .small { color: var(--muted); font-size: 13px; margin-top: 8px; overflow-wrap: anywhere; }
     .ok { color: var(--ok); }
     .warn { color: var(--warn); }
     .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .metrics {
+      grid-column: span 12;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+    .metrics .panel { min-height: 128px; }
+    .metrics .value { font-size: 24px; }
     .pill {
       border: 1px solid var(--line);
       border-radius: 999px;
@@ -124,40 +133,42 @@ DEMO_PAGE_HTML = """
     </header>
 
     <section class="grid">
-      <div class="panel span-2">
-        <div class="label">Runtime</div>
-        <div id="runtime" class="value">Ready</div>
-        <div id="runtime-sub" class="small">Waiting for demo run</div>
-      </div>
-      <div class="panel span-2">
-        <div class="label">LLM</div>
-        <div id="llm" class="value">--</div>
-        <div id="llm-sub" class="small">Provider boundary pending</div>
-      </div>
-      <div class="panel span-2">
-        <div class="label">Lead score</div>
-        <div id="score" class="value">--</div>
-        <div id="risk" class="small">Risk level pending</div>
-      </div>
-      <div class="panel span-2">
-        <div class="label">Approval</div>
-        <div id="approval" class="value">--</div>
-        <div id="reviewer" class="small">Reviewer pending</div>
-      </div>
-      <div class="panel span-2">
-        <div class="label">CRM handoff</div>
-        <div id="crm" class="value">--</div>
-        <div id="crm-sub" class="small">Bitrix24 dispatch pending</div>
-      </div>
-      <div class="panel span-2">
-        <div class="label">Outbox drain</div>
-        <div id="outbox" class="value">--</div>
-        <div id="outbox-sub" class="small">Dry-run drain pending</div>
-      </div>
-      <div class="panel span-2">
-        <div class="label">Worker state</div>
-        <div id="worker" class="value">--</div>
-        <div id="worker-sub" class="small">Runtime not checked</div>
+      <div class="metrics">
+        <div class="panel">
+          <div class="label">Runtime</div>
+          <div id="runtime" class="value">Ready</div>
+          <div id="runtime-sub" class="small">Waiting for demo run</div>
+        </div>
+        <div class="panel">
+          <div class="label">LLM</div>
+          <div id="llm" class="value">--</div>
+          <div id="llm-sub" class="small">Provider boundary pending</div>
+        </div>
+        <div class="panel">
+          <div class="label">Lead score</div>
+          <div id="score" class="value">--</div>
+          <div id="risk" class="small">Risk level pending</div>
+        </div>
+        <div class="panel">
+          <div class="label">Approval</div>
+          <div id="approval" class="value">--</div>
+          <div id="reviewer" class="small">Reviewer pending</div>
+        </div>
+        <div class="panel">
+          <div class="label">CRM handoff</div>
+          <div id="crm" class="value">--</div>
+          <div id="crm-sub" class="small">Bitrix24 dispatch pending</div>
+        </div>
+        <div class="panel">
+          <div class="label">Outbox drain</div>
+          <div id="outbox" class="value">--</div>
+          <div id="outbox-sub" class="small">Dry-run drain pending</div>
+        </div>
+        <div class="panel">
+          <div class="label">Worker state</div>
+          <div id="worker" class="value">--</div>
+          <div id="worker-sub" class="small">Runtime not checked</div>
+        </div>
       </div>
 
       <div class="panel span-7">
