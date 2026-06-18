@@ -9,6 +9,8 @@ The project keeps the workflow engine thin and moves stateful logic into a backe
 webhooks, retries, notifications, and human-in-the-loop routing while the API owns RAG, scoring, audit-friendly
 state transitions, and integration contracts.
 
+![AI Sales Ops Control Tower](docs/assets/live-demo-control-tower.png)
+
 ## 60-Second Reviewer Snapshot
 
 This repository is public proof for AI workflow automation work where the output must be more than a
