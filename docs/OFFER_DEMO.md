@@ -9,8 +9,10 @@ The demo proves an end-to-end AI workflow automation scenario:
 3. accept a call transcript through the n8n-facing webhook;
 4. score the lead and build a structured call analysis;
 5. create a human approval item for the follow-up draft;
-6. approve the item;
-7. queue a mock Bitrix24 CRM handoff event.
+6. build a dry-run Telegram approval payload;
+7. approve the item;
+8. queue a mock Bitrix24 CRM handoff event;
+9. build a dry-run Bitrix24 dispatch payload.
 
 The point is not to show a prompt wrapper. The point is to show the production
 boundary: n8n routes events, while the backend owns retrieval, scoring, state,
@@ -43,7 +45,9 @@ The output contains these sections:
 | `rag_context_sources` | Retrieval returned explicit source context. |
 | `call_analysis` | Transcript was scored and converted into structured business action. |
 | `approval` | Human-in-the-loop state transition happened before CRM handoff. |
+| `telegram_approval` | Telegram approval payload and approve/reject callback contract were built in dry-run mode. |
 | `crm_handoff` | A mock Bitrix24 adapter event was queued after approval. |
+| `bitrix24_dispatch` | Bitrix24 dispatch payload was built in dry-run mode for the queued event. |
 
 Example high-level result:
 
@@ -59,10 +63,19 @@ Example high-level result:
     "status": "approved",
     "reviewer": "sales-lead"
   },
+  "telegram_approval": {
+    "adapter_key": "telegram.approval",
+    "status": "dry_run"
+  },
   "crm_handoff": {
     "adapter_key": "bitrix24.mock",
     "operation": "upsert_lead_follow_up",
     "status": "queued"
+  },
+  "bitrix24_dispatch": {
+    "adapter_key": "bitrix24",
+    "status": "dry_run",
+    "method": "crm.lead.update"
   }
 }
 ```
@@ -81,13 +94,13 @@ That maps directly to real AI automation work:
 - lead scoring;
 - Telegram-style approval;
 - Bitrix/CRM integration;
+- dry-run integration contracts before credentials are connected;
 - audit-friendly state transitions;
 - repeatable local verification.
 
 ## Extension Points
 
-- Replace `bitrix24.mock` with a real Bitrix24 REST adapter.
-- Add Telegram Bot API buttons for approve/reject/edit.
+- Disable dry-run after adding Telegram Bot API and Bitrix24 webhook credentials.
 - Replace deterministic local embeddings with OpenAI or another embedding API.
 - Add Deepgram/Whisper before the transcript webhook.
 - Add metrics for approval outcomes and failed integration events.

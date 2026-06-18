@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 os.environ["DATABASE_URL"] = ""
+os.environ.setdefault("PUBLIC_BASE_URL", "http://saleops.duckdns.org")
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -32,6 +33,7 @@ def main() -> None:
 
     with TestClient(app) as client:
         health = request_json(client, "get", "/health")
+        integrations = request_json(client, "get", "/integrations/runtime")
         document = request_json(
             client,
             "post",
@@ -58,6 +60,11 @@ def main() -> None:
             json=transcript_payload,
         )
         approval_id = analysis["approval"]["id"]
+        telegram = request_json(
+            client,
+            "post",
+            f"/approvals/{approval_id}/notify/telegram",
+        )
         approved = request_json(
             client,
             "post",
@@ -74,8 +81,15 @@ def main() -> None:
     crm_event = next(
         event for event in events if event.get("source_approval_id") == approval_id
     )
+    with TestClient(app) as client:
+        bitrix24 = request_json(
+            client,
+            "post",
+            f"/integration-events/{crm_event['id']}/dispatch/bitrix24",
+        )
     result = {
         "runtime": health,
+        "integrations": integrations,
         "ingestion": document,
         "rag_context_sources": [
             {"source": context["source"], "score": context["score"]}
@@ -96,12 +110,25 @@ def main() -> None:
             "status": approved["status"],
             "reviewer": approved["reviewer"],
         },
+        "telegram_approval": {
+            "adapter_key": telegram["adapter_key"],
+            "operation": telegram["operation"],
+            "status": telegram["status"],
+            "callback_contract": telegram["payload"]["callback_contract"],
+        },
         "crm_handoff": {
+            "event_id": crm_event["id"],
             "adapter_key": crm_event["adapter_key"],
             "operation": crm_event["operation"],
             "status": crm_event["status"],
             "target_stage": crm_event["payload"]["target_stage"],
             "task": crm_event["payload"]["task"],
+        },
+        "bitrix24_dispatch": {
+            "adapter_key": bitrix24["adapter_key"],
+            "operation": bitrix24["operation"],
+            "status": bitrix24["status"],
+            "method": bitrix24["payload"]["method"],
         },
     }
     print(json.dumps(result, indent=2, ensure_ascii=False))

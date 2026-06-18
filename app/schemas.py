@@ -59,6 +59,13 @@ class IntegrationEventStatus(str, Enum):
     failed = "failed"
 
 
+class IntegrationDispatchStatus(str, Enum):
+    dry_run = "dry_run"
+    sent = "sent"
+    not_configured = "not_configured"
+    failed = "failed"
+
+
 class ApprovalIn(BaseModel):
     kind: str = Field(min_length=1, max_length=100)
     title: str = Field(min_length=1, max_length=240)
@@ -109,3 +116,24 @@ class IntegrationEventOut(BaseModel):
     source_approval_id: UUID | None = None
     created_at: datetime
     updated_at: datetime
+
+
+class IntegrationCapabilityOut(BaseModel):
+    adapter_key: str
+    configured: bool
+    dry_run: bool
+    required_env: list[str]
+    notes: str
+
+
+class IntegrationRuntimeOut(BaseModel):
+    public_base_url: str
+    capabilities: list[IntegrationCapabilityOut]
+
+
+class IntegrationDispatchOut(BaseModel):
+    adapter_key: str
+    operation: str
+    status: IntegrationDispatchStatus
+    payload: dict[str, Any]
+    detail: str = ""

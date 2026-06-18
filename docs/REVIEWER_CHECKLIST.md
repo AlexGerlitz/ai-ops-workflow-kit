@@ -12,7 +12,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-8 passed
+10 passed
 public verification passed
 ```
 
@@ -23,7 +23,9 @@ workflow produced:
 - transcript score;
 - structured call analysis;
 - approved human review item;
+- dry-run Telegram approval payload;
 - queued `bitrix24.mock` CRM handoff.
+- dry-run Bitrix24 dispatch payload.
 
 ## 2. Inspect The Offer Demo
 
@@ -59,6 +61,7 @@ Then open:
 | [Architecture](./ARCHITECTURE.md) | FastAPI/n8n/PostgreSQL/LLM boundaries and state ownership. |
 | [Operations](./OPERATIONS.md) | Local runtime, health checks, smoke test, logs, and handoff. |
 | [n8n Approval Flow](./N8N_APPROVAL_FLOW.md) | How webhook routing, Telegram payloads, and approval callbacks connect. |
+| [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Telegram and Bitrix24 dry-run contracts become real credentials later. |
 | [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, and CRM handoff. |
 
 ## 5. What This Proves
@@ -67,4 +70,5 @@ Then open:
 - n8n is used as orchestration glue, not as hidden domain logic.
 - LLM/RAG behavior has deterministic local fallbacks for repeatable review.
 - CRM mutation is queued only after explicit human approval.
+- Telegram and Bitrix24 adapters expose dry-run contracts before credentials are connected.
 - The project has a public verification command and CI gate.

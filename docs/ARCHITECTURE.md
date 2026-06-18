@@ -11,6 +11,7 @@ AI Ops Workflow Kit separates orchestration from durable application logic.
 | PostgreSQL + pgvector | Durable document chunks, metadata, vector search, approval records. |
 | LLM adapter | Optional generation layer with a deterministic fallback for local operation. |
 | Integration event store | Queue-style boundary for CRM handoff after human approval. |
+| Integration adapters | Dry-run or real Telegram approval and Bitrix24 dispatch clients. |
 
 ## Core Flows
 
@@ -41,6 +42,9 @@ AI Ops Workflow Kit separates orchestration from durable application logic.
 7. n8n routes the approval item to Telegram.
 8. After approval, the backend queues an integration event for the CRM adapter.
 
+The backend also exposes `POST /approvals/{id}/notify/telegram` for a direct Telegram approval
+adapter path. In public mode it returns the exact outgoing payload in dry-run mode.
+
 ### CRM Handoff
 
 Approval and CRM mutation are separate steps. This keeps the workflow auditable:
@@ -50,6 +54,10 @@ Approval and CRM mutation are separate steps. This keeps the workflow auditable:
 3. The backend queues a `bitrix24.mock/upsert_lead_follow_up` integration event.
 4. A real adapter can later send that payload to Bitrix24, retry failures, and dead-letter unsafe
    cases without changing the analysis contract.
+
+The skeleton endpoint `POST /integration-events/{id}/dispatch/bitrix24` maps the internal handoff
+event into a Bitrix24 REST payload. It is dry-run by default until `BITRIX24_DRY_RUN=false` and
+`BITRIX24_WEBHOOK_URL` are configured.
 
 ## Production Concerns
 

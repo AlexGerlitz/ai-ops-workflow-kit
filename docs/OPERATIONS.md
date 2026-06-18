@@ -70,6 +70,25 @@ The demo uses the synthetic files in `demo/` and proves:
 
 See `docs/OFFER_DEMO.md` for the expected output shape.
 
+## Integration Skeleton
+
+The public callback base URL is:
+
+```env
+PUBLIC_BASE_URL=http://saleops.duckdns.org
+```
+
+Telegram and Bitrix24 are dry-run by default. This keeps public verification deterministic while
+showing the exact payloads that will be sent after credentials are configured:
+
+```bash
+curl http://127.0.0.1:8080/integrations/runtime
+curl -X POST http://127.0.0.1:8080/approvals/{approval_id}/notify/telegram
+curl -X POST http://127.0.0.1:8080/integration-events/{event_id}/dispatch/bitrix24
+```
+
+See `docs/INTEGRATION_SKELETON.md`.
+
 ## Public Verification Gate
 
 ```bash

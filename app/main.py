@@ -5,6 +5,11 @@ from fastapi import FastAPI, HTTPException
 
 from app.chunking import chunk_text
 from app.embeddings import HashEmbeddingProvider
+from app.integrations import (
+    dispatch_bitrix24_event,
+    dispatch_telegram_approval,
+    integration_runtime,
+)
 from app.llm import LLMClient
 from app.sales_workflow import build_call_analysis
 from app.schemas import (
@@ -14,7 +19,9 @@ from app.schemas import (
     ApprovalStatus,
     DocumentIn,
     DocumentOut,
+    IntegrationDispatchOut,
     IntegrationEventOut,
+    IntegrationRuntimeOut,
     QueryIn,
     QueryOut,
     TranscriptWebhookIn,
@@ -49,6 +56,11 @@ def health() -> dict[str, object]:
         "storage": store.name,
         "embedding_dim": settings.embedding_dim,
     }
+
+
+@app.get("/integrations/runtime", response_model=IntegrationRuntimeOut)
+def get_integration_runtime() -> IntegrationRuntimeOut:
+    return integration_runtime(settings)
 
 
 @app.post("/documents", response_model=DocumentOut)
@@ -111,9 +123,27 @@ def reject(item_id: UUID, decision: ApprovalDecision) -> ApprovalOut:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
+@app.post("/approvals/{item_id}/notify/telegram", response_model=IntegrationDispatchOut)
+def notify_approval_in_telegram(item_id: UUID) -> IntegrationDispatchOut:
+    try:
+        approval = store.get_approval(item_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="approval item not found") from exc
+    return dispatch_telegram_approval(approval, settings)
+
+
 @app.get("/integration-events", response_model=list[IntegrationEventOut])
 def list_integration_events(adapter_key: str | None = None) -> list[IntegrationEventOut]:
     return store.list_integration_events(adapter_key)
+
+
+@app.post("/integration-events/{event_id}/dispatch/bitrix24", response_model=IntegrationDispatchOut)
+def dispatch_event_to_bitrix24(event_id: UUID) -> IntegrationDispatchOut:
+    try:
+        event = store.get_integration_event(event_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="integration event not found") from exc
+    return dispatch_bitrix24_event(event, settings)
 
 
 @app.post("/webhooks/n8n/call-transcript", response_model=TranscriptWebhookOut)

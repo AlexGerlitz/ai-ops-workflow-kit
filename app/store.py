@@ -57,6 +57,8 @@ class Store(Protocol):
         source_approval_id: UUID | None = None,
     ) -> IntegrationEventOut: ...
 
+    def get_integration_event(self, event_id: UUID) -> IntegrationEventOut: ...
+
     def list_integration_events(self, adapter_key: str | None = None) -> list[IntegrationEventOut]: ...
 
 
@@ -157,6 +159,9 @@ class InMemoryStore:
         )
         self.integration_events[event.id] = event
         return event
+
+    def get_integration_event(self, event_id: UUID) -> IntegrationEventOut:
+        return self.integration_events[event_id]
 
     def list_integration_events(self, adapter_key: str | None = None) -> list[IntegrationEventOut]:
         events = list(self.integration_events.values())
@@ -362,6 +367,16 @@ class PostgresVectorStore:
                     source_approval_id,
                 ),
             ).fetchone()
+        return self._event_from_row(row)
+
+    def get_integration_event(self, event_id: UUID) -> IntegrationEventOut:
+        with self._connect() as conn:
+            row = conn.execute(
+                "SELECT * FROM integration_events WHERE id = %s",
+                (event_id,),
+            ).fetchone()
+        if row is None:
+            raise KeyError(str(event_id))
         return self._event_from_row(row)
 
     def list_integration_events(self, adapter_key: str | None = None) -> list[IntegrationEventOut]:

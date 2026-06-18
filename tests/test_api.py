@@ -10,6 +10,16 @@ def test_health_endpoint_reports_runtime() -> None:
     assert response.json()["ok"] is True
 
 
+def test_integration_runtime_reports_dry_run_capabilities() -> None:
+    with TestClient(app) as client:
+        response = client.get("/integrations/runtime")
+    assert response.status_code == 200
+    body = response.json()
+    capabilities = {item["adapter_key"]: item for item in body["capabilities"]}
+    assert capabilities["telegram.approval"]["dry_run"] is True
+    assert capabilities["bitrix24"]["dry_run"] is True
+
+
 def test_ingest_query_and_approval_flow() -> None:
     with TestClient(app) as client:
         ingest = client.post(
@@ -48,6 +58,29 @@ def test_ingest_query_and_approval_flow() -> None:
         )
         assert approved.status_code == 200
         assert approved.json()["status"] == "approved"
+
+
+def test_telegram_approval_notification_dry_run_contract() -> None:
+    with TestClient(app) as client:
+        approval = client.post(
+            "/approvals",
+            json={
+                "kind": "content_review",
+                "title": "Review follow-up",
+                "draft": "Send recap.",
+                "context": {"lead_id": "L-telegram"},
+            },
+        )
+        assert approval.status_code == 200
+        approval_id = approval.json()["id"]
+
+        notify = client.post(f"/approvals/{approval_id}/notify/telegram")
+        assert notify.status_code == 200
+        body = notify.json()
+        assert body["adapter_key"] == "telegram.approval"
+        assert body["status"] == "dry_run"
+        assert body["payload"]["reply_markup"]["inline_keyboard"]
+        assert body["payload"]["callback_contract"]["approve"]["method"] == "POST"
 
 
 def test_offer_demo_call_transcript_queues_crm_handoff_after_approval() -> None:
@@ -103,3 +136,12 @@ def test_offer_demo_call_transcript_queues_crm_handoff_after_approval() -> None:
         assert matching_events
         assert matching_events[0]["operation"] == "upsert_lead_follow_up"
         assert matching_events[0]["payload"]["customer_id"] == "LEAD-42"
+
+        dispatch = client.post(
+            f"/integration-events/{matching_events[0]['id']}/dispatch/bitrix24"
+        )
+        assert dispatch.status_code == 200
+        dispatch_body = dispatch.json()
+        assert dispatch_body["adapter_key"] == "bitrix24"
+        assert dispatch_body["status"] == "dry_run"
+        assert dispatch_body["payload"]["method"] == "crm.lead.update"

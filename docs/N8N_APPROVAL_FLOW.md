@@ -29,6 +29,12 @@ When n8n runs outside Docker, use the host API URL instead:
 http://127.0.0.1:8080/webhooks/n8n/call-transcript
 ```
 
+For the public demo callback contract, use:
+
+```text
+http://saleops.duckdns.org
+```
+
 ## Input Contract
 
 ```json
@@ -56,6 +62,12 @@ The backend returns:
 
 The n8n workflow creates a Telegram-ready text payload from this response. A real Telegram node can
 send that text with approve/reject buttons or links.
+
+The backend also exposes a direct dry-run Telegram skeleton:
+
+```bash
+curl -X POST http://127.0.0.1:8080/approvals/{approval_id}/notify/telegram
+```
 
 ## Approval Callback
 
@@ -97,3 +109,9 @@ A real Bitrix24 adapter would consume queued integration events and update:
 - target CRM stage.
 
 The mock adapter key keeps the public demo safe while preserving the production contract.
+
+The backend dispatch skeleton can inspect the mapped Bitrix24 payload without sending it:
+
+```bash
+curl -X POST http://127.0.0.1:8080/integration-events/{event_id}/dispatch/bitrix24
+```

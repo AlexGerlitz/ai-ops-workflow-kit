@@ -20,9 +20,15 @@ assert payload["ingestion"]["chunks"] >= 1
 assert payload["rag_context_sources"], "RAG retrieval returned no sources"
 assert payload["call_analysis"]["score"] >= 80
 assert payload["approval"]["status"] == "approved"
+assert payload["telegram_approval"]["adapter_key"] == "telegram.approval"
+assert payload["telegram_approval"]["status"] == "dry_run"
+assert "approve" in payload["telegram_approval"]["callback_contract"]
 assert payload["crm_handoff"]["adapter_key"] == "bitrix24.mock"
 assert payload["crm_handoff"]["operation"] == "upsert_lead_follow_up"
 assert payload["crm_handoff"]["status"] == "queued"
+assert payload["bitrix24_dispatch"]["adapter_key"] == "bitrix24"
+assert payload["bitrix24_dispatch"]["status"] == "dry_run"
+assert payload["bitrix24_dispatch"]["method"] == "crm.lead.update"
 
 print("public verification passed")
 PY
