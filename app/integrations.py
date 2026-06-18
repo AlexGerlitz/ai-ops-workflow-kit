@@ -44,6 +44,7 @@ def integration_runtime(config: Settings) -> IntegrationRuntimeOut:
 def build_telegram_approval_payload(approval: ApprovalOut, public_base_url: str) -> dict[str, object]:
     approve_url = _join_url(public_base_url, f"/approvals/{approval.id}/approve")
     reject_url = _join_url(public_base_url, f"/approvals/{approval.id}/reject")
+    webhook_url = _join_url(public_base_url, "/webhooks/telegram/approval")
     text = (
         f"<b>{approval.title}</b>\n\n"
         f"{approval.draft}\n\n"
@@ -63,6 +64,7 @@ def build_telegram_approval_payload(approval: ApprovalOut, public_base_url: str)
         "callback_contract": {
             "approve": {"method": "POST", "url": approve_url},
             "reject": {"method": "POST", "url": reject_url},
+            "telegram_webhook": {"method": "POST", "url": webhook_url},
         },
     }
 

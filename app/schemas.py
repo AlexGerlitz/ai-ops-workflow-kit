@@ -107,6 +107,44 @@ class TranscriptWebhookOut(BaseModel):
     approval: ApprovalOut
 
 
+class TelegramUser(BaseModel):
+    id: int
+    username: str | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+
+
+class TelegramChat(BaseModel):
+    id: int
+    type: str | None = None
+
+
+class TelegramMessage(BaseModel):
+    message_id: int | None = None
+    chat: TelegramChat | None = None
+
+
+class TelegramCallbackQuery(BaseModel):
+    id: str
+    from_user: TelegramUser = Field(alias="from")
+    data: str = Field(min_length=1)
+    message: TelegramMessage | None = None
+
+
+class TelegramWebhookIn(BaseModel):
+    update_id: int | None = None
+    callback_query: TelegramCallbackQuery | None = None
+
+
+class TelegramWebhookOut(BaseModel):
+    ok: bool
+    action: str
+    approval_id: UUID
+    approval_status: ApprovalStatus
+    reviewer: str
+    crm_handoff_event_id: UUID | None = None
+
+
 class IntegrationEventOut(BaseModel):
     id: UUID
     adapter_key: str

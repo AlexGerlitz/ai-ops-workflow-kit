@@ -70,6 +70,7 @@ flowchart LR
 - Transcript webhook that produces a structured analysis and a human approval item.
 - Mock Bitrix24 CRM handoff event queued only after human approval.
 - Dry-run Telegram approval and Bitrix24 dispatch contracts ready for real credentials.
+- Telegram callback webhook for inline approve/reject decisions.
 - Approval state machine for Telegram, CRM, or internal review loops.
 - n8n workflow example for webhook-to-API-to-approval routing.
 - Runtime evidence endpoints for version, deploy environment, counters, and Prometheus-style metrics.
@@ -172,6 +173,7 @@ curl -X POST http://127.0.0.1:8080/approvals \
 | `GET /approvals` | List approval items, optionally filtered by status. |
 | `GET /approvals/{id}` | Inspect one approval item. |
 | `POST /approvals/{id}/notify/telegram` | Build or send a Telegram approval message. |
+| `POST /webhooks/telegram/approval` | Accept Telegram inline button callbacks and apply approve/reject decisions. |
 | `POST /approvals/{id}/approve` | Approve an item and attach reviewer notes. |
 | `POST /approvals/{id}/reject` | Reject an item and attach reviewer notes. |
 | `GET /integration-events` | Inspect queued CRM/integration handoff events. |

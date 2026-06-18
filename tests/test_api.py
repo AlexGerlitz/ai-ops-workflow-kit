@@ -124,6 +124,53 @@ def test_telegram_approval_notification_dry_run_contract() -> None:
         assert body["status"] == "dry_run"
         assert body["payload"]["reply_markup"]["inline_keyboard"]
         assert body["payload"]["callback_contract"]["approve"]["method"] == "POST"
+        assert body["payload"]["callback_contract"]["telegram_webhook"]["url"].endswith(
+            "/webhooks/telegram/approval"
+        )
+
+
+def test_telegram_callback_approves_item_and_queues_crm_handoff() -> None:
+    with TestClient(app) as client:
+        webhook = client.post(
+            "/webhooks/n8n/call-transcript",
+            json={
+                "call_id": "CALL-TELEGRAM-1",
+                "customer_id": "LEAD-TG-42",
+                "transcript": (
+                    "The director approved the budget. They need the rollout this month "
+                    "and agreed that the next step is a short implementation call tomorrow."
+                ),
+                "metadata": {"source": "telegram-test"},
+            },
+        )
+        assert webhook.status_code == 200
+        approval_id = webhook.json()["approval"]["id"]
+
+        callback = client.post(
+            "/webhooks/telegram/approval",
+            json={
+                "update_id": 1001,
+                "callback_query": {
+                    "id": "callback-1",
+                    "from": {"id": 7001, "username": "saleslead"},
+                    "data": f"approve:{approval_id}",
+                    "message": {"message_id": 55, "chat": {"id": 12345, "type": "private"}},
+                },
+            },
+        )
+        assert callback.status_code == 200
+        body = callback.json()
+        assert body["ok"] is True
+        assert body["action"] == "approve"
+        assert body["approval_status"] == "approved"
+        assert body["reviewer"] == "saleslead"
+        assert body["crm_handoff_event_id"]
+
+        events = client.get("/integration-events", params={"adapter_key": "bitrix24.mock"})
+        assert events.status_code == 200
+        assert any(item["source_approval_id"] == approval_id for item in events.json())
+        runtime = client.get("/runtime").json()
+        assert runtime["counters"]["telegram_callbacks_total"] >= 1
 
 
 def test_offer_demo_call_transcript_queues_crm_handoff_after_approval() -> None:

@@ -28,6 +28,8 @@ from app.schemas import (
     OfferDemoRunOut,
     QueryIn,
     QueryOut,
+    TelegramWebhookIn,
+    TelegramWebhookOut,
     TranscriptWebhookIn,
     TranscriptWebhookOut,
 )
@@ -258,6 +260,50 @@ def notify_approval_in_telegram(item_id: UUID) -> IntegrationDispatchOut:
     dispatch = dispatch_telegram_approval(approval, settings)
     runtime_stats.increment("telegram_dispatches_total")
     return dispatch
+
+
+@app.post("/webhooks/telegram/approval", response_model=TelegramWebhookOut)
+def telegram_approval_webhook(payload: TelegramWebhookIn) -> TelegramWebhookOut:
+    callback = payload.callback_query
+    if callback is None:
+        raise HTTPException(status_code=400, detail="callback_query is required")
+
+    try:
+        action, approval_id_raw = callback.data.split(":", 1)
+        approval_id = UUID(approval_id_raw)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail="invalid callback_data") from exc
+
+    reviewer = callback.from_user.username or f"telegram:{callback.from_user.id}"
+    if action == "approve":
+        approval = approve(
+            approval_id,
+            ApprovalDecision(reviewer=reviewer, notes="Approved from Telegram callback"),
+        )
+        events = [
+            event
+            for event in store.list_integration_events("bitrix24.mock")
+            if event.source_approval_id == approval.id
+        ]
+        crm_handoff_event_id = events[-1].id if events else None
+    elif action == "reject":
+        approval = reject(
+            approval_id,
+            ApprovalDecision(reviewer=reviewer, notes="Rejected from Telegram callback"),
+        )
+        crm_handoff_event_id = None
+    else:
+        raise HTTPException(status_code=400, detail="unsupported callback action")
+
+    runtime_stats.increment("telegram_callbacks_total")
+    return TelegramWebhookOut(
+        ok=True,
+        action=action,
+        approval_id=approval.id,
+        approval_status=approval.status,
+        reviewer=reviewer,
+        crm_handoff_event_id=crm_handoff_event_id,
+    )
 
 
 @app.get("/integration-events", response_model=list[IntegrationEventOut])

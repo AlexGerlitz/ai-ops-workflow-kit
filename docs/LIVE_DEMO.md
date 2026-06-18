@@ -42,6 +42,7 @@ version=0.2.0
 git_sha=<deployed-sha>
 score=100
 approval=approved
+telegram_callback=rejected
 telegram=dry_run
 bitrix24=dry_run
 ```
@@ -56,6 +57,7 @@ The `leadscore` alias intentionally keeps approval callbacks on the primary `sal
 - The API is a real deployed service, not a static mock.
 - The workflow runs through the same `/demo/run` endpoint used by local tests.
 - The callback contract uses the public HTTPS base URL.
+- The smoke check creates a synthetic approval and proves the Telegram callback webhook can reject it.
 - `/runtime` exposes deployed version, Git SHA, public callback base URL, integration readiness, and counters.
 - `/metrics` exposes Prometheus-style runtime and workflow counters.
 - Telegram and Bitrix24 remain in dry-run mode until credentials are configured.

@@ -12,7 +12,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-13 passed
+14 passed
 public verification passed
 ```
 
@@ -24,6 +24,7 @@ workflow produced:
 - structured call analysis;
 - approved human review item;
 - dry-run Telegram approval payload;
+- Telegram callback webhook for inline approve/reject decisions;
 - queued `bitrix24.mock` CRM handoff.
 - dry-run Bitrix24 dispatch payload.
 - runtime identity and metrics surface.
@@ -104,5 +105,6 @@ Then open:
 - LLM/RAG behavior has deterministic local fallbacks for repeatable review.
 - CRM mutation is queued only after explicit human approval.
 - Telegram and Bitrix24 adapters expose dry-run contracts before credentials are connected.
+- Telegram inline callbacks have a backend endpoint that applies approve/reject state transitions.
 - Runtime and metrics endpoints expose deploy identity and workflow counters.
 - The project has a public verification command and CI gate.

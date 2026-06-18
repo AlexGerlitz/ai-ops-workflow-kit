@@ -81,6 +81,16 @@ curl -fsS -X POST http://127.0.0.1:8080/query \
   -d '{"question":"What routing is mentioned?","top_k":2}'
 ```
 
+## Telegram Callback Check
+
+Create or inspect an approval item, then send Telegram-style callback data:
+
+```bash
+curl -fsS -X POST http://127.0.0.1:8080/webhooks/telegram/approval \
+  -H 'content-type: application/json' \
+  -d '{"callback_query":{"id":"cb-smoke","from":{"id":7001,"username":"saleslead"},"data":"reject:{approval_id}"}}'
+```
+
 ## Offer Demo
 
 Run the complete reviewer demo without Docker or API keys:
@@ -138,7 +148,7 @@ bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 ```
 
 This verifies the public Caddy/HAProxy route, browser demo HTML, `/demo/run`, approval callback
-base URL, runtime evidence, metrics endpoint, and dry-run integration contracts.
+base URL, Telegram callback webhook, runtime evidence, metrics endpoint, and dry-run integration contracts.
 
 ## n8n Import
 

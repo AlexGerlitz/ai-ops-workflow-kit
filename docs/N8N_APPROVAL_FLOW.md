@@ -87,6 +87,17 @@ curl -X POST http://127.0.0.1:8080/approvals/{approval_id}/reject \
   -d '{"reviewer":"sales-lead","notes":"Needs rewrite"}'
 ```
 
+For Telegram inline keyboard buttons, send Telegram webhook updates to:
+
+```bash
+curl -X POST http://127.0.0.1:8080/webhooks/telegram/approval \
+  -H 'content-type: application/json' \
+  -d '{"callback_query":{"id":"cb-1","from":{"id":7001,"username":"saleslead"},"data":"approve:{approval_id}"}}'
+```
+
+The webhook supports `approve:{approval_id}` and `reject:{approval_id}` callback data. Approval uses the
+same backend state transition and queues the CRM handoff event.
+
 ## CRM Handoff Rule
 
 The backend queues a `bitrix24.mock/upsert_lead_follow_up` integration event only after approval.

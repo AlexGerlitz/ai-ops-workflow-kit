@@ -53,14 +53,33 @@ Dry-run response includes:
 - Telegram `sendMessage` text;
 - inline approve/reject button payload;
 - backend approve/reject callback URLs;
+- Telegram webhook URL for inline `callback_query` updates;
 - adapter status.
 
 Production behavior after dry-run is disabled:
 
 1. backend sends the approval message to Telegram;
-2. Telegram callback is mapped to the backend approval endpoint;
+2. Telegram sends inline button updates to `POST /webhooks/telegram/approval`;
 3. approval state changes in the backend;
 4. approved CRM updates are queued as integration events.
+
+Telegram callback payload shape:
+
+```json
+{
+  "update_id": 1001,
+  "callback_query": {
+    "id": "callback-id",
+    "from": { "id": 7001, "username": "saleslead" },
+    "data": "approve:{approval_id}"
+  }
+}
+```
+
+Supported callback data:
+
+- `approve:{approval_id}`;
+- `reject:{approval_id}`.
 
 ## Bitrix24 Handoff Skeleton
 

@@ -15,6 +15,7 @@ class RuntimeStats:
             "approvals_approved_total": 0,
             "approvals_rejected_total": 0,
             "telegram_dispatches_total": 0,
+            "telegram_callbacks_total": 0,
             "bitrix24_dispatches_total": 0,
             "crm_handoffs_queued_total": 0,
         }

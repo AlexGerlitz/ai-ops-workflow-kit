@@ -12,7 +12,36 @@ curl -fsS "$BASE_URL/" | grep -q "AI Sales Ops Control Tower"
 runtime_payload="$(curl -fsS "$BASE_URL/runtime")"
 metrics_payload="$(curl -fsS "$BASE_URL/metrics")"
 payload="$(curl -fsS -X POST "$BASE_URL/demo/run")"
-RUNTIME_PAYLOAD="$runtime_payload" METRICS_PAYLOAD="$metrics_payload" PAYLOAD="$payload" python3 - "$BASE_URL" "$CALLBACK_BASE_URL" <<'PY'
+approval_payload="$(curl -fsS -X POST "$BASE_URL/approvals" \
+  -H "content-type: application/json" \
+  -d '{"kind":"content_review","title":"Live Telegram callback smoke","draft":"Reject this synthetic live smoke item.","context":{"source":"live-smoke"}}')"
+approval_id="$(APPROVAL_PAYLOAD="$approval_payload" python3 - <<'PY'
+import json
+import os
+
+print(json.loads(os.environ["APPROVAL_PAYLOAD"])["id"])
+PY
+)"
+telegram_callback_payload="$(python3 - "$approval_id" <<'PY'
+import json
+import sys
+
+approval_id = sys.argv[1]
+print(json.dumps({
+    "update_id": 9001,
+    "callback_query": {
+        "id": "live-smoke-callback",
+        "from": {"id": 9001, "username": "live-smoke"},
+        "data": f"reject:{approval_id}",
+        "message": {"message_id": 1, "chat": {"id": 9001, "type": "private"}},
+    },
+}))
+PY
+)"
+telegram_callback_response="$(curl -fsS -X POST "$BASE_URL/webhooks/telegram/approval" \
+  -H "content-type: application/json" \
+  -d "$telegram_callback_payload")"
+RUNTIME_PAYLOAD="$runtime_payload" METRICS_PAYLOAD="$metrics_payload" PAYLOAD="$payload" TELEGRAM_CALLBACK_RESPONSE="$telegram_callback_response" python3 - "$BASE_URL" "$CALLBACK_BASE_URL" <<'PY'
 import json
 import os
 import sys
@@ -22,6 +51,7 @@ expected_callback_base_url = sys.argv[2].rstrip("/")
 payload = json.loads(os.environ["PAYLOAD"])
 runtime_payload = json.loads(os.environ["RUNTIME_PAYLOAD"])
 metrics_payload = os.environ["METRICS_PAYLOAD"]
+telegram_callback_response = json.loads(os.environ["TELEGRAM_CALLBACK_RESPONSE"])
 
 assert runtime_payload["ok"] is True
 assert runtime_payload["public_base_url"] == expected_callback_base_url
@@ -34,6 +64,11 @@ assert payload["telegram_approval"]["status"] == "dry_run"
 assert payload["bitrix24_dispatch"]["status"] == "dry_run"
 approve_url = payload["telegram_approval"]["callback_contract"]["approve"]["url"]
 assert approve_url.startswith(expected_callback_base_url + "/approvals/"), approve_url
+telegram_webhook_url = payload["telegram_approval"]["callback_contract"]["telegram_webhook"]["url"]
+assert telegram_webhook_url == expected_callback_base_url + "/webhooks/telegram/approval"
+assert telegram_callback_response["ok"] is True
+assert telegram_callback_response["action"] == "reject"
+assert telegram_callback_response["approval_status"] == "rejected"
 
 print("live demo smoke passed")
 print(f"base_url={expected_base_url}")
@@ -42,6 +77,7 @@ print(f"version={runtime_payload['version']}")
 print(f"git_sha={runtime_payload['git_sha']}")
 print(f"score={payload['call_analysis']['score']}")
 print(f"approval={payload['approval']['status']}")
+print(f"telegram_callback={telegram_callback_response['approval_status']}")
 print(f"telegram={payload['telegram_approval']['status']}")
 print(f"bitrix24={payload['bitrix24_dispatch']['status']}")
 PY

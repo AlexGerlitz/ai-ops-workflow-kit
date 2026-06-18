@@ -36,12 +36,37 @@ from app.main import app
 with TestClient(app) as client:
     demo_response = client.post("/demo/run")
     assert demo_response.status_code == 200
+    approval_response = client.post(
+        "/approvals",
+        json={
+            "kind": "content_review",
+            "title": "Verify Telegram callback",
+            "draft": "Reject this public verification item.",
+            "context": {"source": "verify_public"},
+        },
+    )
+    assert approval_response.status_code == 200
+    approval_id = approval_response.json()["id"]
+    telegram_callback = client.post(
+        "/webhooks/telegram/approval",
+        json={
+            "update_id": 9001,
+            "callback_query": {
+                "id": "verify-public-callback",
+                "from": {"id": 9001, "username": "verify-public"},
+                "data": f"reject:{approval_id}",
+            },
+        },
+    )
+    assert telegram_callback.status_code == 200
+    assert telegram_callback.json()["approval_status"] == "rejected"
     runtime = client.get("/runtime").json()
     metrics = client.get("/metrics").text
 
 assert runtime["ok"] is True
 assert runtime["counters"]["demo_runs_total"] >= 1
 assert runtime["counters"]["crm_handoffs_queued_total"] >= 1
+assert runtime["counters"]["telegram_callbacks_total"] >= 1
 assert "aiops_runtime_info" in metrics
 assert "aiops_demo_runs_total" in metrics
 

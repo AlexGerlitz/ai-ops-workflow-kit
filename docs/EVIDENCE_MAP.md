@@ -9,7 +9,7 @@ This map connects the repository to the work expected from an AI automation engi
 | pgvector-ready persistence | `app/store.py`, `docker-compose.yml`, `docs/ARCHITECTURE.md` |
 | Transcript analysis and scoring | `app/scoring.py`, `app/sales_workflow.py`, `demo/call-transcript.json` |
 | Human approval flow | `POST /approvals`, `POST /approvals/{id}/approve`, `tests/test_core.py` |
-| Telegram approval contract | `app/integrations.py`, `POST /approvals/{id}/notify/telegram`, `docs/INTEGRATION_SKELETON.md` |
+| Telegram approval contract | `app/integrations.py`, `POST /approvals/{id}/notify/telegram`, `POST /webhooks/telegram/approval`, `docs/INTEGRATION_SKELETON.md` |
 | Bitrix24 handoff contract | `app/integrations.py`, `POST /integration-events/{id}/dispatch/bitrix24` |
 | Self-hosted runtime | `Dockerfile`, `docker-compose.yml`, `docs/LIVE_DEMO.md`, `docs/OPERATIONS.md` |
 | Runtime observability | `GET /runtime`, `GET /metrics`, `app/observability.py`, `scripts/smoke_live_demo.sh` |
