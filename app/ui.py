@@ -58,6 +58,7 @@ DEMO_PAGE_HTML = """
       padding: 16px;
       min-width: 0;
     }
+    .span-2 { grid-column: span 2; }
     .span-3 { grid-column: span 3; }
     .span-4 { grid-column: span 4; }
     .span-5 { grid-column: span 5; }
@@ -108,7 +109,7 @@ DEMO_PAGE_HTML = """
     }
     @media (max-width: 840px) {
       header { grid-template-columns: 1fr; align-items: start; }
-      .span-3, .span-4, .span-5, .span-7 { grid-column: span 12; }
+      .span-2, .span-3, .span-4, .span-5, .span-7 { grid-column: span 12; }
     }
   </style>
 </head>
@@ -117,31 +118,41 @@ DEMO_PAGE_HTML = """
     <header>
       <div>
         <h1>AI Sales Ops Control Tower</h1>
-        <p class="subtitle">RAG-backed transcript analysis, human approval, Telegram payload, and Bitrix24 handoff in one reproducible workflow.</p>
+        <p class="subtitle">RAG-backed transcript analysis, Telegram callback approval, idempotent Bitrix24 outbox drain, and worker-visible CRM handoff in one reproducible workflow.</p>
       </div>
       <button id="run">Run demo workflow</button>
     </header>
 
     <section class="grid">
-      <div class="panel span-3">
+      <div class="panel span-2">
         <div class="label">Runtime</div>
         <div id="runtime" class="value">Ready</div>
         <div id="runtime-sub" class="small">Waiting for demo run</div>
       </div>
-      <div class="panel span-3">
+      <div class="panel span-2">
         <div class="label">Lead score</div>
         <div id="score" class="value">--</div>
         <div id="risk" class="small">Risk level pending</div>
       </div>
-      <div class="panel span-3">
+      <div class="panel span-2">
         <div class="label">Approval</div>
         <div id="approval" class="value">--</div>
         <div id="reviewer" class="small">Reviewer pending</div>
       </div>
-      <div class="panel span-3">
+      <div class="panel span-2">
         <div class="label">CRM handoff</div>
         <div id="crm" class="value">--</div>
         <div id="crm-sub" class="small">Bitrix24 dispatch pending</div>
+      </div>
+      <div class="panel span-2">
+        <div class="label">Outbox drain</div>
+        <div id="outbox" class="value">--</div>
+        <div id="outbox-sub" class="small">Dry-run drain pending</div>
+      </div>
+      <div class="panel span-2">
+        <div class="label">Worker state</div>
+        <div id="worker" class="value">--</div>
+        <div id="worker-sub" class="small">Runtime not checked</div>
       </div>
 
       <div class="panel span-7">
@@ -149,13 +160,16 @@ DEMO_PAGE_HTML = """
           <span class="pill">Transcript</span>
           <span class="pill">RAG</span>
           <span class="pill">Approval</span>
+          <span class="pill">Outbox</span>
           <span class="pill">Bitrix24</span>
+          <span class="pill">Worker state</span>
         </div>
         <div class="stack" style="margin-top: 16px;">
           <div class="step"><div class="num">1</div><div><b>Ingest playbook</b><div class="small" id="step1">Not run yet</div></div></div>
           <div class="step"><div class="num">2</div><div><b>Analyze call</b><div class="small" id="step2">Not run yet</div></div></div>
           <div class="step"><div class="num">3</div><div><b>Build approval payload</b><div class="small" id="step3">Not run yet</div></div></div>
           <div class="step"><div class="num">4</div><div><b>Queue CRM handoff</b><div class="small" id="step4">Not run yet</div></div></div>
+          <div class="step"><div class="num">5</div><div><b>Drain Bitrix24 outbox</b><div class="small" id="step5">Not run yet</div></div></div>
         </div>
       </div>
       <div class="panel span-5">
@@ -176,6 +190,12 @@ DEMO_PAGE_HTML = """
     const setText = (id, value) => { document.getElementById(id).textContent = value; };
     const pretty = (value) => JSON.stringify(value, null, 2);
 
+    function renderWorkerState(runtime) {
+      const worker = runtime.workers.bitrix24_outbox;
+      setText("worker", worker.active ? "active" : "off");
+      setText("worker-sub", worker.dry_run ? "Public dry-run keeps worker disabled" : `Interval ${worker.interval_seconds}s`);
+    }
+
     function renderIntegrations(runtime) {
       const target = document.getElementById("integrations");
       target.innerHTML = "";
@@ -192,6 +212,9 @@ DEMO_PAGE_HTML = """
     }
 
     async function loadRuntime() {
+      const runtimeResponse = await fetch("/runtime");
+      const runtimeState = await runtimeResponse.json();
+      renderWorkerState(runtimeState);
       const response = await fetch("/integrations/runtime");
       const runtime = await response.json();
       renderIntegrations(runtime);
@@ -206,6 +229,11 @@ DEMO_PAGE_HTML = """
         const response = await fetch("/demo/run", { method: "POST" });
         const data = await response.json();
         if (!response.ok) throw new Error(pretty(data));
+        const drainResponse = await fetch("/integrations/bitrix24/drain?limit=100", { method: "POST" });
+        const drain = await drainResponse.json();
+        if (!drainResponse.ok) throw new Error(pretty(drain));
+        const runtimeResponse = await fetch("/runtime");
+        const runtimeState = await runtimeResponse.json();
 
         setText("runtime", data.runtime.storage);
         setText("runtime-sub", data.integrations.public_base_url);
@@ -219,8 +247,12 @@ DEMO_PAGE_HTML = """
         setText("step2", `${data.call_analysis.next_action}`);
         setText("step3", `${data.telegram_approval.adapter_key} ${data.telegram_approval.status}`);
         setText("step4", `${data.crm_handoff.operation} -> ${data.bitrix24_dispatch.status}`);
+        setText("outbox", `${drain.dry_run}`);
+        setText("outbox-sub", `${drain.dispatched} event(s), ${drain.dead_letter} dead-letter`);
+        setText("step5", `${drain.adapter_key} drain dry-run: ${drain.dry_run} event(s)`);
+        renderWorkerState(runtimeState);
         renderIntegrations(data.integrations);
-        output.textContent = pretty(data);
+        output.textContent = pretty({ workflow: data, bitrix24_outbox_drain: drain, runtime: runtimeState });
       } catch (error) {
         output.textContent = pretty({ status: "failed", detail: String(error.message || error) });
       } finally {

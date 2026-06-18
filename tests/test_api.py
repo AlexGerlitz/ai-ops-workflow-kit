@@ -37,6 +37,10 @@ def test_public_demo_page_is_available() -> None:
     assert response.status_code == 200
     assert "AI Sales Ops Control Tower" in response.text
     assert "Run demo workflow" in response.text
+    assert "Telegram callback approval" in response.text
+    assert "Outbox drain" in response.text
+    assert "Worker state" in response.text
+    assert "/integrations/bitrix24/drain" in response.text
 
 
 def test_integration_runtime_reports_dry_run_capabilities() -> None:

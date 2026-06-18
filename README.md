@@ -20,7 +20,7 @@ prompt demo.
 | --- | --- |
 | [Live demo](https://saleops.duckdns.org/) | Public one-click proof of the deployed Sales Ops workflow. |
 | [Evidence map](docs/EVIDENCE_MAP.md) | Maps the repo to AI automation, RAG, approval flow, Bitrix24, Telegram, and self-hosting requirements. |
-| [Offer demo](docs/OFFER_DEMO.md) | One-command proof of transcript -> RAG -> scoring -> approval -> mock Bitrix CRM handoff. |
+| [Offer demo](docs/OFFER_DEMO.md) | One-command proof of transcript -> RAG -> scoring -> Telegram approval -> idempotent outbox drain -> mock Bitrix CRM handoff. |
 | [Reviewer checklist](docs/REVIEWER_CHECKLIST.md) | Single public gate for tests, offer demo, and output validation. |
 | [Live demo notes](docs/LIVE_DEMO.md) | Public URLs and smoke checks for the deployed service. |
 | [Architecture notes](docs/ARCHITECTURE.md) | Shows the FastAPI/n8n/PostgreSQL boundary and why stateful logic stays in the backend. |
@@ -90,7 +90,7 @@ The script runs a complete synthetic sales workflow without external API keys:
 
 ```text
 sales playbook -> RAG retrieval -> call transcript webhook -> AI scoring
--> follow-up approval -> mock Bitrix24 CRM handoff event
+-> follow-up approval -> Telegram callback -> outbox drain -> mock Bitrix24 CRM handoff event
 ```
 
 See [docs/OFFER_DEMO.md](docs/OFFER_DEMO.md) for the reviewer path and expected output shape.

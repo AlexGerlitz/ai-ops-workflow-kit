@@ -23,7 +23,7 @@ as a narrower alias for the scoring surface.
 1. Open `https://saleops.duckdns.org/`.
 2. Click `Run demo workflow`.
 3. Verify the response shows a high lead score, approved review state, dry-run Telegram payload,
-   and dry-run Bitrix24 dispatch.
+   dry-run Bitrix24 dispatch, outbox drain count, and public worker state.
 
 ## Command-Line Smoke
 
