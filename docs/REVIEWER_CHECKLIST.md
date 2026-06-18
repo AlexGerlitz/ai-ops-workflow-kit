@@ -12,7 +12,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-19 passed
+20 passed
 public verification passed
 ```
 
@@ -20,6 +20,7 @@ The gate runs the test suite, runs the offer demo, parses the demo output, and a
 workflow produced:
 
 - RAG context sources;
+- Google Drive import into the same RAG store;
 - transcript score;
 - structured call analysis;
 - approved human review item;
@@ -97,7 +98,7 @@ Then open:
 | [Architecture](./ARCHITECTURE.md) | FastAPI/n8n/PostgreSQL/LLM boundaries and state ownership. |
 | [Operations](./OPERATIONS.md) | Local runtime, health checks, smoke test, logs, and handoff. |
 | [n8n Approval Flow](./N8N_APPROVAL_FLOW.md) | How webhook routing, Telegram payloads, and approval callbacks connect. |
-| [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Telegram and Bitrix24 dry-run contracts become real credentials later. |
+| [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Google Drive, Telegram, and Bitrix24 dry-run contracts become real credentials later. |
 | [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, CRM handoff, idempotency, drain, background worker, and integration retry/dead-letter behavior. |
 
 ## 7. What This Proves
@@ -108,7 +109,7 @@ Then open:
 - LLM/RAG behavior has deterministic local fallbacks for repeatable review.
 - CRM mutation is queued only after explicit human approval.
 - CRM dispatch failures become retry/dead-letter state with `next_retry_at`, not invisible log-only errors.
-- Telegram and Bitrix24 adapters expose dry-run contracts before credentials are connected.
+- Google Drive, Telegram, and Bitrix24 adapters expose dry-run contracts before credentials are connected.
 - Telegram inline callbacks have a backend endpoint that applies approve/reject state transitions.
 - Production Telegram callbacks can be protected with `X-Telegram-Bot-Api-Secret-Token`.
 - Runtime and metrics endpoints expose deploy identity and workflow counters.

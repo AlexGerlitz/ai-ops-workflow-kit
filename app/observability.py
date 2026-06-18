@@ -9,6 +9,7 @@ class RuntimeStats:
         self._counters: dict[str, int] = {
             "demo_runs_total": 0,
             "documents_ingested_total": 0,
+            "google_drive_imports_total": 0,
             "query_requests_total": 0,
             "transcript_webhooks_total": 0,
             "approvals_created_total": 0,

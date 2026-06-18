@@ -133,11 +133,14 @@ The public callback base URL is:
 PUBLIC_BASE_URL=https://saleops.duckdns.org
 ```
 
-Telegram and Bitrix24 are dry-run by default. This keeps public verification deterministic while
+Google Drive, Telegram, and Bitrix24 are dry-run by default. This keeps public verification deterministic while
 showing the exact payloads that will be sent after credentials are configured:
 
 ```bash
 curl http://127.0.0.1:8080/integrations/runtime
+curl -X POST http://127.0.0.1:8080/integrations/google-drive/import \
+  -H "content-type: application/json" \
+  -d '{"file_id":"ops-playbook","name":"Ops playbook","mime_type":"application/vnd.google-apps.document","text":"Approval workflows need RAG context and explicit handoff state.","metadata":{"source":"ops"}}'
 curl -X POST http://127.0.0.1:8080/approvals/{approval_id}/notify/telegram
 curl -X POST http://127.0.0.1:8080/integration-events/{event_id}/dispatch/bitrix24
 curl -X POST http://127.0.0.1:8080/integrations/bitrix24/drain
@@ -168,8 +171,8 @@ python3 -m pip install -r requirements.txt
 bash scripts/verify_public.sh
 ```
 
-The gate runs tests, runs the offer demo, and validates that RAG retrieval, approval, mock Bitrix24
-handoff, runtime metrics, and outbox dispatch state are present in the output.
+The gate runs tests, runs the offer demo, and validates that Google Drive import, RAG retrieval,
+approval, mock Bitrix24 handoff, runtime metrics, and outbox dispatch state are present in the output.
 
 ## Live Deployment Smoke
 
@@ -178,8 +181,9 @@ bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 ```
 
-This verifies the public Caddy/HAProxy route, browser demo HTML, `/demo/run`, approval callback
-base URL, Telegram callback webhook, runtime evidence, metrics endpoint, and dry-run integration contracts.
+This verifies the public Caddy/HAProxy route, browser demo HTML, `/demo/run`, Google Drive import,
+approval callback base URL, Telegram callback webhook, runtime evidence, metrics endpoint, and
+dry-run integration contracts.
 
 ## n8n Import
 

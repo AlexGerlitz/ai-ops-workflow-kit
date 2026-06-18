@@ -13,6 +13,7 @@ from app.chunking import chunk_text
 from app.demo_payloads import DEMO_SALES_PLAYBOOK, DEMO_TRANSCRIPT
 from app.embeddings import HashEmbeddingProvider
 from app.integrations import (
+    GOOGLE_DRIVE_ADAPTER_KEY,
     dispatch_bitrix24_event,
     dispatch_telegram_approval,
     integration_runtime,
@@ -27,6 +28,8 @@ from app.schemas import (
     ApprovalStatus,
     DocumentIn,
     DocumentOut,
+    GoogleDriveImportIn,
+    GoogleDriveImportOut,
     IntegrationDrainOut,
     IntegrationDispatchStatus,
     IntegrationDispatchOut,
@@ -145,10 +148,13 @@ def integration_workers_runtime() -> dict[str, object]:
 @app.post("/demo/run", response_model=OfferDemoRunOut)
 async def run_demo_workflow() -> OfferDemoRunOut:
     runtime_stats.increment("demo_runs_total")
-    document = ingest_document(
-        DocumentIn(
-            source="drive://demo/sales-playbook",
+    drive_import = import_google_drive_document(
+        GoogleDriveImportIn(
+            file_id="demo-sales-playbook",
+            name="Sales playbook",
+            mime_type="application/vnd.google-apps.document",
             text=DEMO_SALES_PLAYBOOK,
+            web_url="https://drive.google.com/file/d/demo-sales-playbook",
             metadata={"team": "sales", "public_demo": True},
         )
     )
@@ -176,7 +182,8 @@ async def run_demo_workflow() -> OfferDemoRunOut:
     return OfferDemoRunOut(
         runtime=health(),
         integrations=get_integration_runtime(),
-        ingestion=document,
+        ingestion=DocumentOut(source=drive_import.source, chunks=drive_import.chunks),
+        google_drive_import=drive_import,
         rag_context_sources=[
             {"source": context.source, "score": context.score}
             for context in rag.contexts
@@ -241,6 +248,39 @@ def ingest_document(document: DocumentIn) -> DocumentOut:
     store.add_chunks(chunks)
     runtime_stats.increment("documents_ingested_total")
     return DocumentOut(source=document.source, chunks=len(chunks))
+
+
+@app.post("/integrations/google-drive/import", response_model=GoogleDriveImportOut)
+def import_google_drive_document(payload: GoogleDriveImportIn) -> GoogleDriveImportOut:
+    source = f"gdrive://{payload.file_id}"
+    metadata = {
+        **payload.metadata,
+        "adapter": GOOGLE_DRIVE_ADAPTER_KEY,
+        "file_id": payload.file_id,
+        "name": payload.name,
+        "mime_type": payload.mime_type,
+    }
+    if payload.web_url:
+        metadata["web_url"] = payload.web_url
+    document = ingest_document(
+        DocumentIn(
+            source=source,
+            text=payload.text,
+            metadata=metadata,
+        )
+    )
+    runtime_stats.increment("google_drive_imports_total")
+    return GoogleDriveImportOut(
+        adapter_key=GOOGLE_DRIVE_ADAPTER_KEY,
+        operation="import_exported_text",
+        dry_run=settings.google_drive_dry_run,
+        source=document.source,
+        file_id=payload.file_id,
+        name=payload.name,
+        mime_type=payload.mime_type,
+        chunks=document.chunks,
+        metadata=metadata,
+    )
 
 
 @app.post("/query", response_model=QueryOut)

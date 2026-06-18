@@ -10,7 +10,8 @@ generic AI claims.
 | --- | --- | --- | --- |
 | AI workflow orchestration | `POST /webhooks/n8n/call-transcript`, `infra/n8n/call-transcript-approval.json`, `docs/N8N_APPROVAL_FLOW.md` | Open the n8n workflow JSON, then run `bash scripts/verify_public.sh`. | n8n owns routing and notifications; the backend owns state, scoring, retrieval, approvals, and integration contracts. |
 | LLM API integration boundary | `app/llm.py`, `app/sales_workflow.py`, `docs/OFFER_DEMO.md` | Run `python3 scripts/run_offer_demo.py` and inspect the structured call analysis output. | The demo uses deterministic local behavior for public review; the provider boundary is isolated so OpenAI, Claude, Gemini, or another model can be connected without moving workflow state into prompts. |
-| RAG and embeddings | `app/chunking.py`, `app/embeddings.py`, `app/store.py`, `POST /documents`, `POST /query` | Run `bash scripts/verify_public.sh` and inspect the demo output for `rag.sources`. | Deterministic local embeddings keep tests repeatable; PostgreSQL/pgvector is the durable runtime path. |
+| RAG and embeddings | `app/chunking.py`, `app/embeddings.py`, `app/store.py`, `POST /documents`, `POST /query` | Run `bash scripts/verify_public.sh` and inspect the demo output for `rag_context_sources`. | Deterministic local embeddings keep tests repeatable; PostgreSQL/pgvector is the durable runtime path. |
+| Google Drive API / document intake | `POST /integrations/google-drive/import`, `GoogleDriveImportIn`, `app/integrations.py`, `docs/INTEGRATION_SKELETON.md` | Run `bash scripts/verify_public.sh` and inspect `google_drive_import` in the offer demo output. | Public mode accepts exported Drive document text without credentials; production mode connects OAuth/service-account export in n8n or a connector and sends normalized text to the backend. |
 | PostgreSQL, Supabase, pgvector readiness | `docker-compose.yml`, `app/store.py`, `docs/ARCHITECTURE.md`, `docs/OPERATIONS.md` | Run `docker compose up --build`, then open `/runtime`, `/documents`, and `/query`. | The public demo can run in memory for inspectability; the storage boundary is designed around PostgreSQL with pgvector. |
 | Transcript ingestion and call analysis | `demo/call-transcript.json`, `app/sales_workflow.py`, `app/scoring.py`, `POST /webhooks/n8n/call-transcript` | Run the offer demo or send the sample transcript to the n8n webhook endpoint. | Transcript analysis produces structured fields, score, risk level, next action, and approval context instead of free-form text only. |
 | AI scoring and content routing | `app/scoring.py`, `app/sales_workflow.py`, approval payload context | Run `python3 scripts/run_offer_demo.py` and inspect `call_analysis.score`, `risk_level`, and `next_action`. | Scoring is explicit and testable; it can later be replaced or calibrated without changing the approval and CRM contracts. |
@@ -34,7 +35,7 @@ curl -fsS https://saleops.duckdns.org/runtime
 Expected local gate result:
 
 ```text
-19 passed
+20 passed
 public verification passed
 ```
 
@@ -43,6 +44,7 @@ Expected live smoke signals:
 ```text
 live demo smoke passed
 score=100
+google_drive=gdrive://demo-sales-playbook
 approval=approved
 telegram_callback=rejected
 bitrix24_drain=<positive dry-run drain count>
@@ -50,8 +52,9 @@ bitrix24_drain=<positive dry-run drain count>
 
 ## Known Public Demo Boundaries
 
-- Telegram and Bitrix24 are dry-run by default so reviewers can inspect payloads without credentials.
-- The public demo does not store real customer calls, CRM data, or bot tokens.
+- Google Drive, Telegram, and Bitrix24 are dry-run by default so reviewers can inspect contracts without credentials.
+- Google Drive import is dry-run/public-safe: the demo accepts exported text and metadata, not live Drive credentials.
+- The public demo does not store real customer calls, CRM data, bot tokens, or Google credentials.
 - The Bitrix24 outbox worker is visible but disabled in the public dry-run deployment.
 - Local deterministic embeddings are intentional for repeatable review; PostgreSQL/pgvector is the durable storage path.
 - Production integrations require server-side secrets, webhook verification, rollout notes, and real CRM field mapping.
@@ -59,5 +62,5 @@ bitrix24_drain=<positive dry-run drain count>
 ## What A Reviewer Should Conclude
 
 This is not a ChatGPT wrapper. The repository demonstrates an AI workflow system with backend-owned
-state, RAG boundaries, approval transitions, Telegram callback handling, CRM outbox semantics, runtime
-evidence, Docker deployment, CI, and public smoke checks.
+state, Google Drive document intake, RAG boundaries, approval transitions, Telegram callback handling,
+CRM outbox semantics, runtime evidence, Docker deployment, CI, and public smoke checks.

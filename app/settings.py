@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     telegram_approval_chat_id: str | None = None
     telegram_webhook_secret: str | None = None
     telegram_dry_run: bool = True
+    google_drive_credentials_json: str | None = None
+    google_drive_dry_run: bool = True
     bitrix24_webhook_url: str | None = None
     bitrix24_dry_run: bool = True
     integration_max_attempts: int = 3

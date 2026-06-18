@@ -37,9 +37,11 @@ def test_public_demo_page_is_available() -> None:
     assert response.status_code == 200
     assert "AI Sales Ops Control Tower" in response.text
     assert "Run demo workflow" in response.text
+    assert "Google Drive import" in response.text
     assert "Telegram callback approval" in response.text
     assert "Outbox drain" in response.text
     assert "Worker state" in response.text
+    assert "/integrations/google-drive/import" in response.text
     assert "/integrations/bitrix24/drain" in response.text
 
 
@@ -50,6 +52,8 @@ def test_integration_runtime_reports_dry_run_capabilities() -> None:
     body = response.json()
     capabilities = {item["adapter_key"]: item for item in body["capabilities"]}
     assert capabilities["telegram.approval"]["dry_run"] is True
+    assert capabilities["google_drive"]["dry_run"] is True
+    assert capabilities["google_drive"]["configured"] is False
     assert capabilities["bitrix24"]["dry_run"] is True
     assert capabilities["telegram.approval"]["webhook_secret_configured"] is False
 
@@ -61,6 +65,9 @@ def test_public_demo_run_proves_workflow_contract() -> None:
     body = response.json()
     assert body["runtime"]["ok"] is True
     assert body["ingestion"]["chunks"] >= 1
+    assert body["google_drive_import"]["adapter_key"] == "google_drive"
+    assert body["google_drive_import"]["source"] == "gdrive://demo-sales-playbook"
+    assert body["google_drive_import"]["chunks"] == body["ingestion"]["chunks"]
     assert body["rag_context_sources"]
     assert body["call_analysis"]["score"] >= 80
     assert body["approval"]["status"] == "approved"
@@ -113,6 +120,42 @@ def test_ingest_query_and_approval_flow() -> None:
         )
         assert approved.status_code == 200
         assert approved.json()["status"] == "approved"
+
+
+def test_google_drive_import_contract_feeds_rag_store() -> None:
+    with TestClient(app) as client:
+        drive_import = client.post(
+            "/integrations/google-drive/import",
+            json={
+                "file_id": "playbook-google-drive-1",
+                "name": "Google Drive Sales Playbook",
+                "mime_type": "application/vnd.google-apps.document",
+                "text": "Google Drive playbooks should be exported, normalized, chunked, and queried through RAG.",
+                "web_url": "https://drive.google.com/file/d/playbook-google-drive-1",
+                "metadata": {"team": "sales", "folder": "knowledge-base"},
+            },
+        )
+        assert drive_import.status_code == 200
+        imported = drive_import.json()
+        assert imported["adapter_key"] == "google_drive"
+        assert imported["operation"] == "import_exported_text"
+        assert imported["dry_run"] is True
+        assert imported["source"] == "gdrive://playbook-google-drive-1"
+        assert imported["metadata"]["adapter"] == "google_drive"
+        assert imported["chunks"] >= 1
+
+        query = client.post(
+            "/query",
+            json={"question": "What should Google Drive playbooks do?", "top_k": 10},
+        )
+        assert query.status_code == 200
+        assert any(
+            context["source"] == "gdrive://playbook-google-drive-1"
+            for context in query.json()["contexts"]
+        )
+
+        runtime = client.get("/runtime").json()
+        assert runtime["counters"]["google_drive_imports_total"] >= 1
 
 
 def test_telegram_approval_notification_dry_run_contract() -> None:

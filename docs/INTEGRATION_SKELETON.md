@@ -1,7 +1,7 @@
 # Integration Skeleton
 
-This skeleton prepares the project for a real Telegram approval bot and Bitrix24 CRM handoff without
-committing credentials or making public demo runs depend on external accounts.
+This skeleton prepares the project for real Google Drive intake, Telegram approval, and Bitrix24 CRM
+handoff without committing credentials or making public demo runs depend on external accounts.
 
 ## Runtime URL
 
@@ -26,6 +26,8 @@ TELEGRAM_BOT_TOKEN=
 TELEGRAM_APPROVAL_CHAT_ID=
 TELEGRAM_WEBHOOK_SECRET=
 TELEGRAM_DRY_RUN=true
+GOOGLE_DRIVE_CREDENTIALS_JSON=
+GOOGLE_DRIVE_DRY_RUN=true
 BITRIX24_WEBHOOK_URL=
 BITRIX24_DRY_RUN=true
 INTEGRATION_MAX_ATTEMPTS=3
@@ -35,8 +37,8 @@ INTEGRATION_WORKER_INTERVAL_SECONDS=60
 INTEGRATION_WORKER_BATCH_SIZE=10
 ```
 
-The default is dry-run. In dry-run mode the API returns the exact outgoing payload but does not call
-Telegram or Bitrix24.
+The default is dry-run. In dry-run mode the API returns the exact contract shape but does not call
+Google Drive, Telegram, or Bitrix24.
 
 ## Capability Check
 
@@ -45,6 +47,39 @@ curl http://127.0.0.1:8080/integrations/runtime
 ```
 
 The response shows whether each adapter is configured and whether dry-run is enabled.
+
+## Google Drive Intake Skeleton
+
+Endpoint:
+
+```text
+POST /integrations/google-drive/import
+```
+
+Dry-run request shape:
+
+```json
+{
+  "file_id": "drive-file-id",
+  "name": "Sales playbook",
+  "mime_type": "application/vnd.google-apps.document",
+  "text": "Exported document text...",
+  "web_url": "https://drive.google.com/file/d/drive-file-id",
+  "metadata": { "team": "sales" }
+}
+```
+
+The backend stores the document as `gdrive://{file_id}` and keeps Drive metadata with each chunk.
+This lets n8n, a Google Drive node, or a dedicated connector own OAuth/export while the backend owns
+normalization, chunking, embeddings, retrieval, and downstream workflow state.
+
+Production behavior after a connector is attached:
+
+1. Google Drive change, schedule, or manual approval selects a document;
+2. the connector exports Google Docs or downloads text-compatible files;
+3. the connector sends normalized text and metadata to `POST /integrations/google-drive/import`;
+4. the backend stores chunks in the same RAG path used by `/documents`;
+5. transcripts and queries retrieve Drive-backed context without knowing connector details.
 
 ## Telegram Approval Skeleton
 
@@ -162,7 +197,7 @@ the approval handoff path returns the same event instead of creating duplicate C
 
 - Public demo remains reproducible without secrets.
 - External calls are explicit and inspectable.
-- Telegram and Bitrix24 credentials stay in `.env` or server secret storage.
+- Google Drive, Telegram, and Bitrix24 credentials stay in `.env` or server secret storage.
 - Approval and CRM mutation remain separate auditable steps.
 - Integration failures are visible as state, not hidden in logs.
 - Retry timing is explicit through `next_retry_at`, so a worker can safely skip events that are not due.

@@ -7,6 +7,7 @@ For a vacancy-style checklist with verification commands and production boundari
 | Requirement | Evidence |
 | --- | --- |
 | AI workflow orchestration | `app/main.py`, `infra/n8n/call-transcript-approval.json`, `docs/N8N_APPROVAL_FLOW.md` |
+| Google Drive intake | `POST /integrations/google-drive/import`, `GoogleDriveImportIn`, `docs/INTEGRATION_SKELETON.md` |
 | RAG and embeddings | `app/chunking.py`, `app/embeddings.py`, `app/store.py`, `POST /documents`, `POST /query` |
 | pgvector-ready persistence | `app/store.py`, `docker-compose.yml`, `docs/ARCHITECTURE.md` |
 | Transcript analysis and scoring | `app/scoring.py`, `app/sales_workflow.py`, `demo/call-transcript.json` |
@@ -23,6 +24,7 @@ For a vacancy-style checklist with verification commands and production boundari
 - n8n is treated as workflow orchestration, not as the place where core state lives.
 - The backend owns retrieval, scoring, approvals, and integration contracts.
 - External integrations are dry-run by default, so a public reviewer can inspect payloads without secrets.
+- Google Drive import is normalized before RAG storage, so connector code does not own retrieval logic.
 - Local embeddings are deterministic, so tests and demo output are repeatable without API keys.
 - CRM handoff is queued only after an explicit approval transition.
 - Bitrix24 handoff is modeled as an outbox event with idempotency keys, attempt counters, `next_retry_at`, retry-safe drain, and `dead_letter` state.

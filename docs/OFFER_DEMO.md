@@ -4,7 +4,7 @@ This is the fast reviewer path for the project.
 
 The demo proves an end-to-end AI workflow automation scenario:
 
-1. ingest a sales playbook into the RAG store;
+1. import an exported Google Drive sales playbook into the RAG store;
 2. query the knowledge base with source context;
 3. accept a call transcript through the n8n-facing webhook;
 4. score the lead and build a structured call analysis;
@@ -59,8 +59,9 @@ The output contains these sections:
 | Section | What it proves |
 | --- | --- |
 | `runtime` | API booted and reported the active storage mode. |
-| `integrations` | Telegram and Bitrix24 adapter readiness and public callback base URL. |
+| `integrations` | Google Drive, Telegram, and Bitrix24 adapter readiness and public callback base URL. |
 | `ingestion` | Sales playbook was chunked and stored. |
+| `google_drive_import` | Exported Google Drive document text was normalized and imported into the RAG store. |
 | `rag_context_sources` | Retrieval returned explicit source context. |
 | `call_analysis` | Transcript was scored and converted into structured business action. |
 | `approval` | Human-in-the-loop state transition happened before CRM handoff. |
@@ -72,6 +73,11 @@ Example high-level result:
 
 ```json
 {
+  "google_drive_import": {
+    "adapter_key": "google_drive",
+    "source": "gdrive://demo-sales-playbook",
+    "chunks": 1
+  },
   "call_analysis": {
     "score": 100,
     "risk_level": "medium",
@@ -105,14 +111,16 @@ Example high-level result:
 
 ## Business Scenario
 
-A sales manager finishes a call. The transcript arrives from telephony or n8n.
-The backend searches the playbook, extracts qualification signals, identifies
-objections, drafts a follow-up, and creates an approval item. Only after a human
-reviewer approves the item does the backend queue the CRM handoff.
+A sales manager keeps the playbook in Google Drive and finishes a call. n8n or another connector
+exports the document text and sends it to the backend. The transcript arrives from telephony or n8n.
+The backend searches the playbook, extracts qualification signals, identifies objections, drafts a
+follow-up, and creates an approval item. Only after a human reviewer approves the item does the
+backend queue the CRM handoff.
 
 That maps directly to real AI automation work:
 
 - call analysis;
+- Google Drive knowledge intake;
 - RAG-backed generation;
 - lead scoring;
 - Telegram-style approval;
@@ -126,6 +134,7 @@ That maps directly to real AI automation work:
 
 ## Extension Points
 
+- Connect Google Drive OAuth/service-account export before the import endpoint.
 - Disable dry-run after adding Telegram Bot API and Bitrix24 webhook credentials.
 - Replace deterministic local embeddings with OpenAI or another embedding API.
 - Add Deepgram/Whisper before the transcript webhook.

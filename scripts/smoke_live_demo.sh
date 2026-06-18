@@ -10,6 +10,7 @@ fi
 
 home_payload="$(curl -fsS "$BASE_URL/")"
 grep -q "AI Sales Ops Control Tower" <<<"$home_payload"
+grep -q "Google Drive import" <<<"$home_payload"
 grep -q "Telegram callback approval" <<<"$home_payload"
 grep -q "Outbox drain" <<<"$home_payload"
 grep -q "Worker state" <<<"$home_payload"
@@ -66,6 +67,8 @@ assert runtime_payload["workers"]["bitrix24_outbox"]["enabled"] is False
 assert runtime_payload["workers"]["bitrix24_outbox"]["active"] is False
 assert "aiops_runtime_info" in metrics_payload
 assert payload["runtime"]["ok"] is True
+assert payload["google_drive_import"]["adapter_key"] == "google_drive"
+assert payload["google_drive_import"]["source"].startswith("gdrive://")
 assert payload["call_analysis"]["score"] >= 80
 assert payload["approval"]["status"] == "approved"
 assert payload["telegram_approval"]["status"] == "dry_run"
@@ -94,6 +97,7 @@ print(f"callback_base_url={expected_callback_base_url}")
 print(f"version={runtime_payload['version']}")
 print(f"git_sha={runtime_payload['git_sha']}")
 print(f"score={payload['call_analysis']['score']}")
+print(f"google_drive={payload['google_drive_import']['source']}")
 print(f"approval={payload['approval']['status']}")
 print(f"telegram_callback={telegram_callback_response['approval_status']}")
 print(f"telegram={payload['telegram_approval']['status']}")

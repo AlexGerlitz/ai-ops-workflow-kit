@@ -17,6 +17,9 @@ payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 assert payload["runtime"]["ok"] is True
 assert payload["runtime"]["storage"] == "memory"
 assert payload["ingestion"]["chunks"] >= 1
+assert payload["google_drive_import"]["adapter_key"] == "google_drive"
+assert payload["google_drive_import"]["source"].startswith("gdrive://")
+assert payload["google_drive_import"]["chunks"] == payload["ingestion"]["chunks"]
 assert payload["rag_context_sources"], "RAG retrieval returned no sources"
 assert payload["call_analysis"]["score"] >= 80
 assert payload["approval"]["status"] == "approved"
@@ -73,6 +76,27 @@ with TestClient(app) as client:
     )
     assert telegram_callback.status_code == 200
     assert telegram_callback.json()["approval_status"] == "rejected"
+    drive_import = client.post(
+        "/integrations/google-drive/import",
+        json={
+            "file_id": "verify-public-playbook",
+            "name": "Verification playbook",
+            "mime_type": "application/vnd.google-apps.document",
+            "text": "Google Drive imports should feed the same RAG store as direct document ingestion.",
+            "metadata": {"source": "verify_public"},
+        },
+    )
+    assert drive_import.status_code == 200
+    assert drive_import.json()["source"] == "gdrive://verify-public-playbook"
+    drive_query = client.post(
+        "/query",
+        json={"question": "What should Google Drive imports feed?", "top_k": 10},
+    )
+    assert drive_query.status_code == 200
+    assert any(
+        context["source"] == "gdrive://verify-public-playbook"
+        for context in drive_query.json()["contexts"]
+    )
     runtime = client.get("/runtime").json()
     metrics = client.get("/metrics").text
 
@@ -86,6 +110,7 @@ assert "integration_events_drained_total" in runtime["counters"]
 assert "integration_worker_ticks_total" in runtime["counters"]
 assert "integration_worker_errors_total" in runtime["counters"]
 assert "integration_retries_scheduled_total" in runtime["counters"]
+assert runtime["counters"]["google_drive_imports_total"] >= 1
 assert runtime["workers"]["bitrix24_outbox"]["enabled"] is False
 assert runtime["workers"]["bitrix24_outbox"]["active"] is False
 assert "aiops_runtime_info" in metrics

@@ -16,6 +16,7 @@ from app.settings import Settings
 
 
 TELEGRAM_ADAPTER_KEY = "telegram.approval"
+GOOGLE_DRIVE_ADAPTER_KEY = "google_drive"
 BITRIX24_ADAPTER_KEY = "bitrix24"
 
 
@@ -32,6 +33,16 @@ def integration_runtime(config: Settings) -> IntegrationRuntimeOut:
                 notes=(
                     "Sends approval cards to Telegram. Dry-run returns the exact outgoing payload. "
                     "TELEGRAM_WEBHOOK_SECRET optionally verifies callback webhooks."
+                ),
+            ),
+            IntegrationCapabilityOut(
+                adapter_key=GOOGLE_DRIVE_ADAPTER_KEY,
+                configured=bool(config.google_drive_credentials_json),
+                dry_run=config.google_drive_dry_run,
+                required_env=["GOOGLE_DRIVE_CREDENTIALS_JSON"],
+                notes=(
+                    "Imports exported Google Drive document text into the RAG pipeline. "
+                    "Dry-run/public mode accepts normalized text from n8n or a connector without storing credentials."
                 ),
             ),
             IntegrationCapabilityOut(

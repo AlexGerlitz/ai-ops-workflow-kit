@@ -7,20 +7,22 @@ AI Ops Workflow Kit separates orchestration from durable application logic.
 | Layer | Responsibility |
 | --- | --- |
 | n8n | Webhooks, connector routing, scheduling, Telegram notifications, and external workflow edges. |
-| FastAPI service | RAG ingestion/query, transcript scoring, approval state, integration contracts. |
+| FastAPI service | Google Drive import, RAG ingestion/query, transcript scoring, approval state, integration contracts. |
 | PostgreSQL + pgvector | Durable document chunks, metadata, vector search, approval records. |
 | LLM adapter | Optional generation layer with a deterministic fallback for local operation. |
 | Integration event store | Idempotent outbox boundary for CRM handoff after human approval. |
-| Integration adapters | Dry-run or real Telegram approval and Bitrix24 dispatch clients. |
+| Integration adapters | Dry-run or real Google Drive import, Telegram approval, and Bitrix24 dispatch clients. |
 
 ## Core Flows
 
 ### Document Ingestion
 
 1. A workflow receives a Google Drive, CRM, or internal content event.
-2. n8n sends normalized text and metadata to `POST /documents`.
-3. The API chunks the text, computes embeddings, and persists chunks.
-4. Retrieval quality can be tested independently from LLM generation.
+2. For Drive-backed knowledge, n8n or a connector exports text and sends it to
+   `POST /integrations/google-drive/import`.
+3. Generic content can still use `POST /documents`.
+4. The API chunks the text, computes embeddings, and persists chunks with source metadata.
+5. Retrieval quality can be tested independently from LLM generation.
 
 ### RAG Query
 

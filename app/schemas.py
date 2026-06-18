@@ -17,6 +17,27 @@ class DocumentOut(BaseModel):
     chunks: int
 
 
+class GoogleDriveImportIn(BaseModel):
+    file_id: str = Field(min_length=1, max_length=160)
+    name: str = Field(min_length=1, max_length=300)
+    mime_type: str = Field(default="text/plain", min_length=1, max_length=160)
+    text: str = Field(min_length=1)
+    web_url: str | None = Field(default=None, max_length=500)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class GoogleDriveImportOut(BaseModel):
+    adapter_key: str
+    operation: str
+    dry_run: bool
+    source: str
+    file_id: str
+    name: str
+    mime_type: str
+    chunks: int
+    metadata: dict[str, Any]
+
+
 class QueryIn(BaseModel):
     question: str = Field(min_length=1)
     top_k: int = Field(default=5, ge=1, le=20)
@@ -202,6 +223,7 @@ class OfferDemoRunOut(BaseModel):
     runtime: dict[str, Any]
     integrations: IntegrationRuntimeOut
     ingestion: DocumentOut
+    google_drive_import: GoogleDriveImportOut
     rag_context_sources: list[dict[str, Any]]
     call_analysis: dict[str, Any]
     approval: dict[str, Any]

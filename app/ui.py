@@ -118,7 +118,7 @@ DEMO_PAGE_HTML = """
     <header>
       <div>
         <h1>AI Sales Ops Control Tower</h1>
-        <p class="subtitle">RAG-backed transcript analysis, Telegram callback approval, idempotent Bitrix24 outbox drain, and worker-visible CRM handoff in one reproducible workflow.</p>
+        <p class="subtitle">Google Drive import, RAG-backed transcript analysis, Telegram callback approval, idempotent Bitrix24 outbox drain, and worker-visible CRM handoff in one reproducible workflow.</p>
       </div>
       <button id="run">Run demo workflow</button>
     </header>
@@ -157,6 +157,7 @@ DEMO_PAGE_HTML = """
 
       <div class="panel span-7">
         <div class="row">
+          <span class="pill">Google Drive</span>
           <span class="pill">Transcript</span>
           <span class="pill">RAG</span>
           <span class="pill">Approval</span>
@@ -165,7 +166,7 @@ DEMO_PAGE_HTML = """
           <span class="pill">Worker state</span>
         </div>
         <div class="stack" style="margin-top: 16px;">
-          <div class="step"><div class="num">1</div><div><b>Ingest playbook</b><div class="small" id="step1">Not run yet</div></div></div>
+          <div class="step" data-endpoint="/integrations/google-drive/import"><div class="num">1</div><div><b>Import Google Drive playbook</b><div class="small" id="step1">Not run yet</div></div></div>
           <div class="step"><div class="num">2</div><div><b>Analyze call</b><div class="small" id="step2">Not run yet</div></div></div>
           <div class="step"><div class="num">3</div><div><b>Build approval payload</b><div class="small" id="step3">Not run yet</div></div></div>
           <div class="step"><div class="num">4</div><div><b>Queue CRM handoff</b><div class="small" id="step4">Not run yet</div></div></div>
@@ -243,7 +244,7 @@ DEMO_PAGE_HTML = """
         setText("reviewer", data.approval.reviewer);
         setText("crm", data.crm_handoff.status);
         setText("crm-sub", `${data.bitrix24_dispatch.method} / ${data.bitrix24_dispatch.status}`);
-        setText("step1", `${data.ingestion.chunks} chunk(s), ${data.rag_context_sources.length} source(s) retrieved`);
+        setText("step1", `${data.google_drive_import.source}: ${data.ingestion.chunks} chunk(s), ${data.rag_context_sources.length} source(s) retrieved`);
         setText("step2", `${data.call_analysis.next_action}`);
         setText("step3", `${data.telegram_approval.adapter_key} ${data.telegram_approval.status}`);
         setText("step4", `${data.crm_handoff.operation} -> ${data.bitrix24_dispatch.status}`);
