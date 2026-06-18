@@ -33,6 +33,18 @@ BITRIX24_WEBHOOK_URL=... \
 python3 scripts/credentialed_sandbox_preflight.py --require-target bitrix24
 ```
 
+GitHub Actions owner-run mode:
+
+1. Add repository secrets `TELEGRAM_BOT_TOKEN`, `TELEGRAM_APPROVAL_CHAT_ID`,
+   `TELEGRAM_WEBHOOK_SECRET`, and/or `BITRIX24_WEBHOOK_URL`.
+2. Open **Actions -> Credentialed Sandbox Preflight**.
+3. Run the workflow manually with target `telegram`, `bitrix24`, or `all`.
+4. Download the `credentialed-sandbox-preflight-*` artifact and inspect the sanitized JSON/text.
+
+The workflow uses the same script, keeps Telegram and Bitrix24 dry-run flags enabled, checks that
+the sanitized artifacts do not contain configured secret values, and uploads only the redacted
+evidence files.
+
 Generated evidence:
 
 | Artifact | Purpose |
@@ -40,6 +52,7 @@ Generated evidence:
 | [`docs/evidence/credentialed-sandbox-preflight.sanitized.json`](./evidence/credentialed-sandbox-preflight.sanitized.json) | Machine-readable credential boundary result. |
 | [`docs/evidence/credentialed-sandbox-preflight.txt`](./evidence/credentialed-sandbox-preflight.txt) | Human-readable summary of the same preflight. |
 | [`scripts/credentialed_sandbox_preflight.py`](../scripts/credentialed_sandbox_preflight.py) | Recreates the preflight. |
+| [`.github/workflows/credentialed-sandbox-preflight.yml`](../.github/workflows/credentialed-sandbox-preflight.yml) | Manual owner-run workflow that produces sanitized private sandbox evidence from repository secrets. |
 
 ## What It Checks
 
@@ -59,6 +72,8 @@ Generated evidence:
   account at a time without weakening the stricter `--require-credentials` mode.
 - Public CI runs this in skipped/no-secret mode so the evidence proves the handoff path without
   depending on private accounts.
+- The manual GitHub Actions workflow runs only when triggered by the owner and uploads sanitized
+  artifacts instead of committing private credential evidence.
 
 Use the production readiness drill for local failure-mode behavior and this preflight when a
 credentialed sandbox is available.

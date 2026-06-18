@@ -265,6 +265,11 @@ This writes `docs/evidence/credentialed-sandbox-preflight.sanitized.json` and
 checks; with partial or full sandbox credentials it checks Telegram `getMe`, Telegram
 `getWebhookInfo`, and Bitrix24 `profile` without printing tokens or writing CRM records.
 
+For owner-run sandbox evidence in GitHub Actions, add the relevant repository secrets, open
+**Actions -> Credentialed Sandbox Preflight**, choose `telegram`, `bitrix24`, or `all`, and download
+the uploaded sanitized artifact. The workflow runs the same read-only script with dry-run flags
+enabled and checks that configured secret values are not present in the generated evidence files.
+
 ## n8n Import
 
 Import one of these workflows into n8n, then set the API URL in the HTTP Request nodes:

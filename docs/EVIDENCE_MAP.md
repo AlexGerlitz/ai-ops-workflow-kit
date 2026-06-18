@@ -23,7 +23,7 @@ For current CI, live smoke, local gate, and public boundary status, read
 | Technical reviewer snapshot | `scripts/reviewer_snapshot.py`, `docs/TECHNICAL_REVIEW_PACKET.md`, `GET /runtime`, `GET /llm/runtime`, `POST /demo/run` |
 | Reviewer evidence pack | `docs/REVIEWER_EVIDENCE_PACK.md`, `docs/evidence/reviewer-snapshot.sanitized.json`, `scripts/capture_reviewer_evidence.py` |
 | Failure-mode evidence | `docs/PRODUCTION_READINESS_DRILL.md`, `docs/evidence/production-readiness-drill.sanitized.json`, `scripts/production_readiness_drill.py` |
-| Credentialed sandbox boundary | `docs/CREDENTIALED_SANDBOX_PREFLIGHT.md`, `docs/evidence/credentialed-sandbox-preflight.sanitized.json`, `scripts/credentialed_sandbox_preflight.py` |
+| Credentialed sandbox boundary | `docs/CREDENTIALED_SANDBOX_PREFLIGHT.md`, `docs/evidence/credentialed-sandbox-preflight.sanitized.json`, `scripts/credentialed_sandbox_preflight.py`, `.github/workflows/credentialed-sandbox-preflight.yml` |
 | Current public proof status | `docs/PUBLIC_PROOF_STATUS.md`, latest CI, live smoke output, public gate output, profile Pages route |
 | Public proof | `https://saleops.duckdns.org/`, `scripts/reviewer_snapshot.py`, `scripts/smoke_live_demo.sh` |
 | Verification discipline | `scripts/verify_public.sh`, `.github/workflows/ci.yml`, `tests/` |
@@ -44,6 +44,8 @@ For current CI, live smoke, local gate, and public boundary status, read
   dead-letter, drain scheduling, idempotency, and worker guard behavior locally or in CI.
 - Credentialed sandbox preflight uses read-only Telegram and Bitrix24 calls when secrets exist, and
   records skipped/no-secret evidence in public mode without printing tokens.
+- The manual credentialed preflight workflow lets the owner generate sanitized private sandbox
+  artifacts from repository secrets without committing credentials.
 
 ## Review Order
 
@@ -54,9 +56,10 @@ For current CI, live smoke, local gate, and public boundary status, read
 5. Run `python3 scripts/reviewer_snapshot.py`.
 6. Run `python3 scripts/production_readiness_drill.py`.
 7. Run `python3 scripts/credentialed_sandbox_preflight.py`.
-8. Run `bash scripts/smoke_live_demo.sh`.
-9. Open `https://saleops.duckdns.org/llm/runtime`.
-10. Run `bash scripts/verify_public.sh`.
-11. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-12. Read `docs/ARCHITECTURE.md`.
-13. Read `docs/INTEGRATION_SKELETON.md`.
+8. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
+9. Run `bash scripts/smoke_live_demo.sh`.
+10. Open `https://saleops.duckdns.org/llm/runtime`.
+11. Run `bash scripts/verify_public.sh`.
+12. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+13. Read `docs/ARCHITECTURE.md`.
+14. Read `docs/INTEGRATION_SKELETON.md`.

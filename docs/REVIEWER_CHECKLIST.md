@@ -95,6 +95,11 @@ python3 scripts/credentialed_sandbox_preflight.py --require-target bitrix24
 This performs read-only Telegram and Bitrix24 checks without printing tokens or writing CRM records.
 Read: [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
 
+When repository secrets are configured, the owner can also run the manual
+`Credentialed Sandbox Preflight` GitHub Actions workflow with target `telegram`, `bitrix24`, or
+`all`. The workflow uploads sanitized evidence artifacts and runs a secret leakage check before
+finishing.
+
 ## 6. Inspect The Offer Demo
 
 ```bash
@@ -162,6 +167,7 @@ Then open:
 | [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live evidence and regeneration command. |
 | [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md) | Failure-mode evidence for auth, retry/dead-letter, drain scheduling, idempotency, and worker guard. |
 | [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md) | Read-only real-credential boundary for Telegram and Bitrix24 sandbox checks. |
+| [Owner-run Sandbox Workflow](../.github/workflows/credentialed-sandbox-preflight.yml) | Manual GitHub Actions path for sanitized Telegram/Bitrix24 sandbox evidence from repository secrets. |
 | [Evidence Map](./EVIDENCE_MAP.md) | Requirement-by-requirement proof map for AI automation roles. |
 | [Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md) | Vacancy-style AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
 | [Live Demo](./LIVE_DEMO.md) | Public deployment URL and public smoke checks. |

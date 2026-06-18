@@ -42,6 +42,8 @@ For deterministic failure-mode evidence, read
 [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
 For the real-credential boundary, read
 [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
+For private sandbox evidence from repository secrets, use the manual
+`Credentialed Sandbox Preflight` GitHub Actions workflow.
 
 ## What The Snapshot Proves
 
@@ -59,6 +61,7 @@ For the real-credential boundary, read
 | Evidence is reproducible | `scripts/capture_reviewer_evidence.py` writes a sanitized live snapshot to `docs/evidence/`. |
 | Failure behavior is testable | `scripts/production_readiness_drill.py` proves webhook auth, retry/dead-letter, retry scheduling, idempotency, and worker dry-run guard. |
 | Credential handoff is safe | `scripts/credentialed_sandbox_preflight.py` validates Telegram/Bitrix24 credentials through read-only calls and sanitized output. |
+| Private sandbox evidence is bounded | `.github/workflows/credentialed-sandbox-preflight.yml` runs the same read-only preflight from repository secrets, checks sanitized artifacts for secret leakage, and uploads only redacted evidence. |
 
 ## Architecture Decisions
 

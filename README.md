@@ -25,6 +25,7 @@ prompt demo.
 | [Reviewer evidence pack](docs/REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live snapshot plus the command that regenerates it from the public deployment. |
 | [Production readiness drill](docs/PRODUCTION_READINESS_DRILL.md) | Deterministic failure-mode proof for webhook auth, retry/dead-letter, drain scheduling, idempotency, and worker dry-run guard. |
 | [Credentialed sandbox preflight](docs/CREDENTIALED_SANDBOX_PREFLIGHT.md) | Read-only Telegram/Bitrix24 credential boundary check that never prints tokens or writes CRM records. |
+| [Owner-run sandbox workflow](.github/workflows/credentialed-sandbox-preflight.yml) | Manual GitHub Actions path for running Telegram/Bitrix24 sandbox checks from repository secrets and uploading sanitized evidence. |
 | [Evidence map](docs/EVIDENCE_MAP.md) | Maps the repo to AI automation, RAG, approval flow, Bitrix24, Telegram, and self-hosting requirements. |
 | [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Maps common AI automation vacancy requirements to exact files, endpoints, verification commands, and production boundaries. |
 | [Offer demo](docs/OFFER_DEMO.md) | One-command proof of Google Drive import -> RAG -> transcript scoring -> Telegram approval -> idempotent outbox drain -> mock Bitrix CRM handoff. |
@@ -55,11 +56,12 @@ Fast evaluation path:
 5. Run `python3 scripts/production_readiness_drill.py`.
 6. Run `python3 scripts/credentialed_sandbox_preflight.py`.
 7. If sandbox credentials exist, run `python3 scripts/credentialed_sandbox_preflight.py --require-target telegram` or `--require-target bitrix24`.
-8. Run `bash scripts/smoke_live_demo.sh`.
-9. Run `bash scripts/verify_public.sh`.
-10. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-11. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
-12. Review `infra/n8n/` to see the external workflow boundary.
+8. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
+9. Run `bash scripts/smoke_live_demo.sh`.
+10. Run `bash scripts/verify_public.sh`.
+11. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+12. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
+13. Review `infra/n8n/` to see the external workflow boundary.
 
 ## System Shape
 
