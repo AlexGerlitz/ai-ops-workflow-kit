@@ -40,7 +40,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-24 passed
+27 passed
 public verification passed
 ```
 
@@ -81,6 +81,13 @@ Public mode records skipped/no-secret evidence. With Telegram and Bitrix24 sandb
 
 ```bash
 python3 scripts/credentialed_sandbox_preflight.py --require-credentials
+```
+
+If only one sandbox account is available, run a target-specific read-only check instead:
+
+```bash
+python3 scripts/credentialed_sandbox_preflight.py --require-target telegram
+python3 scripts/credentialed_sandbox_preflight.py --require-target bitrix24
 ```
 
 This performs read-only Telegram and Bitrix24 checks without printing tokens or writing CRM records.

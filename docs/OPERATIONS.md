@@ -255,12 +255,15 @@ For read-only credentialed sandbox preflight:
 
 ```bash
 python3 scripts/credentialed_sandbox_preflight.py
+python3 scripts/credentialed_sandbox_preflight.py --require-target telegram
+python3 scripts/credentialed_sandbox_preflight.py --require-target bitrix24
+python3 scripts/credentialed_sandbox_preflight.py --require-credentials
 ```
 
 This writes `docs/evidence/credentialed-sandbox-preflight.sanitized.json` and
 `docs/evidence/credentialed-sandbox-preflight.txt`. In no-secret public mode it records skipped
-checks; with Telegram and Bitrix24 sandbox credentials it checks Telegram `getMe`,
-Telegram `getWebhookInfo`, and Bitrix24 `profile` without printing tokens or writing CRM records.
+checks; with partial or full sandbox credentials it checks Telegram `getMe`, Telegram
+`getWebhookInfo`, and Bitrix24 `profile` without printing tokens or writing CRM records.
 
 ## n8n Import
 

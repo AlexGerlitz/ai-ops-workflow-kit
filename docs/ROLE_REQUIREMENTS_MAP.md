@@ -30,6 +30,8 @@ bash scripts/verify_public.sh
 python3 scripts/capture_reviewer_evidence.py
 python3 scripts/production_readiness_drill.py
 python3 scripts/credentialed_sandbox_preflight.py
+python3 scripts/credentialed_sandbox_preflight.py --require-target telegram
+python3 scripts/credentialed_sandbox_preflight.py --require-target bitrix24
 bash scripts/smoke_live_demo.sh https://saleops.duckdns.org
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 curl -fsS https://saleops.duckdns.org/runtime
@@ -39,7 +41,7 @@ curl -fsS https://saleops.duckdns.org/llm/runtime
 Expected local gate result:
 
 ```text
-24 passed
+27 passed
 public verification passed
 ```
 
@@ -76,6 +78,9 @@ Expected credentialed preflight public-mode signal:
 credentialed sandbox preflight captured
 credentialed sandbox preflight passed
 ```
+
+When only one real sandbox is connected, `--require-target telegram` or `--require-target bitrix24`
+turns that specific missing credential into a hard failure while leaving the other target optional.
 
 ## Known Public Demo Boundaries
 

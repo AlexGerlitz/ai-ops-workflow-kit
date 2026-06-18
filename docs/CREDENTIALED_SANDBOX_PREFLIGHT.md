@@ -22,6 +22,17 @@ BITRIX24_WEBHOOK_URL=... \
 python3 scripts/credentialed_sandbox_preflight.py --require-credentials
 ```
 
+Partial sandbox mode when only one external account is available:
+
+```bash
+PUBLIC_BASE_URL=https://saleops.duckdns.org \
+TELEGRAM_BOT_TOKEN=... \
+python3 scripts/credentialed_sandbox_preflight.py --require-target telegram
+
+BITRIX24_WEBHOOK_URL=... \
+python3 scripts/credentialed_sandbox_preflight.py --require-target bitrix24
+```
+
 Generated evidence:
 
 | Artifact | Purpose |
@@ -44,6 +55,8 @@ Generated evidence:
 - The Bitrix24 output keeps only the portal origin, not the full webhook URL.
 - The Telegram checks do not send messages.
 - The Bitrix24 check uses a read-only REST method and does not create or update CRM records.
+- `--require-target telegram` and `--require-target bitrix24` let reviewers validate one sandbox
+  account at a time without weakening the stricter `--require-credentials` mode.
 - Public CI runs this in skipped/no-secret mode so the evidence proves the handoff path without
   depending on private accounts.
 

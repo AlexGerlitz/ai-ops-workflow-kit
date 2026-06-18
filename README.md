@@ -52,11 +52,12 @@ Fast evaluation path:
 3. Run `python3 scripts/reviewer_snapshot.py`.
 4. Run `python3 scripts/production_readiness_drill.py`.
 5. Run `python3 scripts/credentialed_sandbox_preflight.py`.
-6. Run `bash scripts/smoke_live_demo.sh`.
-7. Run `bash scripts/verify_public.sh`.
-8. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-9. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
-10. Review `infra/n8n/` to see the external workflow boundary.
+6. If sandbox credentials exist, run `python3 scripts/credentialed_sandbox_preflight.py --require-target telegram` or `--require-target bitrix24`.
+7. Run `bash scripts/smoke_live_demo.sh`.
+8. Run `bash scripts/verify_public.sh`.
+9. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+10. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
+11. Review `infra/n8n/` to see the external workflow boundary.
 
 ## System Shape
 
@@ -119,6 +120,8 @@ python3 scripts/capture_reviewer_evidence.py
 python3 scripts/reviewer_snapshot.py
 python3 scripts/production_readiness_drill.py
 python3 scripts/credentialed_sandbox_preflight.py
+python3 scripts/credentialed_sandbox_preflight.py --require-target telegram
+python3 scripts/credentialed_sandbox_preflight.py --require-target bitrix24
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 ```

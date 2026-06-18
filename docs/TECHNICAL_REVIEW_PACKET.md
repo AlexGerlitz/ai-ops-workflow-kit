@@ -30,7 +30,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-24 passed
+27 passed
 public verification passed
 ```
 
@@ -125,6 +125,8 @@ python3 scripts/capture_reviewer_evidence.py
 python3 scripts/reviewer_snapshot.py
 python3 scripts/production_readiness_drill.py
 python3 scripts/credentialed_sandbox_preflight.py
+python3 scripts/credentialed_sandbox_preflight.py --require-target telegram
+python3 scripts/credentialed_sandbox_preflight.py --require-target bitrix24
 python3 scripts/reviewer_snapshot.py https://leadscore.duckdns.org
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org

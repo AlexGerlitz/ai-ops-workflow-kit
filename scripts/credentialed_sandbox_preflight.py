@@ -178,10 +178,27 @@ def bitrix24_profile(client: httpx.Client, webhook_url: str | None) -> dict[str,
     }
 
 
-def build_report(settings: Settings, timeout: float, require_credentials: bool) -> dict[str, Any]:
+def missing_required_targets(
+    required_targets: set[str],
+    telegram_configured: bool,
+    bitrix_configured: bool,
+) -> list[str]:
+    missing: list[str] = []
+    if "telegram" in required_targets and not telegram_configured:
+        missing.append("telegram")
+    if "bitrix24" in required_targets and not bitrix_configured:
+        missing.append("bitrix24")
+    return missing
+
+
+def build_report(settings: Settings, timeout: float, required_targets: set[str]) -> dict[str, Any]:
     telegram_configured = bool(settings.telegram_bot_token)
     bitrix_configured = bool(settings.bitrix24_webhook_url)
-    missing_required = require_credentials and not (telegram_configured and bitrix_configured)
+    missing_required = missing_required_targets(
+        required_targets,
+        telegram_configured,
+        bitrix_configured,
+    )
 
     with httpx.Client(timeout=timeout) as client:
         checks = {
@@ -222,7 +239,9 @@ def build_report(settings: Settings, timeout: float, require_credentials: bool) 
         },
         "checks": checks,
         "failures": failures,
-        "missing_required_credentials": missing_required,
+        "required_targets": sorted(required_targets),
+        "missing_required_targets": missing_required,
+        "missing_required_credentials": bool(missing_required),
     }
 
 
@@ -238,6 +257,12 @@ def format_text(report: dict[str, Any]) -> str:
             ),
             f"schema={report['evidence_schema']}",
             f"mode={report['mode']}",
+            (
+                "required_targets="
+                f"{','.join(report['required_targets']) if report['required_targets'] else 'none'} "
+                "missing_required_targets="
+                f"{','.join(report['missing_required_targets']) if report['missing_required_targets'] else 'none'}"
+            ),
             f"public_base_url={environment['public_base_url']}",
             (
                 "telegram="
@@ -290,10 +315,24 @@ def main() -> int:
         action="store_true",
         help="Fail when Telegram or Bitrix24 credentials are missing.",
     )
+    parser.add_argument(
+        "--require-target",
+        action="append",
+        choices=("telegram", "bitrix24"),
+        default=[],
+        help=(
+            "Fail only when the selected credential target is missing. "
+            "Can be passed more than once."
+        ),
+    )
     parser.add_argument("--json", action="store_true", help="Print JSON instead of text.")
     args = parser.parse_args()
 
-    report = build_report(Settings(), args.timeout, args.require_credentials)
+    required_targets = set(args.require_target)
+    if args.require_credentials:
+        required_targets.update({"telegram", "bitrix24"})
+
+    report = build_report(Settings(), args.timeout, required_targets)
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     json_path = output_dir / "credentialed-sandbox-preflight.sanitized.json"
