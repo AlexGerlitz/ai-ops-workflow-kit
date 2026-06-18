@@ -19,12 +19,18 @@ approval transitions, and integration contracts.
 ## One-Command Local Run
 
 ```bash
-python -m pip install -r requirements.txt
-python scripts/run_offer_demo.py
+python3 -m pip install -r requirements.txt
+python3 scripts/run_offer_demo.py
 ```
 
 The script uses in-memory storage so a reviewer can run it without Docker or API keys.
 Docker/PostgreSQL mode is still available through `docker compose up --build`.
+
+The full public gate also runs tests and validates the demo output:
+
+```bash
+bash scripts/verify_public.sh
+```
 
 ## Expected Shape
 

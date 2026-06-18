@@ -17,8 +17,10 @@ prompt demo.
 | What to check | Why it matters |
 | --- | --- |
 | [Offer demo](docs/OFFER_DEMO.md) | One-command proof of transcript -> RAG -> scoring -> approval -> mock Bitrix CRM handoff. |
+| [Reviewer checklist](docs/REVIEWER_CHECKLIST.md) | Single public gate for tests, offer demo, and output validation. |
 | [Architecture notes](docs/ARCHITECTURE.md) | Shows the FastAPI/n8n/PostgreSQL boundary and why stateful logic stays in the backend. |
 | [Operations notes](docs/OPERATIONS.md) | Shows how the system is run, checked, and handed off. |
+| [n8n approval flow](docs/N8N_APPROVAL_FLOW.md) | Shows the webhook, Telegram payload, approval callback, and CRM handoff boundary. |
 | [Tests](tests/) | Shows deterministic coverage around chunking, retrieval, approvals, and API behavior. |
 | [CI workflow](.github/workflows/ci.yml) | Shows the public verification gate. |
 | `infra/n8n/` | Shows how automation/workflow tooling connects without taking over core domain state. |
@@ -33,9 +35,9 @@ Best-fit evidence:
 
 Fast evaluation path:
 
-1. Run `python scripts/run_offer_demo.py`.
+1. Run `python3 scripts/run_offer_demo.py`.
 2. Read `docs/OFFER_DEMO.md`.
-3. Run `pytest -q`.
+3. Run `bash scripts/verify_public.sh`.
 4. Start `docker compose up --build`.
 5. Review `infra/n8n/` to see the external workflow boundary.
 
@@ -66,8 +68,8 @@ flowchart LR
 ## Offer Demo
 
 ```bash
-python -m pip install -r requirements.txt
-python scripts/run_offer_demo.py
+python3 -m pip install -r requirements.txt
+python3 scripts/run_offer_demo.py
 ```
 
 The script runs a complete synthetic sales workflow without external API keys:
@@ -78,6 +80,12 @@ sales playbook -> RAG retrieval -> call transcript webhook -> AI scoring
 ```
 
 See [docs/OFFER_DEMO.md](docs/OFFER_DEMO.md) for the reviewer path and expected output shape.
+
+Full public verification gate:
+
+```bash
+bash scripts/verify_public.sh
+```
 
 ## Local Run
 
@@ -137,8 +145,8 @@ curl -X POST http://127.0.0.1:8080/approvals \
 app/              FastAPI application and workflow domain code
 demo/             Synthetic sales playbook and transcript for the offer demo
 infra/n8n/        Importable n8n workflow example
-docs/             Architecture and operations notes
-scripts/          Reviewer-facing demo runner
+docs/             Offer demo, reviewer checklist, architecture, n8n and operations notes
+scripts/          Reviewer-facing demo runner and public verification gate
 tests/            Unit tests for the core behavior
 docker-compose.yml
 Dockerfile
@@ -147,8 +155,8 @@ Dockerfile
 ## Checks
 
 ```bash
-python -m pip install -r requirements.txt
-pytest -q
+python3 -m pip install -r requirements.txt
+bash scripts/verify_public.sh
 ```
 
 ## Design Notes

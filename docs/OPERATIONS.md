@@ -56,7 +56,7 @@ curl -fsS -X POST http://127.0.0.1:8080/query \
 Run the complete reviewer demo without Docker or API keys:
 
 ```bash
-python scripts/run_offer_demo.py
+python3 scripts/run_offer_demo.py
 ```
 
 The demo uses the synthetic files in `demo/` and proves:
@@ -70,7 +70,20 @@ The demo uses the synthetic files in `demo/` and proves:
 
 See `docs/OFFER_DEMO.md` for the expected output shape.
 
+## Public Verification Gate
+
+```bash
+python3 -m pip install -r requirements.txt
+bash scripts/verify_public.sh
+```
+
+The gate runs tests, runs the offer demo, and validates that RAG retrieval, approval, and mock
+Bitrix24 handoff are present in the output.
+
 ## n8n Import
 
 Import `infra/n8n/call-transcript-approval.json` into n8n, then set the API URL in the HTTP Request node.
 The workflow accepts a transcript webhook, sends it to the FastAPI service, and returns the approval item.
+
+See `docs/N8N_APPROVAL_FLOW.md` for the webhook payload, Telegram payload boundary, approval callback,
+and CRM handoff rule.
