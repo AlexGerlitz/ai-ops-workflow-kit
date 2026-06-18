@@ -1,7 +1,8 @@
 from contextlib import asynccontextmanager
+from hmac import compare_digest
 from uuid import UUID, uuid4
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import HTMLResponse, PlainTextResponse
 
 from app.chunking import chunk_text
@@ -263,7 +264,20 @@ def notify_approval_in_telegram(item_id: UUID) -> IntegrationDispatchOut:
 
 
 @app.post("/webhooks/telegram/approval", response_model=TelegramWebhookOut)
-def telegram_approval_webhook(payload: TelegramWebhookIn) -> TelegramWebhookOut:
+def telegram_approval_webhook(
+    payload: TelegramWebhookIn,
+    x_telegram_bot_api_secret_token: str | None = Header(
+        default=None,
+        alias="X-Telegram-Bot-Api-Secret-Token",
+    ),
+) -> TelegramWebhookOut:
+    if settings.telegram_webhook_secret and not compare_digest(
+        x_telegram_bot_api_secret_token or "",
+        settings.telegram_webhook_secret,
+    ):
+        runtime_stats.increment("telegram_callback_auth_failures_total")
+        raise HTTPException(status_code=403, detail="invalid Telegram webhook secret")
+
     callback = payload.callback_query
     if callback is None:
         raise HTTPException(status_code=400, detail="callback_query is required")

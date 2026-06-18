@@ -71,6 +71,7 @@ flowchart LR
 - Mock Bitrix24 CRM handoff event queued only after human approval.
 - Dry-run Telegram approval and Bitrix24 dispatch contracts ready for real credentials.
 - Telegram callback webhook for inline approve/reject decisions.
+- Optional Telegram webhook secret verification for production callbacks.
 - Approval state machine for Telegram, CRM, or internal review loops.
 - n8n workflow example for webhook-to-API-to-approval routing.
 - Runtime evidence endpoints for version, deploy environment, counters, and Prometheus-style metrics.

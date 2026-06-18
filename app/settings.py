@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     public_base_url: str = "http://127.0.0.1:8080"
     telegram_bot_token: str | None = None
     telegram_approval_chat_id: str | None = None
+    telegram_webhook_secret: str | None = None
     telegram_dry_run: bool = True
     bitrix24_webhook_url: str | None = None
     bitrix24_dry_run: bool = True

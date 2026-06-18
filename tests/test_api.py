@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.main import app, settings
 
 
 def test_health_endpoint_reports_runtime() -> None:
@@ -42,6 +42,7 @@ def test_integration_runtime_reports_dry_run_capabilities() -> None:
     capabilities = {item["adapter_key"]: item for item in body["capabilities"]}
     assert capabilities["telegram.approval"]["dry_run"] is True
     assert capabilities["bitrix24"]["dry_run"] is True
+    assert capabilities["telegram.approval"]["webhook_secret_configured"] is False
 
 
 def test_public_demo_run_proves_workflow_contract() -> None:
@@ -171,6 +172,41 @@ def test_telegram_callback_approves_item_and_queues_crm_handoff() -> None:
         assert any(item["source_approval_id"] == approval_id for item in events.json())
         runtime = client.get("/runtime").json()
         assert runtime["counters"]["telegram_callbacks_total"] >= 1
+
+
+def test_telegram_callback_secret_is_enforced_when_configured(monkeypatch) -> None:
+    monkeypatch.setattr(settings, "telegram_webhook_secret", "expected-secret")
+    with TestClient(app) as client:
+        approval = client.post(
+            "/approvals",
+            json={
+                "kind": "content_review",
+                "title": "Secret protected approval",
+                "draft": "Reject this item.",
+                "context": {"source": "secret-test"},
+            },
+        )
+        assert approval.status_code == 200
+        approval_id = approval.json()["id"]
+        callback_payload = {
+            "update_id": 2001,
+            "callback_query": {
+                "id": "callback-secret",
+                "from": {"id": 7002, "username": "saleslead"},
+                "data": f"reject:{approval_id}",
+            },
+        }
+
+        rejected = client.post("/webhooks/telegram/approval", json=callback_payload)
+        assert rejected.status_code == 403
+
+        accepted = client.post(
+            "/webhooks/telegram/approval",
+            json=callback_payload,
+            headers={"X-Telegram-Bot-Api-Secret-Token": "expected-secret"},
+        )
+        assert accepted.status_code == 200
+        assert accepted.json()["approval_status"] == "rejected"
 
 
 def test_offer_demo_call_transcript_queues_crm_handoff_after_approval() -> None:

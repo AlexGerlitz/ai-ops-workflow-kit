@@ -27,8 +27,12 @@ def integration_runtime(config: Settings) -> IntegrationRuntimeOut:
                 adapter_key=TELEGRAM_ADAPTER_KEY,
                 configured=bool(config.telegram_bot_token and config.telegram_approval_chat_id),
                 dry_run=config.telegram_dry_run,
+                webhook_secret_configured=bool(config.telegram_webhook_secret),
                 required_env=["TELEGRAM_BOT_TOKEN", "TELEGRAM_APPROVAL_CHAT_ID"],
-                notes="Sends approval cards to Telegram. Dry-run returns the exact outgoing payload.",
+                notes=(
+                    "Sends approval cards to Telegram. Dry-run returns the exact outgoing payload. "
+                    "TELEGRAM_WEBHOOK_SECRET optionally verifies callback webhooks."
+                ),
             ),
             IntegrationCapabilityOut(
                 adapter_key=BITRIX24_ADAPTER_KEY,

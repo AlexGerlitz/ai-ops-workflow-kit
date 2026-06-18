@@ -25,6 +25,7 @@ workflow produced:
 - approved human review item;
 - dry-run Telegram approval payload;
 - Telegram callback webhook for inline approve/reject decisions;
+- optional Telegram webhook secret verification;
 - queued `bitrix24.mock` CRM handoff.
 - dry-run Bitrix24 dispatch payload.
 - runtime identity and metrics surface.
@@ -106,5 +107,6 @@ Then open:
 - CRM mutation is queued only after explicit human approval.
 - Telegram and Bitrix24 adapters expose dry-run contracts before credentials are connected.
 - Telegram inline callbacks have a backend endpoint that applies approve/reject state transitions.
+- Production Telegram callbacks can be protected with `X-Telegram-Bot-Api-Secret-Token`.
 - Runtime and metrics endpoints expose deploy identity and workflow counters.
 - The project has a public verification command and CI gate.

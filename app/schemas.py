@@ -160,6 +160,7 @@ class IntegrationCapabilityOut(BaseModel):
     adapter_key: str
     configured: bool
     dry_run: bool
+    webhook_secret_configured: bool = False
     required_env: list[str]
     notes: str
 

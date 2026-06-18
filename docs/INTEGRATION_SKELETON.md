@@ -24,6 +24,7 @@ Telegram approval payloads use this URL to describe the backend approve/reject c
 ```env
 TELEGRAM_BOT_TOKEN=
 TELEGRAM_APPROVAL_CHAT_ID=
+TELEGRAM_WEBHOOK_SECRET=
 TELEGRAM_DRY_RUN=true
 BITRIX24_WEBHOOK_URL=
 BITRIX24_DRY_RUN=true
@@ -80,6 +81,24 @@ Supported callback data:
 
 - `approve:{approval_id}`;
 - `reject:{approval_id}`.
+
+Production webhook hardening:
+
+```env
+TELEGRAM_WEBHOOK_SECRET=<random-secret>
+```
+
+When the secret is configured, `POST /webhooks/telegram/approval` requires Telegram's
+`X-Telegram-Bot-Api-Secret-Token` header. Configure Telegram with:
+
+```bash
+TELEGRAM_BOT_TOKEN=... \
+PUBLIC_BASE_URL=https://saleops.duckdns.org \
+TELEGRAM_WEBHOOK_SECRET=... \
+bash scripts/configure_telegram_webhook.sh
+```
+
+The script calls Telegram `setWebhook` without printing the bot token.
 
 ## Bitrix24 Handoff Skeleton
 

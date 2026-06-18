@@ -9,7 +9,7 @@ This map connects the repository to the work expected from an AI automation engi
 | pgvector-ready persistence | `app/store.py`, `docker-compose.yml`, `docs/ARCHITECTURE.md` |
 | Transcript analysis and scoring | `app/scoring.py`, `app/sales_workflow.py`, `demo/call-transcript.json` |
 | Human approval flow | `POST /approvals`, `POST /approvals/{id}/approve`, `tests/test_core.py` |
-| Telegram approval contract | `app/integrations.py`, `POST /approvals/{id}/notify/telegram`, `POST /webhooks/telegram/approval`, `docs/INTEGRATION_SKELETON.md` |
+| Telegram approval contract | `app/integrations.py`, `POST /approvals/{id}/notify/telegram`, `POST /webhooks/telegram/approval`, `scripts/configure_telegram_webhook.sh`, `docs/INTEGRATION_SKELETON.md` |
 | Bitrix24 handoff contract | `app/integrations.py`, `POST /integration-events/{id}/dispatch/bitrix24` |
 | Self-hosted runtime | `Dockerfile`, `docker-compose.yml`, `docs/LIVE_DEMO.md`, `docs/OPERATIONS.md` |
 | Runtime observability | `GET /runtime`, `GET /metrics`, `app/observability.py`, `scripts/smoke_live_demo.sh` |
@@ -24,6 +24,7 @@ This map connects the repository to the work expected from an AI automation engi
 - Local embeddings are deterministic, so tests and demo output are repeatable without API keys.
 - CRM handoff is queued only after an explicit approval transition.
 - Runtime identity and counters are public, so a reviewer can verify the deployed build without server access.
+- Telegram callbacks can be verified with Telegram's webhook secret header in production.
 
 ## Review Order
 

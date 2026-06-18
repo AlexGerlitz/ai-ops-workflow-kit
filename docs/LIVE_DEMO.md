@@ -58,6 +58,7 @@ The `leadscore` alias intentionally keeps approval callbacks on the primary `sal
 - The workflow runs through the same `/demo/run` endpoint used by local tests.
 - The callback contract uses the public HTTPS base URL.
 - The smoke check creates a synthetic approval and proves the Telegram callback webhook can reject it.
+- Production deployments can enable `TELEGRAM_WEBHOOK_SECRET`; the public demo leaves it unset so smoke checks remain inspectable.
 - `/runtime` exposes deployed version, Git SHA, public callback base URL, integration readiness, and counters.
 - `/metrics` exposes Prometheus-style runtime and workflow counters.
 - Telegram and Bitrix24 remain in dry-run mode until credentials are configured.

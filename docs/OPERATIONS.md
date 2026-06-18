@@ -91,6 +91,18 @@ curl -fsS -X POST http://127.0.0.1:8080/webhooks/telegram/approval \
   -d '{"callback_query":{"id":"cb-smoke","from":{"id":7001,"username":"saleslead"},"data":"reject:{approval_id}"}}'
 ```
 
+Production Telegram webhook setup:
+
+```bash
+TELEGRAM_BOT_TOKEN=... \
+PUBLIC_BASE_URL=https://saleops.duckdns.org \
+TELEGRAM_WEBHOOK_SECRET=... \
+bash scripts/configure_telegram_webhook.sh
+```
+
+Do not commit Telegram tokens or webhook secrets. Keep them in server environment, a secret manager,
+or deployment runtime variables.
+
 ## Offer Demo
 
 Run the complete reviewer demo without Docker or API keys:

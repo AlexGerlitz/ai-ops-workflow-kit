@@ -98,6 +98,18 @@ curl -X POST http://127.0.0.1:8080/webhooks/telegram/approval \
 The webhook supports `approve:{approval_id}` and `reject:{approval_id}` callback data. Approval uses the
 same backend state transition and queues the CRM handoff event.
 
+For production Telegram webhooks, set `TELEGRAM_WEBHOOK_SECRET` and configure Telegram with:
+
+```bash
+TELEGRAM_BOT_TOKEN=... \
+PUBLIC_BASE_URL=https://saleops.duckdns.org \
+TELEGRAM_WEBHOOK_SECRET=... \
+bash scripts/configure_telegram_webhook.sh
+```
+
+Telegram will then send `X-Telegram-Bot-Api-Secret-Token`, and the backend rejects callback requests
+without the matching secret.
+
 ## CRM Handoff Rule
 
 The backend queues a `bitrix24.mock/upsert_lead_follow_up` integration event only after approval.
