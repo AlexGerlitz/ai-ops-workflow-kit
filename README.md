@@ -21,6 +21,7 @@ prompt demo.
 | --- | --- |
 | [Live demo](https://saleops.duckdns.org/) | Public one-click proof of the deployed Sales Ops workflow. |
 | [Public proof status](docs/PUBLIC_PROOF_STATUS.md) | Current CI, live smoke, local gate, Pages route, and public boundary in one reviewer-facing status page. |
+| [Reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md) | One-command acceptance pass across live API, live smoke, GitHub Actions state, Pages route, and public PDF. |
 | [Technical review packet](docs/TECHNICAL_REVIEW_PACKET.md) | 10-15 minute reviewer route covering live snapshot, architecture decisions, failure modes, and rollout boundaries. |
 | [Reviewer evidence pack](docs/REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live snapshot plus the command that regenerates it from the public deployment. |
 | [Production readiness drill](docs/PRODUCTION_READINESS_DRILL.md) | Deterministic failure-mode proof for webhook auth, retry/dead-letter, drain scheduling, idempotency, and worker dry-run guard. |
@@ -51,17 +52,18 @@ Fast evaluation path:
 
 1. Open `https://saleops.duckdns.org/` and run the browser demo.
 2. Open `docs/PUBLIC_PROOF_STATUS.md`.
-3. Open `docs/REVIEWER_EVIDENCE_PACK.md`.
-4. Run `python3 scripts/reviewer_snapshot.py`.
-5. Run `python3 scripts/production_readiness_drill.py`.
-6. Run `python3 scripts/credentialed_sandbox_preflight.py`.
-7. If sandbox credentials exist, run `python3 scripts/credentialed_sandbox_preflight.py --require-target telegram` or `--require-target bitrix24`.
-8. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
-9. Run `bash scripts/smoke_live_demo.sh`.
-10. Run `bash scripts/verify_public.sh`.
-11. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-12. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
-13. Review `infra/n8n/` to see the external workflow boundary.
+3. Run `python3 scripts/reviewer_acceptance_report.py`.
+4. Open `docs/REVIEWER_EVIDENCE_PACK.md`.
+5. Run `python3 scripts/reviewer_snapshot.py`.
+6. Run `python3 scripts/production_readiness_drill.py`.
+7. Run `python3 scripts/credentialed_sandbox_preflight.py`.
+8. If sandbox credentials exist, run `python3 scripts/credentialed_sandbox_preflight.py --require-target telegram` or `--require-target bitrix24`.
+9. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
+10. Run `bash scripts/smoke_live_demo.sh`.
+11. Run `bash scripts/verify_public.sh`.
+12. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+13. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
+14. Review `infra/n8n/` to see the external workflow boundary.
 
 ## System Shape
 

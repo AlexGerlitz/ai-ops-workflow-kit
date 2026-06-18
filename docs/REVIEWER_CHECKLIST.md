@@ -4,6 +4,15 @@ This checklist is the fastest way to verify that AI Ops Workflow Kit is more tha
 
 ## 1. Run The Live Reviewer Snapshot
 
+For a full public acceptance pass across live API, live smoke, GitHub Actions, Pages, and public PDF,
+run:
+
+```bash
+python3 scripts/reviewer_acceptance_report.py
+```
+
+Read: [Reviewer Acceptance Report](./REVIEWER_ACCEPTANCE_REPORT.md).
+
 ```bash
 python3 scripts/reviewer_snapshot.py
 ```
@@ -42,7 +51,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-27 passed
+31 passed
 public verification passed
 ```
 
@@ -163,6 +172,7 @@ Then open:
 | --- | --- |
 | [README](../README.md) | Reviewer snapshot, API surface, repository layout, and checks. |
 | [Public Proof Status](./PUBLIC_PROOF_STATUS.md) | Current CI, live smoke, local public gate, Pages route, and public demo boundary. |
+| [Reviewer Acceptance Report](./REVIEWER_ACCEPTANCE_REPORT.md) | One-command public acceptance check across live API, live smoke, GitHub Actions, Pages, and PDF. |
 | [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md) | Live snapshot, architecture decisions, failure modes, production rollout checklist, and public demo boundary. |
 | [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live evidence and regeneration command. |
 | [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md) | Failure-mode evidence for auth, retry/dead-letter, drain scheduling, idempotency, and worker guard. |

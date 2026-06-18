@@ -8,7 +8,8 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 | --- | --- |
 | Repository state | Current public `main` branch; this file is part of the reviewed tree |
 | CI workflow | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml |
-| Local public gate | `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `27 passed`, `public verification passed` |
+| Reviewer acceptance report | `python3 scripts/reviewer_acceptance_report.py` checks live API, live smoke, GitHub Actions state, Pages route, and public PDF |
+| Local public gate | `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `31 passed`, `public verification passed` |
 | Live smoke | `bash scripts/smoke_live_demo.sh https://saleops.duckdns.org` -> `live demo smoke passed`, `score=100`, `telegram_callback=rejected`, positive Bitrix24 drain counter |
 | Live demo | https://saleops.duckdns.org/ |
 | Lead score alias | https://leadscore.duckdns.org/ |
@@ -22,13 +23,14 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 
 1. Open the live demo: https://saleops.duckdns.org/
 2. Open the CI workflow: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml
-3. Read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
-4. Read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
-5. Read [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
-6. Read [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
-7. If sandbox secrets are configured, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
-8. Run `bash scripts/smoke_live_demo.sh https://saleops.duckdns.org`.
-9. Run `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh`.
+3. Run `python3 scripts/reviewer_acceptance_report.py`.
+4. Read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
+5. Read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
+6. Read [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
+7. Read [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
+8. If sandbox secrets are configured, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
+9. Run `bash scripts/smoke_live_demo.sh https://saleops.duckdns.org`.
+10. Run `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh`.
 
 ## Public Boundary
 

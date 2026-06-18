@@ -18,7 +18,7 @@ generic AI claims.
 | Telegram approval bot flow | `POST /approvals/{id}/notify/telegram`, `POST /webhooks/telegram/approval`, `scripts/configure_telegram_webhook.sh`, `docs/INTEGRATION_SKELETON.md` | Run `bash scripts/smoke_live_demo.sh` and confirm `telegram_callback=rejected`. | Public mode builds dry-run Telegram payloads; production mode can require `X-Telegram-Bot-Api-Secret-Token` for webhook callbacks. |
 | Bitrix24 / CRM handoff | `POST /integration-events/{id}/dispatch/bitrix24`, `POST /integrations/bitrix24/drain`, `app/integrations.py`, `app/store.py` | Run the offer demo and inspect `crm_handoff`, `bitrix24_dispatch`, and outbox state. | CRM writes are queued after approval with idempotency keys, attempts, retry timing, last error, and dead-letter state. |
 | Approval flow and human review | `POST /approvals`, `POST /approvals/{id}/approve`, `POST /approvals/{id}/reject`, `tests/test_core.py` | Run `bash scripts/verify_public.sh`; inspect approval tests and API endpoints. | Risky external actions happen only after explicit state transitions. |
-| Production-ready deployment | `Dockerfile`, `docker-compose.yml`, `.github/workflows/ci.yml`, `.github/workflows/credentialed-sandbox-preflight.yml`, `scripts/verify_public.sh`, `scripts/smoke_live_demo.sh`, `scripts/capture_reviewer_evidence.py`, `scripts/production_readiness_drill.py`, `scripts/credentialed_sandbox_preflight.py`, `docs/OPERATIONS.md` | Open the latest CI run, run the public smoke command against `https://saleops.duckdns.org`, regenerate `docs/evidence/reviewer-snapshot.sanitized.json`, run the production readiness drill, run the credentialed sandbox preflight, and use the manual preflight workflow when repository secrets exist. | The app exposes health, runtime identity, metrics, public callback base URL, integration readiness, worker state, reproducible evidence, failure-mode behavior, read-only credential boundary checks, and owner-run sanitized sandbox evidence. |
+| Production-ready deployment | `Dockerfile`, `docker-compose.yml`, `.github/workflows/ci.yml`, `.github/workflows/credentialed-sandbox-preflight.yml`, `scripts/verify_public.sh`, `scripts/reviewer_acceptance_report.py`, `scripts/smoke_live_demo.sh`, `scripts/capture_reviewer_evidence.py`, `scripts/production_readiness_drill.py`, `scripts/credentialed_sandbox_preflight.py`, `docs/OPERATIONS.md` | Open the latest CI run, run the public acceptance report, run the public smoke command against `https://saleops.duckdns.org`, regenerate `docs/evidence/reviewer-snapshot.sanitized.json`, run the production readiness drill, run the credentialed sandbox preflight, and use the manual preflight workflow when repository secrets exist. | The app exposes health, runtime identity, metrics, public callback base URL, integration readiness, worker state, reproducible evidence, failure-mode behavior, read-only credential boundary checks, owner-run sanitized sandbox evidence, and one-command public acceptance evidence. |
 | Self-host / cloud operation | `docs/LIVE_DEMO.md`, `docs/OPERATIONS.md`, `/runtime`, `/metrics` | Run `curl -fsS https://saleops.duckdns.org/runtime` and `curl -fsS https://saleops.duckdns.org/metrics`. | The live demo is deployed behind HTTPS; secrets are not committed and integrations stay dry-run until credentials are configured. |
 | AI architecture beyond node wiring | `docs/ARCHITECTURE.md`, `docs/EVIDENCE_MAP.md`, backend state model, outbox model | Review the architecture docs and source boundaries in `app/`. | Workflow tooling is kept thin. Durable state, audit, retries, validation, and integration contracts live in code with tests. |
 
@@ -27,6 +27,7 @@ generic AI claims.
 ```bash
 python3 -m pip install -r requirements.txt
 bash scripts/verify_public.sh
+python3 scripts/reviewer_acceptance_report.py
 python3 scripts/capture_reviewer_evidence.py
 python3 scripts/production_readiness_drill.py
 python3 scripts/credentialed_sandbox_preflight.py
@@ -41,7 +42,7 @@ curl -fsS https://saleops.duckdns.org/llm/runtime
 Expected local gate result:
 
 ```text
-27 passed
+31 passed
 public verification passed
 ```
 

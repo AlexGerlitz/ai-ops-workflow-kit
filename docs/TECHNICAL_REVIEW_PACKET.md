@@ -30,12 +30,21 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-27 passed
+31 passed
 public verification passed
+```
+
+For a single acceptance pass across the live API, live smoke, GitHub Actions, Pages, and public PDF,
+run:
+
+```bash
+python3 scripts/reviewer_acceptance_report.py
 ```
 
 For a committed evidence artifact plus the regeneration command, read
 [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
+For the acceptance report route, read
+[Reviewer Acceptance Report](./REVIEWER_ACCEPTANCE_REPORT.md).
 For current CI, live smoke, local gate, Pages route, and public boundary status, read
 [Public Proof Status](./PUBLIC_PROOF_STATUS.md).
 For deterministic failure-mode evidence, read
@@ -58,6 +67,7 @@ For private sandbox evidence from repository secrets, use the manual
 | Bitrix24 handoff is safe | CRM writes are modeled as idempotent outbox events with attempt counters, retry timing, and dead-letter state. |
 | Public mode is safe | Google Drive, Telegram, and Bitrix24 stay dry-run until production credentials are configured. |
 | Operations are visible | `/runtime`, `/metrics`, smoke scripts, Docker, CI, and docs give a reviewer reproducible evidence. |
+| Acceptance can be checked in one pass | `scripts/reviewer_acceptance_report.py` verifies live API, smoke, GitHub Actions workflows, Pages links, and public PDF. |
 | Evidence is reproducible | `scripts/capture_reviewer_evidence.py` writes a sanitized live snapshot to `docs/evidence/`. |
 | Failure behavior is testable | `scripts/production_readiness_drill.py` proves webhook auth, retry/dead-letter, retry scheduling, idempotency, and worker dry-run guard. |
 | Credential handoff is safe | `scripts/credentialed_sandbox_preflight.py` validates Telegram/Bitrix24 credentials through read-only calls and sanitized output. |
