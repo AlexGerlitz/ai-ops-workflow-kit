@@ -36,6 +36,8 @@ public verification passed
 
 For a committed evidence artifact plus the regeneration command, read
 [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
+For current CI, live smoke, local gate, Pages route, and public boundary status, read
+[Public Proof Status](./PUBLIC_PROOF_STATUS.md).
 For deterministic failure-mode evidence, read
 [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
 For the real-credential boundary, read

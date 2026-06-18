@@ -20,6 +20,8 @@ providers, Google Drive/RAG source, score, approval state, Telegram dry-run stat
 state, CRM idempotency key, worker state, and metrics availability.
 
 Read: [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
+For the current CI/live-smoke/local-gate status, read
+[Public Proof Status](./PUBLIC_PROOF_STATUS.md).
 
 ## 2. Regenerate The Evidence Pack
 
@@ -155,6 +157,7 @@ Then open:
 | File | What to check |
 | --- | --- |
 | [README](../README.md) | Reviewer snapshot, API surface, repository layout, and checks. |
+| [Public Proof Status](./PUBLIC_PROOF_STATUS.md) | Current CI, live smoke, local public gate, Pages route, and public demo boundary. |
 | [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md) | Live snapshot, architecture decisions, failure modes, production rollout checklist, and public demo boundary. |
 | [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live evidence and regeneration command. |
 | [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md) | Failure-mode evidence for auth, retry/dead-letter, drain scheduling, idempotency, and worker guard. |

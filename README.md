@@ -20,6 +20,7 @@ prompt demo.
 | What to check | Why it matters |
 | --- | --- |
 | [Live demo](https://saleops.duckdns.org/) | Public one-click proof of the deployed Sales Ops workflow. |
+| [Public proof status](docs/PUBLIC_PROOF_STATUS.md) | Current CI, live smoke, local gate, Pages route, and public boundary in one reviewer-facing status page. |
 | [Technical review packet](docs/TECHNICAL_REVIEW_PACKET.md) | 10-15 minute reviewer route covering live snapshot, architecture decisions, failure modes, and rollout boundaries. |
 | [Reviewer evidence pack](docs/REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live snapshot plus the command that regenerates it from the public deployment. |
 | [Production readiness drill](docs/PRODUCTION_READINESS_DRILL.md) | Deterministic failure-mode proof for webhook auth, retry/dead-letter, drain scheduling, idempotency, and worker dry-run guard. |
@@ -48,16 +49,17 @@ Best-fit evidence:
 Fast evaluation path:
 
 1. Open `https://saleops.duckdns.org/` and run the browser demo.
-2. Open `docs/REVIEWER_EVIDENCE_PACK.md`.
-3. Run `python3 scripts/reviewer_snapshot.py`.
-4. Run `python3 scripts/production_readiness_drill.py`.
-5. Run `python3 scripts/credentialed_sandbox_preflight.py`.
-6. If sandbox credentials exist, run `python3 scripts/credentialed_sandbox_preflight.py --require-target telegram` or `--require-target bitrix24`.
-7. Run `bash scripts/smoke_live_demo.sh`.
-8. Run `bash scripts/verify_public.sh`.
-9. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-10. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
-11. Review `infra/n8n/` to see the external workflow boundary.
+2. Open `docs/PUBLIC_PROOF_STATUS.md`.
+3. Open `docs/REVIEWER_EVIDENCE_PACK.md`.
+4. Run `python3 scripts/reviewer_snapshot.py`.
+5. Run `python3 scripts/production_readiness_drill.py`.
+6. Run `python3 scripts/credentialed_sandbox_preflight.py`.
+7. If sandbox credentials exist, run `python3 scripts/credentialed_sandbox_preflight.py --require-target telegram` or `--require-target bitrix24`.
+8. Run `bash scripts/smoke_live_demo.sh`.
+9. Run `bash scripts/verify_public.sh`.
+10. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+11. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
+12. Review `infra/n8n/` to see the external workflow boundary.
 
 ## System Shape
 
