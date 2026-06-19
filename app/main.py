@@ -208,7 +208,10 @@ async def run_demo_workflow() -> OfferDemoRunOut:
     )
     audio = call_audio_webhook(CallAudioWebhookIn(**DEMO_CALL_AUDIO))
     analysis = audio.transcript_result
-    telegram = notify_approval_in_telegram(analysis.approval.id)
+    telegram = dispatch_telegram_approval(
+        analysis.approval,
+        settings.model_copy(update={"telegram_dry_run": True}),
+    )
     approved = approve(
         analysis.approval.id,
         ApprovalDecision(reviewer="sales-lead", notes="Synthetic demo approval"),
@@ -431,25 +434,44 @@ def telegram_approval_webhook(
         raise HTTPException(status_code=400, detail="invalid callback_data") from exc
 
     reviewer = callback.from_user.username or f"telegram:{callback.from_user.id}"
+    if action not in {"approve", "reject"}:
+        raise HTTPException(status_code=400, detail="unsupported callback action")
+
+    try:
+        current_approval = store.get_approval(approval_id)
+    except KeyError as exc:
+        answer_telegram_callback(callback.id, "Approval not found", settings)
+        raise HTTPException(status_code=404, detail="approval item not found") from exc
+
+    if current_approval.status != ApprovalStatus.pending:
+        crm_handoff_event_id = latest_crm_handoff_event_id(current_approval.id)
+        answer_telegram_callback(
+            callback.id,
+            f"Already {current_approval.status.value}",
+            settings,
+        )
+        runtime_stats.increment("telegram_callbacks_total")
+        return TelegramWebhookOut(
+            ok=True,
+            action=action,
+            approval_id=current_approval.id,
+            approval_status=current_approval.status,
+            reviewer=current_approval.reviewer or reviewer,
+            crm_handoff_event_id=crm_handoff_event_id,
+        )
+
     if action == "approve":
         approval = approve(
             approval_id,
             ApprovalDecision(reviewer=reviewer, notes="Approved from Telegram callback"),
         )
-        events = [
-            event
-            for event in store.list_integration_events("bitrix24.mock")
-            if event.source_approval_id == approval.id
-        ]
-        crm_handoff_event_id = events[-1].id if events else None
+        crm_handoff_event_id = latest_crm_handoff_event_id(approval.id)
     elif action == "reject":
         approval = reject(
             approval_id,
             ApprovalDecision(reviewer=reviewer, notes="Rejected from Telegram callback"),
         )
         crm_handoff_event_id = None
-    else:
-        raise HTTPException(status_code=400, detail="unsupported callback action")
 
     answer_telegram_callback(callback.id, action.title(), settings)
     runtime_stats.increment("telegram_callbacks_total")
@@ -461,6 +483,15 @@ def telegram_approval_webhook(
         reviewer=reviewer,
         crm_handoff_event_id=crm_handoff_event_id,
     )
+
+
+def latest_crm_handoff_event_id(approval_id: UUID) -> UUID | None:
+    events = [
+        event
+        for event in store.list_integration_events("bitrix24.mock")
+        if event.source_approval_id == approval_id
+    ]
+    return events[-1].id if events else None
 
 
 @app.get("/integration-events", response_model=list[IntegrationEventOut])

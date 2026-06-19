@@ -730,6 +730,74 @@ def test_telegram_callback_answers_query_when_live(monkeypatch) -> None:
     ]
 
 
+def test_telegram_callback_repeated_click_answers_without_error(monkeypatch) -> None:
+    calls: list[dict[str, object]] = []
+
+    class Response:
+        def raise_for_status(self) -> None:
+            return None
+
+    def fake_post(url: str, json: dict[str, object], timeout: float) -> Response:
+        calls.append({"url": url, "json": json, "timeout": timeout})
+        return Response()
+
+    monkeypatch.setattr(settings, "telegram_dry_run", False)
+    monkeypatch.setattr(settings, "telegram_bot_token", "token-for-test")
+    monkeypatch.setattr("app.integrations.httpx.post", fake_post)
+
+    with TestClient(app) as client:
+        approval = client.post(
+            "/approvals",
+            json={
+                "kind": "content_review",
+                "title": "Repeated callback",
+                "draft": "Approve once, tap twice.",
+                "context": {"source": "callback-repeat-test"},
+            },
+        )
+        assert approval.status_code == 200
+        approval_id = approval.json()["id"]
+
+        first = client.post(
+            "/webhooks/telegram/approval",
+            json={
+                "update_id": 3101,
+                "callback_query": {
+                    "id": "callback-repeat-1",
+                    "from": {"id": 7004, "username": "saleslead"},
+                    "data": f"approve:{approval_id}",
+                },
+            },
+        )
+        second = client.post(
+            "/webhooks/telegram/approval",
+            json={
+                "update_id": 3102,
+                "callback_query": {
+                    "id": "callback-repeat-2",
+                    "from": {"id": 7004, "username": "saleslead"},
+                    "data": f"approve:{approval_id}",
+                },
+            },
+        )
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert second.json()["approval_status"] == "approved"
+    assert calls == [
+        {
+            "url": "https://api.telegram.org/bottoken-for-test/answerCallbackQuery",
+            "json": {"callback_query_id": "callback-repeat-1", "text": "Approve"},
+            "timeout": 5,
+        },
+        {
+            "url": "https://api.telegram.org/bottoken-for-test/answerCallbackQuery",
+            "json": {"callback_query_id": "callback-repeat-2", "text": "Already approved"},
+            "timeout": 5,
+        },
+    ]
+
+
 def test_offer_demo_call_transcript_queues_crm_handoff_after_approval() -> None:
     with TestClient(app) as client:
         playbook = client.post(
