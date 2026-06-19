@@ -1,6 +1,6 @@
 {
   "evidence_schema": "reviewer_acceptance_report_v1",
-  "generated_at": "2026-06-19T14:22:15.559227+00:00",
+  "generated_at": "2026-06-19T18:35:28.399520+00:00",
   "ok": true,
   "sanitized": true,
   "secret_boundaries": {
@@ -19,7 +19,7 @@
   "base_url": "https://saleops.duckdns.org",
   "live_snapshot": {
     "version": "0.2.0",
-    "git_sha": "67c3fbbafbd5a3c26a267d9735f1737382b9deb7",
+    "git_sha": "a908262d6ada8c19b16107b590c2a2bd33e1ce30",
     "storage": "memory",
     "llm": {
       "requested_provider": "auto",
@@ -108,7 +108,7 @@
       "base_url": "https://saleops.duckdns.org",
       "callback_base_url": "https://saleops.duckdns.org",
       "version": "0.2.0",
-      "git_sha": "67c3fbbafbd5a3c26a267d9735f1737382b9deb7",
+      "git_sha": "a908262d6ada8c19b16107b590c2a2bd33e1ce30",
       "llm": "local",
       "score": "100",
       "google_drive": "gdrive://demo-sales-playbook",
@@ -118,10 +118,10 @@
       "telegram": "dry_run",
       "bitrix24": "dry_run",
       "crm_event_status": "queued",
-      "bitrix24_drain": "17",
+      "bitrix24_drain": "8",
       "worker_active": "False"
     },
-    "console_tail": "live demo smoke passed\nbase_url=https://saleops.duckdns.org\ncallback_base_url=https://saleops.duckdns.org\nversion=0.2.0\ngit_sha=67c3fbbafbd5a3c26a267d9735f1737382b9deb7\nllm=local\nscore=100\ngoogle_drive=gdrive://demo-sales-playbook\ntranscription=local_stub:dry_run\napproval=approved\ntelegram_callback=rejected\ntelegram=dry_run\nbitrix24=dry_run\ncrm_event_status=queued\nbitrix24_drain=17\nworker_active=False\n"
+    "console_tail": "live demo smoke passed\nbase_url=https://saleops.duckdns.org\ncallback_base_url=https://saleops.duckdns.org\nversion=0.2.0\ngit_sha=a908262d6ada8c19b16107b590c2a2bd33e1ce30\nllm=local\nscore=100\ngoogle_drive=gdrive://demo-sales-playbook\ntranscription=local_stub:dry_run\napproval=approved\ntelegram_callback=rejected\ntelegram=dry_run\nbitrix24=dry_run\ncrm_event_status=queued\nbitrix24_drain=8\nworker_active=False\n"
   },
   "github": {
     "status": "passed",
@@ -146,9 +146,9 @@
       "status": "passed",
       "name": "CI",
       "conclusion": "success",
-      "head_sha": "addd91e396c6ae2feb003a2e8d73afe6b84e7032",
-      "html_url": "https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27822610360",
-      "created_at": "2026-06-19T11:19:16Z"
+      "head_sha": "a908262d6ada8c19b16107b590c2a2bd33e1ce30",
+      "html_url": "https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27839133476",
+      "created_at": "2026-06-19T17:10:50Z"
     },
     "latest_checked_sandbox_run": {
       "status": "passed",
@@ -191,7 +191,7 @@
       {
         "status": "passed",
         "url": "https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-remote-ai-automation-resume.pdf",
-        "bytes": 185421,
+        "bytes": 189799,
         "pdf_header_present": true
       }
     ]
