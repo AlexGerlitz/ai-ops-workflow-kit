@@ -1,0 +1,207 @@
+{
+  "evidence_schema": "reviewer_acceptance_report_v1",
+  "generated_at": "2026-06-19T02:23:15.221894+00:00",
+  "ok": true,
+  "sanitized": true,
+  "secret_boundaries": {
+    "secrets_printed": false,
+    "mutating_external_calls": false,
+    "sanitized_credentialed_sandbox_artifacts_committed": true
+  },
+  "checks": {
+    "live_snapshot": "passed",
+    "live_smoke": "passed",
+    "github": "passed",
+    "profile_pages": "passed",
+    "bitrix24_contract": "passed"
+  },
+  "base_url": "https://saleops.duckdns.org",
+  "live_snapshot": {
+    "version": "0.2.0",
+    "git_sha": "0aa7dd3d100a404c92467f79258e796afab24723",
+    "storage": "memory",
+    "llm": {
+      "requested_provider": "auto",
+      "selected_provider": "local",
+      "fallback": true,
+      "supported_providers": [
+        "local",
+        "openai",
+        "claude",
+        "gemini"
+      ],
+      "providers": [
+        {
+          "provider": "local",
+          "configured": true,
+          "selected": true,
+          "required_env": []
+        },
+        {
+          "provider": "openai",
+          "configured": false,
+          "selected": false,
+          "required_env": [
+            "OPENAI_API_KEY"
+          ]
+        },
+        {
+          "provider": "claude",
+          "configured": false,
+          "selected": false,
+          "required_env": [
+            "ANTHROPIC_API_KEY"
+          ]
+        },
+        {
+          "provider": "gemini",
+          "configured": false,
+          "selected": false,
+          "required_env": [
+            "GEMINI_API_KEY"
+          ]
+        }
+      ]
+    },
+    "integrations": {
+      "google_drive": {
+        "configured": false,
+        "dry_run": true
+      },
+      "telegram": {
+        "configured": false,
+        "dry_run": true
+      },
+      "bitrix24": {
+        "configured": false,
+        "dry_run": true
+      }
+    },
+    "workflow": {
+      "google_drive_source": "gdrive://demo-sales-playbook",
+      "score": 100,
+      "risk_level": "medium",
+      "approval_status": "approved",
+      "telegram_status": "dry_run",
+      "bitrix24_status": "dry_run",
+      "crm_event_status": "queued"
+    },
+    "worker": {
+      "enabled": false,
+      "active": false,
+      "dry_run": true,
+      "interval_seconds": 60.0,
+      "batch_size": 10,
+      "notes": "Worker is active only when enabled and Bitrix24 dry-run is disabled; public demo keeps it disabled to avoid consuming synthetic events."
+    },
+    "metrics": {
+      "runtime_info": true,
+      "demo_runs_total": true
+    }
+  },
+  "live_smoke": {
+    "status": "passed",
+    "returncode": 0,
+    "command": "bash scripts/smoke_live_demo.sh https://saleops.duckdns.org",
+    "signals": {
+      "base_url": "https://saleops.duckdns.org",
+      "callback_base_url": "https://saleops.duckdns.org",
+      "version": "0.2.0",
+      "git_sha": "0aa7dd3d100a404c92467f79258e796afab24723",
+      "llm": "local",
+      "score": "100",
+      "google_drive": "gdrive://demo-sales-playbook",
+      "transcription": "local_stub:dry_run",
+      "approval": "approved",
+      "telegram_callback": "rejected",
+      "telegram": "dry_run",
+      "bitrix24": "dry_run",
+      "crm_event_status": "queued",
+      "bitrix24_drain": "5",
+      "worker_active": "False"
+    },
+    "console_tail": "live demo smoke passed\nbase_url=https://saleops.duckdns.org\ncallback_base_url=https://saleops.duckdns.org\nversion=0.2.0\ngit_sha=0aa7dd3d100a404c92467f79258e796afab24723\nllm=local\nscore=100\ngoogle_drive=gdrive://demo-sales-playbook\ntranscription=local_stub:dry_run\napproval=approved\ntelegram_callback=rejected\ntelegram=dry_run\nbitrix24=dry_run\ncrm_event_status=queued\nbitrix24_drain=5\nworker_active=False\n"
+  },
+  "github": {
+    "status": "passed",
+    "repo": "AlexGerlitz/ai-ops-workflow-kit",
+    "ci_workflow": {
+      "status": "passed",
+      "id": 297500189,
+      "name": "CI",
+      "path": ".github/workflows/ci.yml",
+      "state": "active",
+      "html_url": "https://github.com/AlexGerlitz/ai-ops-workflow-kit/blob/main/.github/workflows/ci.yml"
+    },
+    "credentialed_sandbox_workflow": {
+      "status": "passed",
+      "id": 298575851,
+      "name": "Credentialed Sandbox Preflight",
+      "path": ".github/workflows/credentialed-sandbox-preflight.yml",
+      "state": "active",
+      "html_url": "https://github.com/AlexGerlitz/ai-ops-workflow-kit/blob/main/.github/workflows/credentialed-sandbox-preflight.yml"
+    },
+    "latest_checked_ci_run": {
+      "status": "passed",
+      "name": "CI",
+      "conclusion": "success",
+      "head_sha": "0aa7dd3d100a404c92467f79258e796afab24723",
+      "html_url": "https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27801402399",
+      "created_at": "2026-06-19T02:19:40Z"
+    },
+    "latest_checked_sandbox_run": {
+      "status": "passed",
+      "name": "Credentialed Sandbox Preflight",
+      "conclusion": "success",
+      "head_sha": "bb79ea34e42e395c2892efadeb2f1647f5b80ffc",
+      "html_url": "https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429",
+      "created_at": "2026-06-19T01:14:04Z"
+    }
+  },
+  "profile": {
+    "status": "passed",
+    "profile_base_url": "https://alexgerlitz.github.io/AlexGerlitz",
+    "pages": [
+      {
+        "status": "passed",
+        "url": "https://alexgerlitz.github.io/AlexGerlitz/",
+        "missing_markers": []
+      },
+      {
+        "status": "passed",
+        "url": "https://alexgerlitz.github.io/AlexGerlitz/verification-pack.html",
+        "missing_markers": []
+      },
+      {
+        "status": "passed",
+        "url": "https://alexgerlitz.github.io/AlexGerlitz/hiring-screen.html",
+        "missing_markers": []
+      },
+      {
+        "status": "passed",
+        "url": "https://alexgerlitz.github.io/AlexGerlitz/application-pack.html",
+        "missing_markers": []
+      },
+      {
+        "status": "passed",
+        "url": "https://alexgerlitz.github.io/AlexGerlitz/resume.html",
+        "missing_markers": []
+      },
+      {
+        "status": "passed",
+        "url": "https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-remote-ai-automation-resume.pdf",
+        "bytes": 185386,
+        "pdf_header_present": true
+      }
+    ]
+  },
+  "bitrix24_contract": {
+    "status": "passed",
+    "artifact": "docs/evidence/bitrix24-contract.sanitized.json",
+    "method": "crm.lead.update",
+    "request_shape": true,
+    "secret_token_leaked": false,
+    "external_calls": "none_contract_only"
+  },
+  "private_sandbox_next_step": "Combined Telegram and Bitrix24 owner-run sandbox evidence is present; rerun Credentialed Sandbox Preflight when rotating either secret."
+}

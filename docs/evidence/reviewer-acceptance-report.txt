@@ -1,0 +1,10 @@
+reviewer acceptance report passed
+schema=reviewer_acceptance_report_v1
+base_url=https://saleops.duckdns.org
+live_snapshot=passed git_sha=0aa7dd3d100a404c92467f79258e796afab24723 llm=local
+live_smoke=passed score=100 telegram_callback=rejected bitrix24_drain=5
+github=passed ci=success ci_sha=0aa7dd3d100a404c92467f79258e796afab24723 sandbox_workflow=active sandbox_run=success
+profile_pages=passed count=6
+bitrix24_contract=passed method=crm.lead.update request_shape=True secret_token_leaked=False
+secret_boundaries=secrets_printed=False mutating_external_calls=False
+private_sandbox_next_step=Combined Telegram and Bitrix24 owner-run sandbox evidence is present; rerun Credentialed Sandbox Preflight when rotating either secret.

@@ -2,7 +2,7 @@
   "base_url": "https://saleops.duckdns.org",
   "ok": true,
   "version": "0.2.0",
-  "git_sha": "889717fbba247b5d12b8d98374f02089266c526e",
+  "git_sha": "0aa7dd3d100a404c92467f79258e796afab24723",
   "storage": "memory",
   "public_base_url": "https://saleops.duckdns.org",
   "llm": {
@@ -48,6 +48,40 @@
       }
     ]
   },
+  "transcription": {
+    "requested_provider": "local_stub",
+    "selected_provider": "local_stub",
+    "dry_run": true,
+    "supported_providers": [
+      "local_stub",
+      "openai_whisper",
+      "deepgram"
+    ],
+    "providers": [
+      {
+        "provider": "local_stub",
+        "configured": true,
+        "selected": true,
+        "required_env": []
+      },
+      {
+        "provider": "openai_whisper",
+        "configured": false,
+        "selected": false,
+        "required_env": [
+          "OPENAI_API_KEY"
+        ]
+      },
+      {
+        "provider": "deepgram",
+        "configured": false,
+        "selected": false,
+        "required_env": [
+          "DEEPGRAM_API_KEY"
+        ]
+      }
+    ]
+  },
   "integrations": {
     "google_drive": {
       "configured": false,
@@ -66,18 +100,21 @@
     "google_drive_source": "gdrive://demo-sales-playbook",
     "rag_context_sources": [
       {
-        "source": "gdrive://demo-sales-playbook",
-        "score": 0.318727
+        "source": "call://CALL-LIVE-DEMO-1",
+        "score": 0.333105
       },
       {
-        "source": "gdrive://demo-sales-playbook",
-        "score": 0.318727
+        "source": "call://CALL-LIVE-DEMO-1",
+        "score": 0.333105
       },
       {
         "source": "gdrive://demo-sales-playbook",
         "score": 0.318727
       }
     ],
+    "transcription_provider": "local_stub",
+    "transcription_status": "dry_run",
+    "transcription_segments": 3,
     "score": 100,
     "risk_level": "medium",
     "approval_status": "approved",
@@ -103,6 +140,7 @@
     "deployed API responds with runtime identity",
     "LLM boundary exposes OpenAI, Claude, Gemini, and local fallback without secrets",
     "demo imports Google Drive text into RAG and returns source context",
+    "demo accepts call audio metadata and converts it into a transcript boundary",
     "transcript analysis produces a high lead score and approval item",
     "Telegram and Bitrix24 remain dry-run in public mode",
     "CRM handoff is queued with an idempotency key after approval",
