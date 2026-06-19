@@ -45,7 +45,7 @@ The workflow uses the same script, keeps Telegram and Bitrix24 dry-run flags ena
 the sanitized artifacts do not contain configured secret values, and uploads only the redacted
 evidence files.
 
-Current committed live combined Telegram + Bitrix24 evidence:
+Latest owner-run live combined Telegram + Bitrix24 workflow run:
 
 ```text
 run=https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429
@@ -57,8 +57,13 @@ bitrix24=configured=True profile=passed crm_lead_fields=passed origin=https://b2
 secret_boundaries=secrets_printed=False mutating_external_calls=False
 ```
 
-Bitrix24 now also has a separate sanitized read-only sandbox artifact in `docs/evidence/`. The
-committed public workflow still avoids CRM writes; production writes remain gated by
+The generic committed preflight artifact is intentionally safe to regenerate in no-secret mode.
+Live proof is split into owner-run workflow output plus committed focused artifacts:
+
+- live Telegram approval proof: `docs/evidence/live-telegram-approval.txt`;
+- live Bitrix24 read-only proof: `docs/evidence/bitrix24-sandbox-preflight.txt`.
+
+The committed public workflow still avoids CRM writes; production writes remain gated by
 `BITRIX24_DRY_RUN=false` and the outbox worker rollout checklist.
 
 Generated evidence:

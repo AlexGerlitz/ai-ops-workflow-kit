@@ -131,7 +131,8 @@ The n8n workflows create a Telegram-ready text payload from this response. A rea
 send that text with approve/reject buttons or links. In the Google Drive workflow, n8n owns OAuth and
 document export while the backend owns normalization, RAG, scoring, approval state, and CRM handoff.
 
-The backend also exposes a direct dry-run Telegram skeleton:
+The backend also exposes a direct Telegram approval adapter. In the synthetic public demo this is
+kept dry-run; owner deployments can send the same payload to the real bot:
 
 ```bash
 curl -X POST http://127.0.0.1:8080/approvals/{approval_id}/notify/telegram

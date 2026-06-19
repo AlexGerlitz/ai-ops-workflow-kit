@@ -65,7 +65,8 @@ scoring/approval/CRM contract.
 8. After approval, the backend queues an integration event for the CRM adapter.
 
 The backend also exposes `POST /approvals/{id}/notify/telegram` for a direct Telegram approval
-adapter path. In public mode it returns the exact outgoing payload in dry-run mode.
+adapter path. The synthetic public demo calls it in dry-run mode; owner-triggered approval messages
+can send through the real Telegram bot when credentials are configured.
 
 ### CRM Handoff
 

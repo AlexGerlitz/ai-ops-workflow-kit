@@ -1,0 +1,58 @@
+{
+  "evidence_schema": "live_telegram_approval_evidence_v1",
+  "generated_at": "2026-06-19T11:09:42.521391+00:00",
+  "ok": true,
+  "sanitized": true,
+  "base_url": "https://saleops.duckdns.org",
+  "external_calls": "read_only_live_api_and_optional_telegram_webhook_info",
+  "secret_boundaries": {
+    "secrets_printed": false,
+    "telegram_token_redacted": true,
+    "telegram_chat_id_redacted": true,
+    "bitrix24_webhook_token_redacted": true,
+    "customer_audio_retained": false
+  },
+  "runtime": {
+    "git_sha": "67c3fbbafbd5a3c26a267d9735f1737382b9deb7",
+    "storage": "memory",
+    "telegram": {
+      "configured": true,
+      "dry_run": false
+    },
+    "bitrix24": {
+      "configured": false,
+      "dry_run": true
+    },
+    "deepgram_configured": true
+  },
+  "telegram_webhook": {
+    "status": "passed",
+    "url_present": true,
+    "pending_update_count": 0,
+    "allowed_updates": [
+      "callback_query"
+    ],
+    "last_error_present": false
+  },
+  "approval": {
+    "id": "b4272428-c29d-4ecf-8f01-b2f08f586dca",
+    "title": "Approve fresh Telegram callback test",
+    "kind": "call_follow_up",
+    "status": "approved",
+    "reviewer_present": true,
+    "notes_present": true
+  },
+  "crm_event": {
+    "id": "a97dfa73-c56d-4e76-a39f-2750d2f5b70f",
+    "adapter_key": "bitrix24.mock",
+    "operation": "upsert_lead_follow_up",
+    "status": "queued",
+    "attempt_count": 0,
+    "source_approval_id": "b4272428-c29d-4ecf-8f01-b2f08f586dca"
+  },
+  "public_boundary": {
+    "synthetic_demo_telegram_remains_dry_run": true,
+    "bitrix24_trial_is_not_required_for_public_proof": true,
+    "real_bitrix24_writes_remain_production_gated": true
+  }
+}

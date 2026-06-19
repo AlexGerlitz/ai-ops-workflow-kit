@@ -1,0 +1,11 @@
+live telegram approval evidence passed
+schema=live_telegram_approval_evidence_v1
+base_url=https://saleops.duckdns.org
+git_sha=67c3fbbafbd5a3c26a267d9735f1737382b9deb7
+telegram=configured=True dry_run=False webhook=passed pending_updates=0
+bitrix24=configured=False dry_run=True
+deepgram_configured=True
+approval=id=b4272428-c29d-4ecf-8f01-b2f08f586dca kind=call_follow_up status=approved reviewer_present=True
+crm_event=adapter=bitrix24.mock operation=upsert_lead_follow_up status=queued attempt_count=0
+secret_boundaries=secrets_printed=False telegram_token_redacted=True customer_audio_retained=False
+public_boundary=synthetic_demo_telegram_remains_dry_run=True bitrix24_trial_is_not_required_for_public_proof=True

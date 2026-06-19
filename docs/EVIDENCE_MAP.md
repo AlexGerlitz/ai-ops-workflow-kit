@@ -17,7 +17,7 @@ For current CI, live smoke, local gate, and public boundary status, read
 | pgvector-ready persistence | `app/store.py`, `docker-compose.yml`, `docs/ARCHITECTURE.md` |
 | Transcript analysis and scoring | `app/scoring.py`, `app/sales_workflow.py`, `demo/call-transcript.json` |
 | Human approval flow | `POST /approvals`, `POST /approvals/{id}/approve`, `tests/test_core.py` |
-| Telegram approval contract | `app/integrations.py`, `POST /approvals/{id}/notify/telegram`, `POST /webhooks/telegram/approval`, `scripts/configure_telegram_webhook.sh`, `docs/INTEGRATION_SKELETON.md` |
+| Telegram approval contract | `app/integrations.py`, `POST /approvals/{id}/notify/telegram`, `POST /webhooks/telegram/approval`, `scripts/configure_telegram_webhook.sh`, `docs/INTEGRATION_SKELETON.md`, `docs/LIVE_OWNER_PROOF.md`, `docs/evidence/live-telegram-approval.sanitized.json` |
 | Bitrix24 handoff contract | `app/integrations.py`, `app/store.py`, `POST /integration-events/{id}/dispatch/bitrix24`, `POST /integrations/bitrix24/drain`, `docs/evidence/bitrix24-contract.sanitized.json`, `docs/evidence/bitrix24-sandbox-preflight.sanitized.json` |
 | Self-hosted runtime | `Dockerfile`, `docker-compose.yml`, `docs/LIVE_DEMO.md`, `docs/OPERATIONS.md` |
 | Runtime observability | `GET /runtime`, `GET /metrics`, worker state, `app/observability.py`, `scripts/smoke_live_demo.sh` |
@@ -34,7 +34,8 @@ For current CI, live smoke, local gate, and public boundary status, read
 
 - n8n is treated as workflow orchestration, not as the place where core state lives.
 - The backend owns retrieval, scoring, approvals, and integration contracts.
-- External integrations are dry-run by default, so a public reviewer can inspect payloads without secrets.
+- External write integrations are dry-run by default, so a public reviewer can inspect payloads without secrets.
+- The synthetic public demo keeps Telegram dry-run; owner-run evidence proves the real Telegram approval callback path.
 - Google Drive import is normalized before RAG storage, so connector code does not own retrieval logic.
 - Local embeddings and LLM fallback are deterministic, so tests and demo output are repeatable without API keys.
 - OpenAI, Claude/Anthropic, and Gemini provider wiring is contract-tested without committing secrets.
@@ -45,6 +46,7 @@ For current CI, live smoke, local gate, and public boundary status, read
 - Runtime identity, worker state, and counters are public, so a reviewer can verify the deployed build without server access.
 - Reviewer acceptance report combines live API, smoke, GitHub Actions, Pages, and PDF checks in one command.
 - Telegram callbacks can be verified with Telegram's webhook secret header in production.
+- Repeated Telegram approval taps are handled idempotently so the client receives a callback answer instead of spinning.
 - Failure-mode evidence is captured without external credentials, so reviewers can inspect retry,
   dead-letter, drain scheduling, idempotency, and worker guard behavior locally or in CI.
 - Credentialed sandbox preflight uses read-only Telegram and Bitrix24 calls when secrets exist, and
@@ -62,12 +64,13 @@ For current CI, live smoke, local gate, and public boundary status, read
 6. Run `python3 scripts/reviewer_snapshot.py`.
 7. Run `python3 scripts/production_readiness_drill.py`.
 8. Run `python3 scripts/credentialed_sandbox_preflight.py`.
-9. Run `python3 scripts/bitrix24_contract_evidence.py`.
-10. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
-11. Run `bash scripts/smoke_live_demo.sh`.
-12. Open `https://saleops.duckdns.org/llm/runtime`.
-13. Open `https://saleops.duckdns.org/transcription/runtime`.
-14. Run `bash scripts/verify_public.sh`.
-15. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-16. Read `docs/ARCHITECTURE.md`.
-17. Read `docs/INTEGRATION_SKELETON.md`.
+9. Open `docs/LIVE_OWNER_PROOF.md`.
+10. Run `python3 scripts/bitrix24_contract_evidence.py`.
+11. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
+12. Run `bash scripts/smoke_live_demo.sh`.
+13. Open `https://saleops.duckdns.org/llm/runtime`.
+14. Open `https://saleops.duckdns.org/transcription/runtime`.
+15. Run `bash scripts/verify_public.sh`.
+16. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+17. Read `docs/ARCHITECTURE.md`.
+18. Read `docs/INTEGRATION_SKELETON.md`.

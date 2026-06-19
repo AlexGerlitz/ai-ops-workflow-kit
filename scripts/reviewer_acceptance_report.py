@@ -24,6 +24,9 @@ DEFAULT_GITHUB_REPO = "AlexGerlitz/ai-ops-workflow-kit"
 DEFAULT_PROFILE_BASE_URL = "https://alexgerlitz.github.io/AlexGerlitz"
 USER_AGENT = "aiops-reviewer-acceptance-report"
 BITRIX24_CONTRACT_EVIDENCE = REPO_ROOT / "docs" / "evidence" / "bitrix24-contract.sanitized.json"
+LIVE_TELEGRAM_APPROVAL_EVIDENCE = (
+    REPO_ROOT / "docs" / "evidence" / "live-telegram-approval.sanitized.json"
+)
 
 
 def fetch_json_url(url: str, timeout: float) -> dict[str, Any]:
@@ -235,6 +238,44 @@ def build_bitrix24_contract_report() -> dict[str, Any]:
     }
 
 
+def build_live_telegram_approval_report() -> dict[str, Any]:
+    try:
+        payload = json.loads(LIVE_TELEGRAM_APPROVAL_EVIDENCE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "status": "failed",
+            "artifact": str(LIVE_TELEGRAM_APPROVAL_EVIDENCE.relative_to(REPO_ROOT)),
+            "error": exc.__class__.__name__,
+        }
+
+    runtime = payload.get("runtime") or {}
+    approval = payload.get("approval") or {}
+    crm_event = payload.get("crm_event") or {}
+    secret_boundaries = payload.get("secret_boundaries") or {}
+    public_boundary = payload.get("public_boundary") or {}
+    passed = (
+        payload.get("ok") is True
+        and payload.get("sanitized") is True
+        and runtime.get("telegram", {}).get("configured") is True
+        and runtime.get("telegram", {}).get("dry_run") is False
+        and runtime.get("bitrix24", {}).get("dry_run") is True
+        and approval.get("status") == "approved"
+        and approval.get("reviewer_present") is True
+        and crm_event.get("adapter_key") == "bitrix24.mock"
+        and crm_event.get("status") in {"queued", "retry", "sent"}
+        and secret_boundaries.get("secrets_printed") is False
+        and public_boundary.get("synthetic_demo_telegram_remains_dry_run") is True
+    )
+    return {
+        "status": "passed" if passed else "failed",
+        "artifact": str(LIVE_TELEGRAM_APPROVAL_EVIDENCE.relative_to(REPO_ROOT)),
+        "telegram_live": runtime.get("telegram", {}).get("dry_run") is False,
+        "approval_status": approval.get("status"),
+        "crm_event_status": crm_event.get("status"),
+        "bitrix24_dry_run": runtime.get("bitrix24", {}).get("dry_run"),
+    }
+
+
 def build_report(
     base_url: str,
     github_repo: str,
@@ -247,12 +288,14 @@ def build_report(
     github = build_github_report(github_repo, timeout)
     profile = build_profile_report(profile_base_url, timeout)
     bitrix24_contract = build_bitrix24_contract_report()
+    live_telegram_approval = build_live_telegram_approval_report()
     checks = {
         "live_snapshot": "passed" if snapshot.get("ok") is True else "failed",
         "live_smoke": smoke["status"],
         "github": github["status"],
         "profile_pages": profile["status"],
         "bitrix24_contract": bitrix24_contract["status"],
+        "live_telegram_approval": live_telegram_approval["status"],
     }
     ok = all(status == "passed" for status in checks.values())
     return {
@@ -289,9 +332,11 @@ def build_report(
         "github": github,
         "profile": profile,
         "bitrix24_contract": bitrix24_contract,
+        "live_telegram_approval": live_telegram_approval,
         "private_sandbox_next_step": (
             "Combined Telegram and Bitrix24 owner-run sandbox evidence is present; rerun "
-            "Credentialed Sandbox Preflight when rotating either secret."
+            "Credentialed Sandbox Preflight when rotating either secret, and regenerate "
+            "Live Owner Proof when validating a new Telegram approval."
         ),
     }
 
@@ -304,6 +349,7 @@ def format_text(report: dict[str, Any]) -> str:
     latest_ci = github["latest_checked_ci_run"]
     latest_sandbox = github.get("latest_checked_sandbox_run", {})
     bitrix24_contract = report["bitrix24_contract"]
+    live_telegram_approval = report["live_telegram_approval"]
     return "\n".join(
         [
             "reviewer acceptance report passed" if report["ok"] else "reviewer acceptance report failed",
@@ -332,6 +378,14 @@ def format_text(report: dict[str, Any]) -> str:
                 f"method={bitrix24_contract.get('method')} "
                 f"request_shape={bitrix24_contract.get('request_shape')} "
                 f"secret_token_leaked={bitrix24_contract.get('secret_token_leaked')}"
+            ),
+            (
+                "live_telegram_approval="
+                f"{report['checks']['live_telegram_approval']} "
+                f"telegram_live={live_telegram_approval.get('telegram_live')} "
+                f"approval={live_telegram_approval.get('approval_status')} "
+                f"crm_event={live_telegram_approval.get('crm_event_status')} "
+                f"bitrix24_dry_run={live_telegram_approval.get('bitrix24_dry_run')}"
             ),
             (
                 "secret_boundaries="

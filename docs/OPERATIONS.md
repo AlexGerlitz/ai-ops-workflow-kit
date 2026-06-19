@@ -209,8 +209,10 @@ The public callback base URL is:
 PUBLIC_BASE_URL=https://saleops.duckdns.org
 ```
 
-Google Drive, Telegram, and Bitrix24 are dry-run by default. This keeps public verification deterministic while
-showing the exact payloads that will be sent after credentials are configured:
+Google Drive and Bitrix24 are dry-run by default. The synthetic public workflow also keeps Telegram dry-run.
+Owner-triggered Telegram approvals can be live when `TELEGRAM_BOT_TOKEN` and `TELEGRAM_APPROVAL_CHAT_ID`
+are configured. This keeps public verification deterministic while
+showing the exact CRM payloads that will be sent after credentials are configured:
 
 ```bash
 curl http://127.0.0.1:8080/integrations/runtime

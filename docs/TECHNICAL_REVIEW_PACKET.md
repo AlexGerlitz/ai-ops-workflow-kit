@@ -70,7 +70,7 @@ https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429 or u
 | Telegram is a real contract surface | Public smoke creates a synthetic approval and verifies Telegram callback handling through `POST /webhooks/telegram/approval`. |
 | Bitrix24 handoff is safe | CRM writes are modeled as idempotent outbox events with attempt counters, retry timing, and dead-letter state. |
 | Bitrix24 sandbox is real | Sanitized evidence proves the incoming webhook can call read-only `profile` and CRM `crm.lead.fields`; the committed contract shows the `crm.lead.update` request body. |
-| Public mode is safe | Google Drive, Telegram, and Bitrix24 stay dry-run until production credentials are configured. |
+| Public mode is safe | The synthetic public workflow keeps Telegram and Bitrix24 dry-run; owner-triggered Telegram approvals can be live without opening CRM writes. |
 | Operations are visible | `/runtime`, `/metrics`, smoke scripts, Docker, CI, and docs give a reviewer reproducible evidence. |
 | Acceptance can be checked in one pass | `scripts/reviewer_acceptance_report.py` verifies live API, smoke, GitHub Actions workflows, Pages links, and public PDF. |
 | Evidence is reproducible | `scripts/capture_reviewer_evidence.py` writes a sanitized live snapshot to `docs/evidence/`. |
@@ -127,7 +127,7 @@ allows retry, dead-letter handling, and audit without changing the LLM/RAG contr
 | Duplicate approval handoff | CRM event gets deterministic idempotency key. |
 | Bitrix24 temporary failure | Dispatch records attempt count, `last_error`, `next_retry_at`, and can move to `dead_letter`. |
 | Bitrix24 permission drift | Credentialed preflight checks both generic `profile` and CRM `crm.lead.fields`, so missing CRM scope is visible before enabling writes. |
-| Unsafe public integration writes | Google Drive, Telegram, and Bitrix24 are dry-run by default. |
+| Unsafe public integration writes | The one-click synthetic demo keeps external writes dry-run. Owner-run Telegram evidence is explicit and Bitrix24 writes remain production-gated. |
 | Background worker accidentally mutates demo data | Worker starts only when explicitly enabled and Bitrix24 dry-run is disabled. |
 | Telegram callback spoofing in production | Webhook secret support is available through `TELEGRAM_WEBHOOK_SECRET`. |
 | Deployment drift | `/runtime` exposes deployed Git SHA, version, worker state, integration state, and counters. |

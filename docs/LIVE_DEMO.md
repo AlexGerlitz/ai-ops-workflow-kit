@@ -27,8 +27,9 @@ as a narrower alias for the scoring surface.
    outbox drain count, and public worker state.
 4. Upload an `.m4a`, `.mp3`, or `.wav` call recording in the live audio panel when a Deepgram key
    is configured. The browser path sends the temporary audio file through `POST /demo/audio/upload`,
-   returns the transcript, lead score, pending approval, and dry-run Telegram approval payload, then
-   can approve and drain the Bitrix24 dry-run outbox from the same page.
+   returns the transcript, lead score, pending approval, and a Telegram approval dispatch. On an
+   owner deployment this can send to the real bot; Bitrix24 remains dry-run unless explicitly
+   credentialed.
 
 ## Command-Line Smoke
 
@@ -93,7 +94,9 @@ For committed live evidence, read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_P
 - Production deployments can enable `TELEGRAM_WEBHOOK_SECRET`; the public demo leaves it unset so smoke checks remain inspectable.
 - `/runtime` exposes deployed version, Git SHA, public callback base URL, integration readiness, and counters.
 - `/metrics` exposes Prometheus-style runtime and workflow counters.
-- Google Drive, Telegram, and Bitrix24 remain in dry-run mode until credentials are configured.
+- Google Drive and Bitrix24 remain in dry-run mode until credentials are configured.
+- `/demo/run` keeps Telegram dry-run for public safety; owner-triggered approval messages can use
+  the real Telegram bot and are documented in [Live Owner Proof](./LIVE_OWNER_PROOF.md).
 - The one-click synthetic smoke remains dry-run/local-fixture for deterministic review; the upload panel
   can run live Deepgram transcription when `DEEPGRAM_API_KEY` is configured.
 - Bitrix24 dry-run leaves CRM events queued; production mode records idempotency, attempts, `next_retry_at`, `last_error`, and `dead_letter`.

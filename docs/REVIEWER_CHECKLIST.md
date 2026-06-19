@@ -25,7 +25,7 @@ technical reviewer snapshot passed
 
 The snapshot checks the public deployment, `/runtime`, `/llm/runtime`, `/transcription/runtime`, `/integrations/runtime`,
 `/metrics`, and `/demo/run`. It summarizes the deployed Git SHA, selected LLM provider, supported
-providers, transcription provider, Google Drive/RAG source, score, approval state, Telegram dry-run
+providers, transcription provider, Google Drive/RAG source, score, approval state, synthetic Telegram dry-run
 state, Bitrix24 dry-run state, CRM idempotency key, worker state, and metrics availability.
 
 Read: [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
@@ -66,7 +66,7 @@ workflow produced:
 - transcript score;
 - structured call analysis;
 - approved human review item;
-- dry-run Telegram approval payload;
+- dry-run Telegram approval payload in the synthetic demo;
 - Telegram callback webhook for inline approve/reject decisions;
 - optional Telegram webhook secret verification;
 - queued `bitrix24.mock` CRM handoff.
@@ -197,7 +197,8 @@ Then open:
 | [Architecture](./ARCHITECTURE.md) | FastAPI/n8n/PostgreSQL/LLM boundaries and state ownership. |
 | [Operations](./OPERATIONS.md) | Local runtime, health checks, smoke test, logs, and handoff. |
 | [n8n Approval Flow](./N8N_APPROVAL_FLOW.md) | How importable call-audio, transcript, and Google Drive workflow routing, Telegram payloads, and approval callbacks connect. |
-| [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Google Drive, Telegram, and Bitrix24 dry-run contracts become real credentials later. |
+| [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Google Drive, Telegram, and Bitrix24 contracts become real credentials later. |
+| [Live Owner Proof](./LIVE_OWNER_PROOF.md) | Owner-run live Telegram approval proof while Bitrix24 remains dry-run. |
 | [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, CRM handoff, idempotency, drain, background worker, and integration retry/dead-letter behavior. |
 
 ## 11. What This Proves
@@ -212,7 +213,8 @@ Then open:
 - Retry timing, webhook auth, idempotency, and worker dry-run guard are captured by a deterministic drill.
 - Real Telegram and Bitrix24 credentials can be checked through a read-only, token-redacted preflight.
 - Bitrix24 CRM scope is checked through read-only `crm.lead.fields`, and the production write payload is exposed as sanitized contract evidence.
-- Google Drive, Telegram, and Bitrix24 adapters expose dry-run contracts before credentials are connected.
+- Google Drive and Bitrix24 adapters expose dry-run contracts before credentials are connected.
+- Telegram approval is dry-run in the synthetic public demo and live in the owner-run proof path.
 - Telegram inline callbacks have a backend endpoint that applies approve/reject state transitions.
 - Production Telegram callbacks can be protected with `X-Telegram-Bot-Api-Secret-Token`.
 - Runtime and metrics endpoints expose deploy identity and workflow counters.
