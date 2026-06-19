@@ -19,7 +19,7 @@ prompt demo.
 
 | What to check | Why it matters |
 | --- | --- |
-| [Live demo](https://saleops.duckdns.org/) | Public one-click proof of the deployed Sales Ops workflow. |
+| [Live demo](https://saleops.duckdns.org/) | Public one-click proof of the deployed Sales Ops workflow plus a live audio upload path for owner-provided recordings. |
 | [Public proof status](docs/PUBLIC_PROOF_STATUS.md) | Current CI, live smoke, local gate, Pages route, and public boundary in one reviewer-facing status page. |
 | [Reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md) | One-command acceptance pass across live API, live smoke, GitHub Actions state, Pages route, and public PDF. |
 | [Technical review packet](docs/TECHNICAL_REVIEW_PACKET.md) | 10-15 minute reviewer route covering live snapshot, architecture decisions, failure modes, and rollout boundaries. |
@@ -88,7 +88,7 @@ flowchart LR
 - FastAPI service boundary for AI workflow orchestration.
 - Browser-visible Sales Ops Control Tower demo at `/`.
 - Google Drive import contract for exported document text from n8n or another connector.
-- Call-audio webhook that converts audio metadata through a transcription provider boundary into normalized transcript text.
+- Call-audio webhook and browser upload endpoint that convert audio through a transcription provider boundary into normalized transcript text.
 - Transcription runtime endpoint for OpenAI Whisper, Deepgram, and deterministic local fixture without exposing secrets.
 - RAG ingestion and retrieval with deterministic local embeddings for repeatable development.
 - pgvector-ready schema and Docker Compose runtime.

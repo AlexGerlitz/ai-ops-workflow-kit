@@ -25,6 +25,10 @@ as a narrower alias for the scoring surface.
 3. Verify the response shows a Google Drive import, LLM provider boundary, transcription status,
    high lead score, approved review state, dry-run Telegram payload, dry-run Bitrix24 dispatch,
    outbox drain count, and public worker state.
+4. Upload an `.m4a`, `.mp3`, or `.wav` call recording in the live audio panel when a Deepgram key
+   is configured. The browser path sends the temporary audio file through `POST /demo/audio/upload`,
+   returns the transcript, lead score, pending approval, and dry-run Telegram approval payload, then
+   can approve and drain the Bitrix24 dry-run outbox from the same page.
 
 ## Command-Line Smoke
 
@@ -68,7 +72,7 @@ The smoke check proves that the public edge route, FastAPI runtime, workflow end
 approval callback base URL, LLM provider runtime, transcription boundary, runtime evidence, metrics endpoint,
 and integration dry-run contracts are aligned. It also verifies that the browser UI exposes the current
 reviewer proof labels: Google Drive import, call audio transcription, OpenAI/Claude/Gemini provider boundary,
-Telegram callback approval, outbox drain, and worker state.
+Telegram callback approval, live audio upload, outbox drain, and worker state.
 The `leadscore` alias intentionally keeps approval callbacks on the primary `saleops` URL.
 
 For the complete reviewer route, read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
@@ -80,6 +84,8 @@ For committed live evidence, read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_P
 - The workflow runs through the same `/demo/run` endpoint used by local tests.
 - The workflow imports exported Google Drive text into the same RAG store as direct document ingestion.
 - The workflow accepts call-audio metadata and returns normalized transcript segments before scoring.
+- `POST /demo/audio/upload` accepts a temporary browser-uploaded recording and runs the same
+  transcription -> transcript analysis -> approval path with live STT when a provider key is configured.
 - The callback contract uses the public HTTPS base URL.
 - The smoke check creates a synthetic approval and proves the Telegram callback webhook can reject it.
 - `/llm/runtime` exposes OpenAI, Claude/Anthropic, Gemini, and local fallback state without returning secrets.
@@ -88,7 +94,8 @@ For committed live evidence, read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_P
 - `/runtime` exposes deployed version, Git SHA, public callback base URL, integration readiness, and counters.
 - `/metrics` exposes Prometheus-style runtime and workflow counters.
 - Google Drive, Telegram, and Bitrix24 remain in dry-run mode until credentials are configured.
-- Speech-to-text remains dry-run/local-fixture in the public demo until audio storage and a provider key are configured.
+- The one-click synthetic smoke remains dry-run/local-fixture for deterministic review; the upload panel
+  can run live Deepgram transcription when `DEEPGRAM_API_KEY` is configured.
 - Bitrix24 dry-run leaves CRM events queued; production mode records idempotency, attempts, `next_retry_at`, `last_error`, and `dead_letter`.
 - The live smoke also calls `POST /integrations/bitrix24/drain` to prove the worker-style queue drain surface.
 - `GET /runtime` shows the Bitrix24 outbox worker is disabled in the public dry-run demo.

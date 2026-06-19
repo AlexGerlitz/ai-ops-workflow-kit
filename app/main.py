@@ -4,9 +4,11 @@ from contextlib import asynccontextmanager, suppress
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 from hmac import compare_digest
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 from uuid import UUID, uuid4
 
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse, PlainTextResponse
 
 from app.chunking import chunk_text
@@ -28,6 +30,7 @@ from app.schemas import (
     ApprovalStatus,
     CallAudioWebhookIn,
     CallAudioWebhookOut,
+    CallAudioUploadOut,
     DocumentIn,
     DocumentOut,
     GoogleDriveImportIn,
@@ -46,10 +49,11 @@ from app.schemas import (
     TelegramWebhookOut,
     TranscriptWebhookIn,
     TranscriptWebhookOut,
+    TranscriptionOut,
     TranscriptionRuntimeOut,
 )
 from app.scoring import score_transcript
-from app.settings import settings
+from app.settings import Settings, settings
 from app.store import ChunkRecord, build_store
 from app.transcription import transcribe_call_audio, transcription_runtime
 from app.ui import DEMO_PAGE_HTML
@@ -68,6 +72,17 @@ llm = LLMClient(
 )
 runtime_stats = RuntimeStats()
 logger = logging.getLogger("aiops.integration_worker")
+UPLOAD_CHUNK_BYTES = 1024 * 1024
+UPLOAD_AUDIO_MIME_BY_SUFFIX = {
+    ".aac": "audio/aac",
+    ".m4a": "audio/mp4",
+    ".mp3": "audio/mpeg",
+    ".mp4": "audio/mp4",
+    ".ogg": "audio/ogg",
+    ".opus": "audio/ogg",
+    ".wav": "audio/wav",
+    ".webm": "audio/webm",
+}
 
 
 @asynccontextmanager
@@ -577,9 +592,105 @@ def call_transcript_webhook(payload: TranscriptWebhookIn) -> TranscriptWebhookOu
 
 @app.post("/webhooks/n8n/call-audio", response_model=CallAudioWebhookOut)
 def call_audio_webhook(payload: CallAudioWebhookIn) -> CallAudioWebhookOut:
+    return process_call_audio(payload, settings)
+
+
+@app.post("/demo/audio/upload", response_model=CallAudioUploadOut)
+async def upload_call_audio_demo(
+    file: UploadFile = File(...),
+    call_id: str | None = Form(default=None),
+    customer_id: str = Form(default="uploaded-lead"),
+    language: str = Form(default="ru"),
+    provider: str = Form(default="deepgram"),
+) -> CallAudioUploadOut:
+    temp_path: Path | None = None
+    total_bytes = 0
+    filename = Path(file.filename or "call-audio").name
+    suffix = Path(filename).suffix.lower() or ".audio"
+    try:
+        with NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
+            temp_path = Path(temp_file.name)
+            while chunk := await file.read(UPLOAD_CHUNK_BYTES):
+                total_bytes += len(chunk)
+                if total_bytes > settings.max_call_audio_upload_bytes:
+                    raise HTTPException(status_code=413, detail="call audio upload is too large")
+                temp_file.write(chunk)
+        if total_bytes == 0:
+            raise HTTPException(status_code=400, detail="call audio upload is empty")
+
+        selected_provider = provider.strip() or "deepgram"
+        upload_config = settings.model_copy(
+            update={
+                "transcription_provider": selected_provider,
+                "transcription_dry_run": False,
+            }
+        )
+        payload = CallAudioWebhookIn(
+            call_id=call_id.strip() if call_id and call_id.strip() else f"upload-{uuid4().hex[:12]}",
+            customer_id=customer_id.strip() or "uploaded-lead",
+            audio_uri=str(temp_path),
+            audio_mime_type=guess_upload_audio_mime(filename, file.content_type),
+            duration_seconds=None,
+            language=language.strip() or "ru",
+            provider=selected_provider,
+            metadata={
+                "source": "browser-audio-upload",
+                "original_filename": filename,
+                "upload_bytes": total_bytes,
+            },
+        )
+        result = process_call_audio(payload, upload_config)
+        telegram = notify_approval_in_telegram(result.transcript_result.approval.id)
+        public_audio_uri = f"upload://{filename}"
+        return CallAudioUploadOut(
+            upload={
+                "filename": filename,
+                "bytes": total_bytes,
+                "stored": "temporary",
+                "provider": selected_provider,
+                "language": payload.language,
+            },
+            transcription=public_upload_transcription(result.transcription, public_audio_uri),
+            transcript_result=result.transcript_result,
+            telegram_approval=telegram,
+        )
+    finally:
+        await file.close()
+        if temp_path is not None:
+            with suppress(FileNotFoundError):
+                temp_path.unlink()
+
+
+def guess_upload_audio_mime(filename: str, content_type: str | None) -> str:
+    if content_type and content_type != "application/octet-stream":
+        return content_type
+    return UPLOAD_AUDIO_MIME_BY_SUFFIX.get(Path(filename).suffix.lower(), "application/octet-stream")
+
+
+def public_upload_transcription(
+    transcription: TranscriptionOut,
+    public_audio_uri: str,
+) -> TranscriptionOut:
+    request_contract = {
+        **transcription.request_contract,
+        "audio_uri": public_audio_uri,
+        "body": {"file": "uploaded audio bytes"},
+    }
+    return transcription.model_copy(
+        update={
+            "audio_uri": public_audio_uri,
+            "request_contract": request_contract,
+        }
+    )
+
+
+def process_call_audio(
+    payload: CallAudioWebhookIn,
+    config: Settings,
+) -> CallAudioWebhookOut:
     runtime_stats.increment("audio_webhooks_total")
     try:
-        transcription = transcribe_call_audio(payload, settings)
+        transcription = transcribe_call_audio(payload, config)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     if not transcription.transcript:

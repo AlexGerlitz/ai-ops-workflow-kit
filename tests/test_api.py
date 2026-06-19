@@ -16,7 +16,13 @@ from app.llm import (
     parse_openai_response,
 )
 from app.main import app, queue_crm_handoff_if_needed, settings, store
-from app.schemas import CallAudioWebhookIn, RetrievedContext
+from app.schemas import (
+    CallAudioWebhookIn,
+    RetrievedContext,
+    TranscriptionOut,
+    TranscriptionSegmentOut,
+    TranscriptionStatus,
+)
 from app.settings import Settings
 from app.transcription import transcribe_call_audio_with_client
 
@@ -276,8 +282,10 @@ def test_public_demo_page_is_available() -> None:
     assert "Telegram callback approval" in response.text
     assert "Outbox drain" in response.text
     assert "Worker state" in response.text
+    assert "Transcribe uploaded call" in response.text
     assert "/integrations/google-drive/import" in response.text
     assert "/integrations/bitrix24/drain" in response.text
+    assert "/demo/audio/upload" in response.text
 
 
 def test_integration_runtime_reports_dry_run_capabilities() -> None:
@@ -493,6 +501,78 @@ def test_call_audio_webhook_transcribes_and_continues_to_approval_flow() -> None
         assert runtime["counters"]["audio_webhooks_total"] >= 1
         assert runtime["counters"]["audio_transcriptions_total"] >= 1
         assert runtime["counters"]["transcript_webhooks_total"] >= 1
+
+
+def test_audio_upload_endpoint_runs_live_pipeline_without_exposing_temp_path(monkeypatch) -> None:
+    seen: dict[str, str] = {}
+
+    def fake_transcribe(payload: CallAudioWebhookIn, config: Settings) -> TranscriptionOut:
+        seen["audio_uri"] = payload.audio_uri
+        assert Path(payload.audio_uri).exists()
+        assert payload.audio_mime_type == "audio/mp4"
+        assert payload.provider == "deepgram"
+        assert config.transcription_provider == "deepgram"
+        assert config.transcription_dry_run is False
+        return TranscriptionOut(
+            provider="deepgram",
+            status=TranscriptionStatus.transcribed,
+            audio_uri=payload.audio_uri,
+            audio_mime_type=payload.audio_mime_type,
+            language=payload.language,
+            duration_seconds=None,
+            transcript=(
+                "Manager: The director approved the budget. "
+                "Client: We need the workflow this month. "
+                "Manager: The next step is a meeting tomorrow."
+            ),
+            segments=[
+                TranscriptionSegmentOut(
+                    speaker="speaker_0",
+                    start_seconds=0.0,
+                    end_seconds=5.0,
+                    text="Manager: The director approved the budget.",
+                )
+            ],
+            confidence=0.98,
+            detail="Fake upload transcript.",
+            request_contract={
+                "method": "POST",
+                "url": "https://api.deepgram.com/v1/listen",
+                "audio_uri": payload.audio_uri,
+                "secret_fields": ["DEEPGRAM_API_KEY"],
+            },
+        )
+
+    monkeypatch.setattr("app.main.transcribe_call_audio", fake_transcribe)
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/demo/audio/upload",
+            data={
+                "call_id": "CALL-UPLOAD-1",
+                "customer_id": "LEAD-UPLOAD-1",
+                "language": "en",
+                "provider": "deepgram",
+            },
+            files={"file": ("sales-call.m4a", b"fake m4a bytes", "audio/mp4")},
+        )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["upload"]["filename"] == "sales-call.m4a"
+    assert body["upload"]["stored"] == "temporary"
+    assert body["transcription"]["provider"] == "deepgram"
+    assert body["transcription"]["status"] == "transcribed"
+    assert body["transcription"]["audio_uri"] == "upload://sales-call.m4a"
+    assert body["transcription"]["request_contract"]["audio_uri"] == "upload://sales-call.m4a"
+    assert body["transcription"]["request_contract"]["body"] == {"file": "uploaded audio bytes"}
+    assert body["transcript_result"]["score"] >= 80
+    assert body["transcript_result"]["approval"]["status"] == "pending"
+    assert body["telegram_approval"]["adapter_key"] == "telegram.approval"
+    assert body["telegram_approval"]["status"] == "dry_run"
+    assert Path(seen["audio_uri"]).is_absolute()
+    assert not Path(seen["audio_uri"]).exists()
+    assert seen["audio_uri"] not in json.dumps(body)
 
 
 def test_telegram_approval_notification_dry_run_contract() -> None:

@@ -290,6 +290,13 @@ class IntegrationDispatchOut(BaseModel):
     max_attempts: int | None = None
 
 
+class CallAudioUploadOut(BaseModel):
+    upload: dict[str, Any]
+    transcription: TranscriptionOut
+    transcript_result: TranscriptWebhookOut
+    telegram_approval: IntegrationDispatchOut
+
+
 class IntegrationDrainOut(BaseModel):
     adapter_key: str
     selected: int

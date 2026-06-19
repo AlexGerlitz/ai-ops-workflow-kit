@@ -49,6 +49,29 @@ DEMO_PAGE_HTML = """
       box-shadow: var(--shadow);
     }
     button:disabled { cursor: wait; opacity: 0.72; }
+    button.secondary {
+      background: #27364a;
+      box-shadow: none;
+    }
+    input, select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--text);
+      padding: 8px 10px;
+      font: inherit;
+    }
+    input[type="file"] { padding: 8px; }
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
     .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 14px; }
     .panel {
       background: var(--panel);
@@ -100,6 +123,21 @@ DEMO_PAGE_HTML = """
       max-height: 460px;
     }
     .stack { display: grid; gap: 10px; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 10px;
+      align-items: end;
+      margin-top: 12px;
+    }
+    .field { grid-column: span 3; min-width: 0; }
+    .field.wide { grid-column: span 6; }
+    .field.actions {
+      grid-column: span 12;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
     .step {
       display: grid;
       grid-template-columns: 26px 1fr;
@@ -119,6 +157,7 @@ DEMO_PAGE_HTML = """
     @media (max-width: 840px) {
       header { grid-template-columns: 1fr; align-items: start; }
       .span-2, .span-3, .span-4, .span-5, .span-7 { grid-column: span 12; }
+      .field, .field.wide { grid-column: span 12; }
     }
   </style>
 </head>
@@ -201,6 +240,48 @@ DEMO_PAGE_HTML = """
         <div id="integrations" class="stack" style="margin-top: 12px;"></div>
       </div>
       <div class="panel span-12">
+        <div class="row">
+          <span class="pill">Live Deepgram</span>
+          <span class="pill">Audio upload</span>
+          <span class="pill">AI score</span>
+          <span class="pill">Approval handoff</span>
+        </div>
+        <form id="audio-upload-form" class="form-grid">
+          <div class="field wide">
+            <label for="upload-file">Call recording</label>
+            <input id="upload-file" name="file" type="file" accept=".aac,.m4a,.mp3,.mp4,.ogg,.opus,.wav,.webm,audio/*" required>
+          </div>
+          <div class="field">
+            <label for="upload-call-id">Call ID</label>
+            <input id="upload-call-id" name="call_id" value="manual-demo-call">
+          </div>
+          <div class="field">
+            <label for="upload-customer-id">Customer ID</label>
+            <input id="upload-customer-id" name="customer_id" value="manual-demo-lead">
+          </div>
+          <div class="field">
+            <label for="upload-language">Language</label>
+            <select id="upload-language" name="language">
+              <option value="ru" selected>ru</option>
+              <option value="en">en</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="upload-provider">Provider</label>
+            <select id="upload-provider" name="provider">
+              <option value="deepgram" selected>deepgram</option>
+              <option value="openai_whisper">openai_whisper</option>
+            </select>
+          </div>
+          <div class="field actions">
+            <button id="upload-run" type="submit">Transcribe uploaded call</button>
+            <button id="upload-approve" class="secondary" type="button" disabled>Approve and drain CRM</button>
+            <span id="upload-status" class="small">Waiting for audio</span>
+          </div>
+        </form>
+        <pre id="upload-transcript">{ "transcript": "waiting" }</pre>
+      </div>
+      <div class="panel span-12">
         <div class="label">Workflow output</div>
         <pre id="output">{ "status": "idle" }</pre>
       </div>
@@ -210,6 +291,12 @@ DEMO_PAGE_HTML = """
   <script>
     const runButton = document.getElementById("run");
     const output = document.getElementById("output");
+    const uploadForm = document.getElementById("audio-upload-form");
+    const uploadButton = document.getElementById("upload-run");
+    const uploadApproveButton = document.getElementById("upload-approve");
+    const uploadTranscript = document.getElementById("upload-transcript");
+    let latestUploadApprovalId = null;
+    let latestUploadResult = null;
 
     const setText = (id, value) => { document.getElementById(id).textContent = value; };
     const pretty = (value) => JSON.stringify(value, null, 2);
@@ -224,6 +311,13 @@ DEMO_PAGE_HTML = """
       const llm = runtime.llm;
       setText("llm", llm.selected_provider);
       setText("llm-sub", llm.supported_providers.join(" / "));
+    }
+
+    function renderTranscriptionState(runtime) {
+      const transcription = runtime.transcription;
+      const deepgram = transcription.providers.find((item) => item.provider === "deepgram");
+      setText("transcription", transcription.selected_provider);
+      setText("transcription-sub", `Deepgram ${deepgram && deepgram.configured ? "configured" : "not configured"}`);
     }
 
     function renderIntegrations(runtime) {
@@ -245,6 +339,7 @@ DEMO_PAGE_HTML = """
       const runtimeResponse = await fetch("/runtime");
       const runtimeState = await runtimeResponse.json();
       renderLlmState(runtimeState);
+      renderTranscriptionState(runtimeState);
       renderWorkerState(runtimeState);
       const response = await fetch("/integrations/runtime");
       const runtime = await response.json();
@@ -295,7 +390,86 @@ DEMO_PAGE_HTML = """
       }
     }
 
+    function renderUploadResult(data) {
+      latestUploadResult = data;
+      latestUploadApprovalId = data.transcript_result.approval.id;
+      const segments = data.transcription.segments || [];
+      setText("upload-status", `${data.upload.filename}: ${data.transcription.status}`);
+      setText("transcription", data.transcription.status);
+      setText("transcription-sub", `${data.transcription.provider}: ${segments.length} segment(s)`);
+      setText("score", `${data.transcript_result.score}/100`);
+      setText("risk", `Risk: ${data.transcript_result.analysis.risk_level}`);
+      setText("approval", data.transcript_result.approval.status);
+      setText("reviewer", "waiting for approval");
+      setText("crm", "pending");
+      setText("crm-sub", "approval required");
+      setText("step2", `${data.transcription.provider} ${data.transcription.status}: ${segments.length} segment(s)`);
+      setText("step3", data.transcript_result.analysis.next_action);
+      setText("step4", `${data.telegram_approval.adapter_key} ${data.telegram_approval.status}`);
+      uploadApproveButton.disabled = false;
+      uploadTranscript.textContent = data.transcription.transcript || "(empty transcript)";
+      output.textContent = pretty({ audio_upload: data });
+    }
+
+    async function uploadAudio(event) {
+      event.preventDefault();
+      uploadButton.disabled = true;
+      uploadApproveButton.disabled = true;
+      latestUploadApprovalId = null;
+      setText("upload-status", "Transcribing...");
+      uploadTranscript.textContent = pretty({ status: "transcribing" });
+      try {
+        const response = await fetch("/demo/audio/upload", {
+          method: "POST",
+          body: new FormData(uploadForm),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(pretty(data));
+        renderUploadResult(data);
+      } catch (error) {
+        setText("upload-status", "Upload failed");
+        uploadTranscript.textContent = pretty({ status: "failed", detail: String(error.message || error) });
+      } finally {
+        uploadButton.disabled = false;
+      }
+    }
+
+    async function approveUploadedCall() {
+      if (!latestUploadApprovalId) return;
+      uploadApproveButton.disabled = true;
+      setText("upload-status", "Approving...");
+      try {
+        const approvalResponse = await fetch(`/approvals/${latestUploadApprovalId}/approve`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ reviewer: "browser-demo", notes: "Approved from live audio upload demo" }),
+        });
+        const approval = await approvalResponse.json();
+        if (!approvalResponse.ok) throw new Error(pretty(approval));
+        const drainResponse = await fetch("/integrations/bitrix24/drain?limit=100", { method: "POST" });
+        const drain = await drainResponse.json();
+        if (!drainResponse.ok) throw new Error(pretty(drain));
+        const runtimeResponse = await fetch("/runtime");
+        const runtimeState = await runtimeResponse.json();
+        setText("approval", approval.status);
+        setText("reviewer", approval.reviewer || "browser-demo");
+        setText("crm", "queued");
+        setText("crm-sub", `drain dry-run: ${drain.dry_run}`);
+        setText("outbox", `${drain.dry_run}`);
+        setText("outbox-sub", `${drain.dispatched} event(s), ${drain.dead_letter} dead-letter`);
+        renderWorkerState(runtimeState);
+        setText("upload-status", "Approved and drained");
+        output.textContent = pretty({ audio_upload: latestUploadResult, approval, bitrix24_outbox_drain: drain, runtime: runtimeState });
+      } catch (error) {
+        setText("upload-status", "Approval failed");
+        output.textContent = pretty({ status: "approval-failed", detail: String(error.message || error), audio_upload: latestUploadResult });
+        uploadApproveButton.disabled = false;
+      }
+    }
+
     runButton.addEventListener("click", runDemo);
+    uploadForm.addEventListener("submit", uploadAudio);
+    uploadApproveButton.addEventListener("click", approveUploadedCall);
     loadRuntime().catch((error) => {
       output.textContent = pretty({ status: "runtime-check-failed", detail: String(error.message || error) });
     });

@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     whisper_model: str = "whisper-1"
     deepgram_api_key: str | None = None
     deepgram_model: str = "nova-3"
+    max_call_audio_upload_bytes: int = 25 * 1024 * 1024
     public_base_url: str = "http://127.0.0.1:8080"
     telegram_bot_token: str | None = None
     telegram_approval_chat_id: str | None = None
