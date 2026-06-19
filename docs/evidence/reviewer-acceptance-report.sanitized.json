@@ -1,6 +1,6 @@
 {
   "evidence_schema": "reviewer_acceptance_report_v1",
-  "generated_at": "2026-06-19T11:18:33.996333+00:00",
+  "generated_at": "2026-06-19T14:22:15.559227+00:00",
   "ok": true,
   "sanitized": true,
   "secret_boundaries": {
@@ -118,10 +118,10 @@
       "telegram": "dry_run",
       "bitrix24": "dry_run",
       "crm_event_status": "queued",
-      "bitrix24_drain": "11",
+      "bitrix24_drain": "17",
       "worker_active": "False"
     },
-    "console_tail": "live demo smoke passed\nbase_url=https://saleops.duckdns.org\ncallback_base_url=https://saleops.duckdns.org\nversion=0.2.0\ngit_sha=67c3fbbafbd5a3c26a267d9735f1737382b9deb7\nllm=local\nscore=100\ngoogle_drive=gdrive://demo-sales-playbook\ntranscription=local_stub:dry_run\napproval=approved\ntelegram_callback=rejected\ntelegram=dry_run\nbitrix24=dry_run\ncrm_event_status=queued\nbitrix24_drain=11\nworker_active=False\n"
+    "console_tail": "live demo smoke passed\nbase_url=https://saleops.duckdns.org\ncallback_base_url=https://saleops.duckdns.org\nversion=0.2.0\ngit_sha=67c3fbbafbd5a3c26a267d9735f1737382b9deb7\nllm=local\nscore=100\ngoogle_drive=gdrive://demo-sales-playbook\ntranscription=local_stub:dry_run\napproval=approved\ntelegram_callback=rejected\ntelegram=dry_run\nbitrix24=dry_run\ncrm_event_status=queued\nbitrix24_drain=17\nworker_active=False\n"
   },
   "github": {
     "status": "passed",
@@ -146,9 +146,9 @@
       "status": "passed",
       "name": "CI",
       "conclusion": "success",
-      "head_sha": "67c3fbbafbd5a3c26a267d9735f1737382b9deb7",
-      "html_url": "https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27821462710",
-      "created_at": "2026-06-19T10:53:49Z"
+      "head_sha": "addd91e396c6ae2feb003a2e8d73afe6b84e7032",
+      "html_url": "https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27822610360",
+      "created_at": "2026-06-19T11:19:16Z"
     },
     "latest_checked_sandbox_run": {
       "status": "passed",
@@ -170,22 +170,22 @@
       },
       {
         "status": "passed",
-        "url": "https://alexgerlitz.github.io/AlexGerlitz/verification-pack.html",
+        "url": "https://alexgerlitz.github.io/AlexGerlitz/role-fit.html",
         "missing_markers": []
       },
       {
         "status": "passed",
-        "url": "https://alexgerlitz.github.io/AlexGerlitz/hiring-screen.html",
+        "url": "https://alexgerlitz.github.io/AlexGerlitz/start-conversation.html",
         "missing_markers": []
       },
       {
         "status": "passed",
-        "url": "https://alexgerlitz.github.io/AlexGerlitz/application-pack.html",
+        "url": "https://alexgerlitz.github.io/AlexGerlitz/drivedesk-ai-operator.html",
         "missing_markers": []
       },
       {
         "status": "passed",
-        "url": "https://alexgerlitz.github.io/AlexGerlitz/resume.html",
+        "url": "https://alexgerlitz.github.io/AlexGerlitz/AI_AUTOMATION_ROLE_FIT.md",
         "missing_markers": []
       },
       {

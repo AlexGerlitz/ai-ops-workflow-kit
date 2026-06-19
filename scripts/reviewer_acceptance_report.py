@@ -172,27 +172,27 @@ def build_profile_report(profile_base_url: str, timeout: float) -> dict[str, Any
     pages = [
         profile_page_check(
             base + "/",
-            ["AI Ops proof status", "credentialed-sandbox-preflight.yml"],
+            ["Open AI Operator case", "Live owner proof", "Start conversation"],
             timeout,
         ),
         profile_page_check(
-            base + "/verification-pack.html",
-            ["AI Ops public proof status", "owner-run sandbox workflow"],
+            base + "/role-fit.html",
+            ["AI Ops proof status", "Live owner proof", "AI Ops CI workflow"],
             timeout,
         ),
         profile_page_check(
-            base + "/hiring-screen.html",
-            ["AI Ops sandbox workflow", "AI Ops CI workflow"],
+            base + "/start-conversation.html",
+            ["Current Public Proof", "Live owner proof", "AI Operator case"],
             timeout,
         ),
         profile_page_check(
-            base + "/application-pack.html",
-            ["owner-run sandbox workflow", "AI Ops public proof status"],
+            base + "/drivedesk-ai-operator.html",
+            ["Live owner proof", "Open public proof status", "Open CI workflow"],
             timeout,
         ),
         profile_page_check(
-            base + "/resume.html",
-            ["owner-run sandbox workflow", "AI Ops public proof status"],
+            base + "/AI_AUTOMATION_ROLE_FIT.md",
+            ["Live owner proof", "Live Telegram approval evidence", "AI Ops CI workflow"],
             timeout,
         ),
         profile_pdf_check(

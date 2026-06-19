@@ -19,31 +19,13 @@ prompt demo.
 
 | What to check | Why it matters |
 | --- | --- |
-| [Live demo](https://saleops.duckdns.org/) | Public one-click proof of the deployed Sales Ops workflow plus a live audio upload path for owner-provided recordings. |
-| [Public proof status](docs/PUBLIC_PROOF_STATUS.md) | Current CI, live smoke, local gate, Pages route, and public boundary in one reviewer-facing status page. |
+| [Live demo](https://saleops.duckdns.org/) | Browser-visible Sales Ops workflow with Google Drive/RAG, call-audio path, scoring, approval, and CRM handoff boundary. |
+| [Live owner proof](docs/LIVE_OWNER_PROOF.md) | Real Telegram approval callback proof: approved item -> queued CRM handoff, while Bitrix24 stays dry-run. |
 | [Reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md) | One-command acceptance pass across live API, live smoke, GitHub Actions state, Pages route, and public PDF. |
 | [Technical review packet](docs/TECHNICAL_REVIEW_PACKET.md) | 10-15 minute reviewer route covering live snapshot, architecture decisions, failure modes, and rollout boundaries. |
-| [Reviewer evidence pack](docs/REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live snapshot plus the command that regenerates it from the public deployment. |
-| [Production readiness drill](docs/PRODUCTION_READINESS_DRILL.md) | Deterministic failure-mode proof for webhook auth, retry/dead-letter, drain scheduling, idempotency, and worker dry-run guard. |
+| [Production readiness drill](docs/PRODUCTION_READINESS_DRILL.md) | Failure-mode proof for webhook auth, retry/dead-letter, drain scheduling, idempotency, and worker dry-run guard. |
 | [Credentialed sandbox preflight](docs/CREDENTIALED_SANDBOX_PREFLIGHT.md) | Read-only Telegram/Bitrix24 credential boundary check that never prints tokens or writes CRM records. |
-| [Live owner proof](docs/LIVE_OWNER_PROOF.md) | Sanitized evidence that a real Telegram approval was approved and queued a CRM handoff while Bitrix24 stayed dry-run. |
-| [Owner-run sandbox workflow](.github/workflows/credentialed-sandbox-preflight.yml) | Manual GitHub Actions path for running Telegram/Bitrix24 sandbox checks from repository secrets and uploading sanitized evidence. |
-| [Live combined sandbox run](https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429) | Owner-run credentialed preflight against Telegram and Bitrix24 secrets: `telegram getMe=passed`, `webhook=passed`, `bitrix24 profile=passed`, `crm_lead_fields=passed`. |
-| [Live Telegram approval evidence](docs/evidence/live-telegram-approval.txt) | Owner-run proof: Telegram live message -> inline approve callback -> approved item -> queued CRM outbox event, with secrets redacted. |
-| [Bitrix24 contract evidence](docs/evidence/bitrix24-contract.txt) | Sanitized proof of the `crm.lead.update` REST request shape, idempotency boundary, dry-run guard, and token redaction. |
-| [Bitrix24 sandbox preflight](docs/evidence/bitrix24-sandbox-preflight.txt) | Sanitized read-only proof that the Bitrix24 incoming webhook can call `profile` and CRM `crm.lead.fields` without writing records. |
-| [Evidence map](docs/EVIDENCE_MAP.md) | Maps the repo to AI automation, RAG, approval flow, Bitrix24, Telegram, and self-hosting requirements. |
-| [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Maps common AI automation vacancy requirements to exact files, endpoints, verification commands, and production boundaries. |
-| [Offer demo](docs/OFFER_DEMO.md) | One-command proof of Google Drive import -> RAG -> call-audio transcription boundary -> transcript scoring -> Telegram approval -> idempotent outbox drain -> dry-run Bitrix24 CRM handoff. |
-| [Reviewer checklist](docs/REVIEWER_CHECKLIST.md) | Single public gate for tests, offer demo, and output validation. |
-| [Live demo notes](docs/LIVE_DEMO.md) | Public URLs and smoke checks for the deployed service. |
-| [Architecture notes](docs/ARCHITECTURE.md) | Shows the FastAPI/n8n/PostgreSQL boundary and why stateful logic stays in the backend. |
-| [Operations notes](docs/OPERATIONS.md) | Shows how the system is run, checked, and handed off. |
-| [n8n approval flow](docs/N8N_APPROVAL_FLOW.md) | Shows importable call-audio, transcript, and Google Drive workflows, Telegram payloads, approval callbacks, and CRM handoff boundaries. |
-| [Integration skeleton](docs/INTEGRATION_SKELETON.md) | Shows Telegram live/dry-run boundaries, Bitrix24 idempotency, retry scheduling, drain, opt-in worker, and dead-letter contracts before credentials are connected. |
-| [Tests](tests/) | Shows deterministic coverage around chunking, retrieval, approvals, and API behavior. |
-| [CI workflow](.github/workflows/ci.yml) | Shows the public verification gate. |
-| `infra/n8n/` | Shows how automation/workflow tooling connects without taking over core domain state. |
+| [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Vacancy-style AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
 
 Best-fit evidence:
 
@@ -70,6 +52,21 @@ Fast evaluation path:
 14. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
 15. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
 16. Review `infra/n8n/` to see the external workflow boundary.
+
+## Deep Proof Index
+
+| Surface | Proof |
+| --- | --- |
+| Public status | [Public proof status](docs/PUBLIC_PROOF_STATUS.md) with current CI, live smoke, local gate, Pages route, and public boundary. |
+| Evidence pack | [Reviewer evidence pack](docs/REVIEWER_EVIDENCE_PACK.md) with committed sanitized live snapshot plus the regeneration command. |
+| Owner-run sandbox | [Owner-run sandbox workflow](.github/workflows/credentialed-sandbox-preflight.yml) and [live combined sandbox run](https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429) for Telegram and Bitrix24 read-only checks. |
+| Telegram proof | [Live Telegram approval evidence](docs/evidence/live-telegram-approval.txt): live message -> inline approve callback -> queued CRM outbox event, with secrets redacted. |
+| Bitrix24 proof | [Bitrix24 contract evidence](docs/evidence/bitrix24-contract.txt) and [Bitrix24 sandbox preflight](docs/evidence/bitrix24-sandbox-preflight.txt). |
+| Offer demo | [Offer demo](docs/OFFER_DEMO.md) for Google Drive import -> RAG -> call-audio transcription boundary -> transcript scoring -> Telegram approval -> outbox drain -> dry-run Bitrix24 handoff. |
+| Reviewer gate | [Reviewer checklist](docs/REVIEWER_CHECKLIST.md), [CI workflow](.github/workflows/ci.yml), and deterministic tests in [tests/](tests/). |
+| Runtime docs | [Live demo notes](docs/LIVE_DEMO.md), [Operations notes](docs/OPERATIONS.md), and runtime endpoints `/runtime`, `/llm/runtime`, `/transcription/runtime`, `/integrations/runtime`, `/metrics`. |
+| Architecture | [Architecture notes](docs/ARCHITECTURE.md), [Evidence map](docs/EVIDENCE_MAP.md), and [Integration skeleton](docs/INTEGRATION_SKELETON.md). |
+| n8n boundary | [n8n approval flow](docs/N8N_APPROVAL_FLOW.md) and importable workflows in [`infra/n8n/`](infra/n8n/). |
 
 ## System Shape
 
