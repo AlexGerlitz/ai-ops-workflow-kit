@@ -245,6 +245,7 @@ async def run_demo_workflow() -> OfferDemoRunOut:
             "attempt_count": bitrix24.attempt_count,
             "max_attempts": bitrix24.max_attempts,
             "method": bitrix24.payload["method"],
+            "bitrix_request": bitrix24.payload["bitrix_request"],
         },
     )
 

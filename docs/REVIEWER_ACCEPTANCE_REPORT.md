@@ -27,6 +27,7 @@ Generated evidence:
 | GitHub proof state | Public CI workflow, latest checked CI run, owner-run `Credentialed Sandbox Preflight` workflow, and latest checked sandbox run are successful. |
 | Profile proof route | GitHub Pages surfaces link to AI Ops public proof status and owner-run sandbox workflow. |
 | Resume artifact | Public PDF resume is present and downloadable. |
+| Bitrix24 contract artifact | Committed sanitized proof for `crm.lead.update` request shape, dry-run guard, and token redaction. |
 
 ## Expected Summary
 
@@ -38,6 +39,7 @@ live_smoke=passed
 github=passed
 sandbox_run=success
 profile_pages=passed
+bitrix24_contract=passed
 secret_boundaries=secrets_printed=False mutating_external_calls=False
 ```
 
@@ -45,5 +47,6 @@ secret_boundaries=secrets_printed=False mutating_external_calls=False
 
 - The report does not use or print private API keys.
 - Public mode stays dry-run for Telegram and Bitrix24 external actions.
-- Telegram owner-run sandbox evidence is present as a sanitized artifact. Bitrix24 remains a separate
-  target-specific proof until a `BITRIX24_WEBHOOK_URL` repository secret is configured.
+- Telegram owner-run sandbox evidence is present as a sanitized artifact.
+- Bitrix24 has sanitized read-only sandbox evidence for `profile` and `crm.lead.fields`, plus a
+  committed contract artifact for the production dispatch request shape.

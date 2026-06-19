@@ -68,6 +68,7 @@ def test_format_text_summarizes_acceptance_boundaries() -> None:
             "live_smoke": "passed",
             "github": "passed",
             "profile_pages": "passed",
+            "bitrix24_contract": "passed",
         },
         "live_snapshot": {
             "git_sha": "abc123",
@@ -92,6 +93,11 @@ def test_format_text_summarizes_acceptance_boundaries() -> None:
             "credentialed_sandbox_workflow": {"state": "active"},
         },
         "profile": {"pages": [{}, {}]},
+        "bitrix24_contract": {
+            "method": "crm.lead.update",
+            "request_shape": True,
+            "secret_token_leaked": False,
+        },
         "secret_boundaries": {
             "secrets_printed": False,
             "mutating_external_calls": False,
@@ -104,4 +110,5 @@ def test_format_text_summarizes_acceptance_boundaries() -> None:
     assert "reviewer acceptance report passed" in text
     assert "live_smoke=passed score=100 telegram_callback=rejected bitrix24_drain=31" in text
     assert "sandbox_run=success" in text
+    assert "bitrix24_contract=passed method=crm.lead.update request_shape=True" in text
     assert "secret_boundaries=secrets_printed=False mutating_external_calls=False" in text

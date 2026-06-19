@@ -159,7 +159,8 @@ Dry-run response includes:
 - Bitrix24 method name;
 - source integration event id;
 - source approval id;
-- CRM update payload.
+- internal CRM update payload;
+- Bitrix24 REST request body sent to the selected method.
 
 Production behavior after dry-run is disabled:
 
@@ -183,7 +184,17 @@ The endpoint response includes the adapter result plus the backend event state:
   "status": "not_configured",
   "event_status": "retry",
   "attempt_count": 1,
-  "max_attempts": 3
+  "max_attempts": 3,
+  "payload": {
+    "method": "crm.lead.update",
+    "bitrix_request": {
+      "id": "42",
+      "fields": {
+        "COMMENTS": "AI lead score, risk, summary, objections, and next task"
+      },
+      "params": { "REGISTER_SONET_EVENT": "Y" }
+    }
+  }
 }
 ```
 

@@ -453,6 +453,8 @@ def test_offer_demo_call_transcript_queues_crm_handoff_after_approval() -> None:
         assert dispatch_body["event_status"] == "queued"
         assert dispatch_body["attempt_count"] == 0
         assert dispatch_body["payload"]["method"] == "crm.lead.update"
+        assert dispatch_body["payload"]["bitrix_request"]["id"] == "42"
+        assert "COMMENTS" in dispatch_body["payload"]["bitrix_request"]["fields"]
 
 
 def test_bitrix24_dispatch_records_retry_state_and_dead_letter(monkeypatch) -> None:

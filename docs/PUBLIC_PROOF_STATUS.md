@@ -17,6 +17,8 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 | Credential preflight | Public no-secret evidence plus target-specific modes: `--require-target telegram` and `--require-target bitrix24` |
 | Owner-run sandbox workflow | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/credentialed-sandbox-preflight.yml |
 | Latest live Telegram sandbox run | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178 -> `telegram=configured=True get_me=passed webhook=passed`, sanitized artifact committed in `docs/evidence/` |
+| Bitrix24 contract evidence | `docs/evidence/bitrix24-contract.txt` -> `method=crm.lead.update`, `request_shape=True`, `secret_token_leaked=False` |
+| Live Bitrix24 read-only sandbox | `docs/evidence/bitrix24-sandbox-preflight.txt` -> `profile=passed`, `crm_lead_fields=passed`, `origin=https://b24-jgkzt9.bitrix24.ru` |
 | Profile Pages route | https://alexgerlitz.github.io/AlexGerlitz/ |
 | Public resume PDF | Published from the profile repo and linked from the Pages route |
 
@@ -30,12 +32,14 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 6. Read [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
 7. Read [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
 8. Inspect the latest live Telegram sandbox run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178
-9. Run `bash scripts/smoke_live_demo.sh https://saleops.duckdns.org`.
-10. Run `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh`.
+9. Inspect `docs/evidence/bitrix24-contract.txt` and `docs/evidence/bitrix24-sandbox-preflight.txt`.
+10. Run `bash scripts/smoke_live_demo.sh https://saleops.duckdns.org`.
+11. Run `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh`.
 
 ## Public Boundary
 
 - Public demo mode intentionally avoids customer data, real Telegram sends, real Bitrix24 writes, and committed secrets.
 - Live runtime may report an older deployed app Git SHA when the latest repository changes are docs, tests, or verification scripts only. CI proves those repository changes; live smoke proves the deployed workflow remains healthy.
-- Telegram sandbox credentials have been validated through the owner-run workflow; Bitrix24 remains target-specific until a `BITRIX24_WEBHOOK_URL` secret is configured.
+- Telegram sandbox credentials have been validated through the owner-run workflow.
+- Bitrix24 sandbox evidence validates the incoming webhook with read-only `profile` and CRM `crm.lead.fields`; public CRM writes remain dry-run and production-gated.
 - Private sandbox artifacts should be generated through the manual GitHub Actions workflow or a local run, then inspected as sanitized evidence instead of committing secrets.

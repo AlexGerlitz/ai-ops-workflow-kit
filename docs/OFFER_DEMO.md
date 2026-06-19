@@ -112,7 +112,14 @@ Example high-level result:
     "status": "dry_run",
     "event_status": "queued",
     "attempt_count": 0,
-    "method": "crm.lead.update"
+    "method": "crm.lead.update",
+    "bitrix_request": {
+      "id": "42",
+      "fields": {
+        "COMMENTS": "AI lead score, risk, summary, objections, and next task"
+      },
+      "params": { "REGISTER_SONET_EVENT": "Y" }
+    }
   }
 }
 ```

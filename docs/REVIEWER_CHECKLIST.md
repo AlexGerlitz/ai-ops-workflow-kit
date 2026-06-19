@@ -69,6 +69,7 @@ workflow produced:
 - optional Telegram webhook secret verification;
 - queued `bitrix24.mock` CRM handoff.
 - dry-run Bitrix24 dispatch payload.
+- exact Bitrix24 `crm.lead.update` request body for the dispatch adapter.
 - Bitrix24 idempotency, retry scheduling, drain, opt-in worker, and dead-letter state for failed production dispatches.
 - runtime identity and metrics surface.
 
@@ -112,6 +113,10 @@ finishing.
 Current live Telegram evidence is already available at
 https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178 and in
 `docs/evidence/credentialed-sandbox-preflight.*`.
+
+Current live Bitrix24 read-only evidence is available in
+`docs/evidence/bitrix24-sandbox-preflight.*`; the committed Bitrix24 contract artifact is in
+`docs/evidence/bitrix24-contract.*`.
 
 ## 6. Inspect The Offer Demo
 
@@ -181,6 +186,7 @@ Then open:
 | [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live evidence and regeneration command. |
 | [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md) | Failure-mode evidence for auth, retry/dead-letter, drain scheduling, idempotency, and worker guard. |
 | [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md) | Read-only real-credential boundary for Telegram and Bitrix24 sandbox checks. |
+| [Bitrix24 Contract Evidence](./evidence/bitrix24-contract.txt) | Sanitized REST request contract for the Bitrix24 CRM dispatch adapter. |
 | [Owner-run Sandbox Workflow](../.github/workflows/credentialed-sandbox-preflight.yml) | Manual GitHub Actions path for sanitized Telegram/Bitrix24 sandbox evidence from repository secrets. |
 | [Evidence Map](./EVIDENCE_MAP.md) | Requirement-by-requirement proof map for AI automation roles. |
 | [Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md) | Vacancy-style AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
@@ -201,6 +207,7 @@ Then open:
 - CRM dispatch failures become retry/dead-letter state with `next_retry_at`, not invisible log-only errors.
 - Retry timing, webhook auth, idempotency, and worker dry-run guard are captured by a deterministic drill.
 - Real Telegram and Bitrix24 credentials can be checked through a read-only, token-redacted preflight.
+- Bitrix24 CRM scope is checked through read-only `crm.lead.fields`, and the production write payload is exposed as sanitized contract evidence.
 - Google Drive, Telegram, and Bitrix24 adapters expose dry-run contracts before credentials are connected.
 - Telegram inline callbacks have a backend endpoint that applies approve/reject state transitions.
 - Production Telegram callbacks can be protected with `X-Telegram-Bot-Api-Secret-Token`.

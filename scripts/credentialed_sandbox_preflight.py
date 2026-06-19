@@ -178,6 +178,54 @@ def bitrix24_profile(client: httpx.Client, webhook_url: str | None) -> dict[str,
     }
 
 
+def bitrix24_crm_lead_fields(client: httpx.Client, webhook_url: str | None) -> dict[str, Any]:
+    if not webhook_url:
+        return {"status": "skipped", "reason": "BITRIX24_WEBHOOK_URL is not configured"}
+
+    parsed = urlparse(webhook_url)
+    if not parsed.scheme or not parsed.hostname:
+        return {
+            "status": "failed",
+            "error": "BITRIX24_WEBHOOK_URL is not a valid URL",
+            "webhook_origin": "<invalid-url>",
+        }
+
+    try:
+        response = client.post(join_url(webhook_url, "/crm.lead.fields.json"))
+    except httpx.HTTPError as exc:
+        return {
+            "status": "failed",
+            "error": f"bitrix24_request_failed:{exc.__class__.__name__}",
+            "webhook_origin": redacted_url_origin(webhook_url),
+        }
+    try:
+        body = response.json()
+    except json.JSONDecodeError:
+        return {
+            "status": "failed",
+            "http_status": response.status_code,
+            "error": "bitrix24_response_was_not_json",
+            "webhook_origin": redacted_url_origin(webhook_url),
+        }
+
+    if response.status_code >= 400 or body.get("error"):
+        return {
+            "status": "failed",
+            "http_status": response.status_code,
+            "bitrix_error": body.get("error") or "http_error",
+            "webhook_origin": redacted_url_origin(webhook_url),
+        }
+
+    result = body.get("result") or {}
+    return {
+        "status": "passed",
+        "http_status": response.status_code,
+        "webhook_origin": redacted_url_origin(webhook_url),
+        "lead_fields_present": bool(result),
+        "core_fields_present": all(field in result for field in ("ID", "TITLE", "STATUS_ID")),
+    }
+
+
 def missing_required_targets(
     required_targets: set[str],
     telegram_configured: bool,
@@ -209,6 +257,10 @@ def build_report(settings: Settings, timeout: float, required_targets: set[str])
                 settings.public_base_url,
             ),
             "bitrix24_profile": bitrix24_profile(client, settings.bitrix24_webhook_url),
+            "bitrix24_crm_lead_fields": bitrix24_crm_lead_fields(
+                client,
+                settings.bitrix24_webhook_url,
+            ),
         }
 
     failures = [name for name, check in checks.items() if status_is_failure(check)]
@@ -274,6 +326,7 @@ def format_text(report: dict[str, Any]) -> str:
                 "bitrix24="
                 f"configured={environment['bitrix24_webhook_url_configured']} "
                 f"profile={checks['bitrix24_profile']['status']} "
+                f"crm_lead_fields={checks['bitrix24_crm_lead_fields']['status']} "
                 f"origin={environment['bitrix24_webhook_origin']}"
             ),
             (

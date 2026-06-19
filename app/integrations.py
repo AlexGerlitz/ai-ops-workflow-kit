@@ -133,12 +133,68 @@ def dispatch_telegram_approval(approval: ApprovalOut, config: Settings) -> Integ
 
 def build_bitrix24_handoff_payload(event: IntegrationEventOut) -> dict[str, object]:
     method = "crm.lead.update" if event.operation == "upsert_lead_follow_up" else event.operation
+    bitrix_request = (
+        build_bitrix24_lead_update_request(event.payload)
+        if method == "crm.lead.update"
+        else event.payload
+    )
     return {
         "method": method,
         "event_id": str(event.id),
         "source_approval_id": str(event.source_approval_id) if event.source_approval_id else None,
         "crm_update": event.payload,
+        "bitrix_request": bitrix_request,
     }
+
+
+def build_bitrix24_lead_update_request(crm_update: dict[str, object]) -> dict[str, object]:
+    task = crm_update.get("task")
+    task_description = ""
+    if isinstance(task, dict):
+        title = str(task.get("title") or "").strip()
+        description = str(task.get("description") or "").strip()
+        if title or description:
+            task_description = f"\nNext task: {title} - {description}".strip()
+
+    objections = crm_update.get("objections")
+    objection_text = ", ".join(str(item) for item in objections) if isinstance(objections, list) else ""
+    missing_signals = ""
+    fields_payload = crm_update.get("fields")
+    if isinstance(fields_payload, dict):
+        raw_missing = fields_payload.get("AI Missing Signals")
+        if isinstance(raw_missing, list):
+            missing_signals = ", ".join(str(item) for item in raw_missing)
+
+    comment_parts = [
+        f"AI lead score: {crm_update.get('lead_score')}",
+        f"AI risk level: {crm_update.get('risk_level')}",
+        f"Target stage: {crm_update.get('target_stage')}",
+        f"Call id: {crm_update.get('call_id')}",
+        f"Summary: {crm_update.get('comment')}",
+    ]
+    if objection_text:
+        comment_parts.append(f"Objections: {objection_text}")
+    if missing_signals:
+        comment_parts.append(f"Missing signals: {missing_signals}")
+    if task_description:
+        comment_parts.append(task_description)
+
+    return {
+        "id": bitrix24_lead_id(crm_update.get("customer_id")),
+        "fields": {
+            "COMMENTS": "\n".join(part for part in comment_parts if part and not part.endswith("None")),
+        },
+        "params": {"REGISTER_SONET_EVENT": "Y"},
+    }
+
+
+def bitrix24_lead_id(customer_id: object) -> str:
+    value = str(customer_id or "").strip()
+    if value.upper().startswith("LEAD-"):
+        candidate = value.rsplit("-", 1)[-1]
+        if candidate.isdigit():
+            return candidate
+    return value
 
 
 def dispatch_bitrix24_event(event: IntegrationEventOut, config: Settings) -> IntegrationDispatchOut:
@@ -162,7 +218,7 @@ def dispatch_bitrix24_event(event: IntegrationEventOut, config: Settings) -> Int
 
     method_url = _join_url(config.bitrix24_webhook_url, f"/{payload['method']}.json")
     try:
-        response = httpx.post(method_url, json=payload["crm_update"], timeout=10)
+        response = httpx.post(method_url, json=payload["bitrix_request"], timeout=10)
         response.raise_for_status()
     except httpx.HTTPError as exc:
         return IntegrationDispatchOut(

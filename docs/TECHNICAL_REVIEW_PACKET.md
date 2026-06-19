@@ -66,6 +66,7 @@ https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178 or u
 | Human approval is explicit | The workflow creates a pending approval, applies an approve/reject state transition, and only then queues CRM handoff. |
 | Telegram is a real contract surface | Public smoke creates a synthetic approval and verifies Telegram callback handling through `POST /webhooks/telegram/approval`. |
 | Bitrix24 handoff is safe | CRM writes are modeled as idempotent outbox events with attempt counters, retry timing, and dead-letter state. |
+| Bitrix24 sandbox is real | Sanitized evidence proves the incoming webhook can call read-only `profile` and CRM `crm.lead.fields`; the committed contract shows the `crm.lead.update` request body. |
 | Public mode is safe | Google Drive, Telegram, and Bitrix24 stay dry-run until production credentials are configured. |
 | Operations are visible | `/runtime`, `/metrics`, smoke scripts, Docker, CI, and docs give a reviewer reproducible evidence. |
 | Acceptance can be checked in one pass | `scripts/reviewer_acceptance_report.py` verifies live API, smoke, GitHub Actions workflows, Pages links, and public PDF. |
@@ -111,6 +112,7 @@ allows retry, dead-letter handling, and audit without changing the LLM/RAG contr
 | Empty or weak retrieval | Query responses expose retrieved source context; tests assert RAG sources are returned. |
 | Duplicate approval handoff | CRM event gets deterministic idempotency key. |
 | Bitrix24 temporary failure | Dispatch records attempt count, `last_error`, `next_retry_at`, and can move to `dead_letter`. |
+| Bitrix24 permission drift | Credentialed preflight checks both generic `profile` and CRM `crm.lead.fields`, so missing CRM scope is visible before enabling writes. |
 | Unsafe public integration writes | Google Drive, Telegram, and Bitrix24 are dry-run by default. |
 | Background worker accidentally mutates demo data | Worker starts only when explicitly enabled and Bitrix24 dry-run is disabled. |
 | Telegram callback spoofing in production | Webhook secret support is available through `TELEGRAM_WEBHOOK_SECRET`. |
@@ -143,6 +145,7 @@ python3 scripts/production_readiness_drill.py
 python3 scripts/credentialed_sandbox_preflight.py
 python3 scripts/credentialed_sandbox_preflight.py --require-target telegram
 python3 scripts/credentialed_sandbox_preflight.py --require-target bitrix24
+python3 scripts/bitrix24_contract_evidence.py
 python3 scripts/reviewer_snapshot.py https://leadscore.duckdns.org
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org

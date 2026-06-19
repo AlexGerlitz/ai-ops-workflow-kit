@@ -9,13 +9,17 @@ DEMO_OUTPUT="${DEMO_OUTPUT:-/tmp/aiops-offer-demo.json}"
 "$PYTHON_BIN" -m py_compile scripts/capture_reviewer_evidence.py
 "$PYTHON_BIN" -m py_compile scripts/production_readiness_drill.py
 "$PYTHON_BIN" -m py_compile scripts/credentialed_sandbox_preflight.py
+"$PYTHON_BIN" -m py_compile scripts/bitrix24_contract_evidence.py
 "$PYTHON_BIN" -m py_compile scripts/reviewer_acceptance_report.py
 "$PYTHON_BIN" scripts/run_offer_demo.py > "$DEMO_OUTPUT"
 "$PYTHON_BIN" scripts/production_readiness_drill.py --output-dir /tmp/aiops-production-readiness-drill > /tmp/aiops-production-readiness-drill.txt
 "$PYTHON_BIN" scripts/credentialed_sandbox_preflight.py --output-dir /tmp/aiops-credentialed-sandbox-preflight > /tmp/aiops-credentialed-sandbox-preflight.txt
+"$PYTHON_BIN" scripts/bitrix24_contract_evidence.py --output-dir /tmp/aiops-bitrix24-contract > /tmp/aiops-bitrix24-contract.txt
 grep -q "credentialed sandbox preflight passed" /tmp/aiops-credentialed-sandbox-preflight.txt
 grep -q "mode=skipped_no_credentials" /tmp/aiops-credentialed-sandbox-preflight.txt
 grep -q "secrets_printed=False" /tmp/aiops-credentialed-sandbox-preflight.txt
+grep -q "bitrix24 contract evidence passed" /tmp/aiops-bitrix24-contract.txt
+grep -q "secret_token_leaked=False" /tmp/aiops-bitrix24-contract.txt
 
 "$PYTHON_BIN" - "$DEMO_OUTPUT" <<'PY'
 import json
@@ -56,6 +60,8 @@ assert payload["bitrix24_dispatch"]["event_status"] == "queued"
 assert payload["bitrix24_dispatch"]["attempt_count"] == 0
 assert payload["bitrix24_dispatch"]["max_attempts"] >= 1
 assert payload["bitrix24_dispatch"]["method"] == "crm.lead.update"
+assert payload["bitrix24_dispatch"]["bitrix_request"]["id"] == "42"
+assert "COMMENTS" in payload["bitrix24_dispatch"]["bitrix_request"]["fields"]
 
 workflow_dir = Path("infra/n8n")
 for workflow_name in (

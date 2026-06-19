@@ -17,7 +17,7 @@ For current CI, live smoke, local gate, and public boundary status, read
 | Transcript analysis and scoring | `app/scoring.py`, `app/sales_workflow.py`, `demo/call-transcript.json` |
 | Human approval flow | `POST /approvals`, `POST /approvals/{id}/approve`, `tests/test_core.py` |
 | Telegram approval contract | `app/integrations.py`, `POST /approvals/{id}/notify/telegram`, `POST /webhooks/telegram/approval`, `scripts/configure_telegram_webhook.sh`, `docs/INTEGRATION_SKELETON.md` |
-| Bitrix24 handoff contract | `app/integrations.py`, `app/store.py`, `POST /integration-events/{id}/dispatch/bitrix24`, `POST /integrations/bitrix24/drain` |
+| Bitrix24 handoff contract | `app/integrations.py`, `app/store.py`, `POST /integration-events/{id}/dispatch/bitrix24`, `POST /integrations/bitrix24/drain`, `docs/evidence/bitrix24-contract.sanitized.json`, `docs/evidence/bitrix24-sandbox-preflight.sanitized.json` |
 | Self-hosted runtime | `Dockerfile`, `docker-compose.yml`, `docs/LIVE_DEMO.md`, `docs/OPERATIONS.md` |
 | Runtime observability | `GET /runtime`, `GET /metrics`, worker state, `app/observability.py`, `scripts/smoke_live_demo.sh` |
 | Reviewer acceptance report | `docs/REVIEWER_ACCEPTANCE_REPORT.md`, `scripts/reviewer_acceptance_report.py` |
@@ -39,6 +39,7 @@ For current CI, live smoke, local gate, and public boundary status, read
 - OpenAI, Claude/Anthropic, and Gemini provider wiring is contract-tested without committing secrets.
 - CRM handoff is queued only after an explicit approval transition.
 - Bitrix24 handoff is modeled as an outbox event with idempotency keys, attempt counters, `next_retry_at`, retry-safe drain, and `dead_letter` state.
+- Bitrix24 proof covers both the production request contract and a real read-only sandbox check for `profile` plus CRM `crm.lead.fields`.
 - Runtime identity, worker state, and counters are public, so a reviewer can verify the deployed build without server access.
 - Reviewer acceptance report combines live API, smoke, GitHub Actions, Pages, and PDF checks in one command.
 - Telegram callbacks can be verified with Telegram's webhook secret header in production.
@@ -59,10 +60,11 @@ For current CI, live smoke, local gate, and public boundary status, read
 6. Run `python3 scripts/reviewer_snapshot.py`.
 7. Run `python3 scripts/production_readiness_drill.py`.
 8. Run `python3 scripts/credentialed_sandbox_preflight.py`.
-9. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
-10. Run `bash scripts/smoke_live_demo.sh`.
-11. Open `https://saleops.duckdns.org/llm/runtime`.
-12. Run `bash scripts/verify_public.sh`.
-13. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-14. Read `docs/ARCHITECTURE.md`.
-15. Read `docs/INTEGRATION_SKELETON.md`.
+9. Run `python3 scripts/bitrix24_contract_evidence.py`.
+10. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
+11. Run `bash scripts/smoke_live_demo.sh`.
+12. Open `https://saleops.duckdns.org/llm/runtime`.
+13. Run `bash scripts/verify_public.sh`.
+14. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+15. Read `docs/ARCHITECTURE.md`.
+16. Read `docs/INTEGRATION_SKELETON.md`.

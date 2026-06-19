@@ -31,11 +31,13 @@ def test_public_preflight_stays_ok_without_required_targets() -> None:
     assert report["missing_required_credentials"] is False
     assert report["checks"]["telegram_get_me"]["status"] == "skipped"
     assert report["checks"]["bitrix24_profile"]["status"] == "skipped"
+    assert report["checks"]["bitrix24_crm_lead_fields"]["status"] == "skipped"
 
     text = format_text(report)
     assert "required_targets=none" in text
     assert "missing_required_targets=none" in text
     assert "secrets_printed=False" in text
+    assert "crm_lead_fields=skipped" in text
 
 
 def test_target_required_preflight_fails_only_for_missing_target() -> None:

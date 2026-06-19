@@ -23,6 +23,7 @@ DEFAULT_OUTPUT_DIR = REPO_ROOT / "docs" / "evidence"
 DEFAULT_GITHUB_REPO = "AlexGerlitz/ai-ops-workflow-kit"
 DEFAULT_PROFILE_BASE_URL = "https://alexgerlitz.github.io/AlexGerlitz"
 USER_AGENT = "aiops-reviewer-acceptance-report"
+BITRIX24_CONTRACT_EVIDENCE = REPO_ROOT / "docs" / "evidence" / "bitrix24-contract.sanitized.json"
 
 
 def fetch_json_url(url: str, timeout: float) -> dict[str, Any]:
@@ -203,6 +204,37 @@ def build_profile_report(profile_base_url: str, timeout: float) -> dict[str, Any
     }
 
 
+def build_bitrix24_contract_report() -> dict[str, Any]:
+    try:
+        payload = json.loads(BITRIX24_CONTRACT_EVIDENCE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {
+            "status": "failed",
+            "artifact": str(BITRIX24_CONTRACT_EVIDENCE.relative_to(REPO_ROOT)),
+            "error": exc.__class__.__name__,
+        }
+
+    checks = payload.get("checks") or {}
+    contract = payload.get("contract") or {}
+    secret_boundaries = payload.get("secret_boundaries") or {}
+    passed = (
+        payload.get("ok") is True
+        and contract.get("method") == "crm.lead.update"
+        and checks.get("request_shape") is True
+        and checks.get("secret_token_leaked") is False
+        and secret_boundaries.get("secrets_printed") is False
+        and secret_boundaries.get("mutating_external_calls") is False
+    )
+    return {
+        "status": "passed" if passed else "failed",
+        "artifact": str(BITRIX24_CONTRACT_EVIDENCE.relative_to(REPO_ROOT)),
+        "method": contract.get("method"),
+        "request_shape": checks.get("request_shape"),
+        "secret_token_leaked": checks.get("secret_token_leaked"),
+        "external_calls": payload.get("external_calls"),
+    }
+
+
 def build_report(
     base_url: str,
     github_repo: str,
@@ -214,11 +246,13 @@ def build_report(
     smoke = run_live_smoke(base_url, smoke_timeout)
     github = build_github_report(github_repo, timeout)
     profile = build_profile_report(profile_base_url, timeout)
+    bitrix24_contract = build_bitrix24_contract_report()
     checks = {
         "live_snapshot": "passed" if snapshot.get("ok") is True else "failed",
         "live_smoke": smoke["status"],
         "github": github["status"],
         "profile_pages": profile["status"],
+        "bitrix24_contract": bitrix24_contract["status"],
     }
     ok = all(status == "passed" for status in checks.values())
     return {
@@ -254,9 +288,10 @@ def build_report(
         "live_smoke": smoke,
         "github": github,
         "profile": profile,
+        "bitrix24_contract": bitrix24_contract,
         "private_sandbox_next_step": (
-            "Telegram owner-run sandbox evidence is present; configure BITRIX24_WEBHOOK_URL "
-            "and rerun Credentialed Sandbox Preflight with target bitrix24 for CRM sandbox proof."
+            "Telegram owner-run sandbox evidence is present. Bitrix24 CRM read-only sandbox "
+            "can be rerun through Credentialed Sandbox Preflight with target bitrix24."
         ),
     }
 
@@ -268,6 +303,7 @@ def format_text(report: dict[str, Any]) -> str:
     profile = report["profile"]
     latest_ci = github["latest_checked_ci_run"]
     latest_sandbox = github.get("latest_checked_sandbox_run", {})
+    bitrix24_contract = report["bitrix24_contract"]
     return "\n".join(
         [
             "reviewer acceptance report passed" if report["ok"] else "reviewer acceptance report failed",
@@ -290,6 +326,13 @@ def format_text(report: dict[str, Any]) -> str:
                 f"sandbox_run={latest_sandbox.get('conclusion')}"
             ),
             f"profile_pages={report['checks']['profile_pages']} count={len(profile['pages'])}",
+            (
+                "bitrix24_contract="
+                f"{report['checks']['bitrix24_contract']} "
+                f"method={bitrix24_contract.get('method')} "
+                f"request_shape={bitrix24_contract.get('request_shape')} "
+                f"secret_token_leaked={bitrix24_contract.get('secret_token_leaked')}"
+            ),
             (
                 "secret_boundaries="
                 f"secrets_printed={report['secret_boundaries']['secrets_printed']} "

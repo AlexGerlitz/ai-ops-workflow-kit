@@ -1,0 +1,9 @@
+bitrix24 contract evidence passed
+schema=bitrix24_contract_evidence_v1
+method=crm.lead.update
+request_shape=True
+idempotency_key_present=True
+dry_run_status=dry_run
+method_url=https://example.bitrix24.ru/rest/<user_id>/<webhook_token>/crm.lead.update.json
+secret_boundaries=secrets_printed=False mutating_external_calls=False secret_token_leaked=False
+credentialed_read_only_check=scripts/credentialed_sandbox_preflight.py --require-target bitrix24
