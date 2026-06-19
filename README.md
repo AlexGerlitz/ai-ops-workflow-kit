@@ -27,6 +27,7 @@ prompt demo.
 | [Production readiness drill](docs/PRODUCTION_READINESS_DRILL.md) | Deterministic failure-mode proof for webhook auth, retry/dead-letter, drain scheduling, idempotency, and worker dry-run guard. |
 | [Credentialed sandbox preflight](docs/CREDENTIALED_SANDBOX_PREFLIGHT.md) | Read-only Telegram/Bitrix24 credential boundary check that never prints tokens or writes CRM records. |
 | [Owner-run sandbox workflow](.github/workflows/credentialed-sandbox-preflight.yml) | Manual GitHub Actions path for running Telegram/Bitrix24 sandbox checks from repository secrets and uploading sanitized evidence. |
+| [Live Telegram sandbox run](https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178) | Owner-run credentialed preflight against Telegram secrets: `getMe=passed`, `webhook=passed`, sanitized artifact uploaded. |
 | [Evidence map](docs/EVIDENCE_MAP.md) | Maps the repo to AI automation, RAG, approval flow, Bitrix24, Telegram, and self-hosting requirements. |
 | [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Maps common AI automation vacancy requirements to exact files, endpoints, verification commands, and production boundaries. |
 | [Offer demo](docs/OFFER_DEMO.md) | One-command proof of Google Drive import -> RAG -> transcript scoring -> Telegram approval -> idempotent outbox drain -> mock Bitrix CRM handoff. |
@@ -58,7 +59,7 @@ Fast evaluation path:
 6. Run `python3 scripts/production_readiness_drill.py`.
 7. Run `python3 scripts/credentialed_sandbox_preflight.py`.
 8. If sandbox credentials exist, run `python3 scripts/credentialed_sandbox_preflight.py --require-target telegram` or `--require-target bitrix24`.
-9. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
+9. Inspect the latest live Telegram sandbox run: `https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178`.
 10. Run `bash scripts/smoke_live_demo.sh`.
 11. Run `bash scripts/verify_public.sh`.
 12. Read `docs/TECHNICAL_REVIEW_PACKET.md`.

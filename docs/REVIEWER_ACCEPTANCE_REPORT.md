@@ -24,7 +24,7 @@ Generated evidence:
 | --- | --- |
 | Live API snapshot | `/runtime`, `/llm/runtime`, `/integrations/runtime`, `/metrics`, and `/demo/run` through `scripts/reviewer_snapshot.py`. |
 | Live browser/workflow smoke | `scripts/smoke_live_demo.sh https://saleops.duckdns.org`, including Telegram callback rejection and Bitrix24 dry-run drain. |
-| GitHub proof state | Public CI workflow, latest checked CI run, and owner-run `Credentialed Sandbox Preflight` workflow are active. |
+| GitHub proof state | Public CI workflow, latest checked CI run, owner-run `Credentialed Sandbox Preflight` workflow, and latest checked sandbox run are successful. |
 | Profile proof route | GitHub Pages surfaces link to AI Ops public proof status and owner-run sandbox workflow. |
 | Resume artifact | Public PDF resume is present and downloadable. |
 
@@ -36,6 +36,7 @@ reviewer acceptance report passed
 live_snapshot=passed
 live_smoke=passed
 github=passed
+sandbox_run=success
 profile_pages=passed
 secret_boundaries=secrets_printed=False mutating_external_calls=False
 ```
@@ -44,5 +45,5 @@ secret_boundaries=secrets_printed=False mutating_external_calls=False
 
 - The report does not use or print private API keys.
 - Public mode stays dry-run for Telegram and Bitrix24 external actions.
-- The report does not replace the private sandbox run. The final external proof is still the manual
-  `Credentialed Sandbox Preflight` workflow with real repository secrets and sanitized artifacts.
+- Telegram owner-run sandbox evidence is present as a sanitized artifact. Bitrix24 remains a separate
+  target-specific proof until a `BITRIX24_WEBHOOK_URL` repository secret is configured.

@@ -109,6 +109,10 @@ When repository secrets are configured, the owner can also run the manual
 `all`. The workflow uploads sanitized evidence artifacts and runs a secret leakage check before
 finishing.
 
+Current live Telegram evidence is already available at
+https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178 and in
+`docs/evidence/credentialed-sandbox-preflight.*`.
+
 ## 6. Inspect The Offer Demo
 
 ```bash

@@ -85,6 +85,10 @@ def test_format_text_summarizes_acceptance_boundaries() -> None:
                 "conclusion": "success",
                 "head_sha": "abc123",
             },
+            "latest_checked_sandbox_run": {
+                "conclusion": "success",
+                "head_sha": "abc123",
+            },
             "credentialed_sandbox_workflow": {"state": "active"},
         },
         "profile": {"pages": [{}, {}]},
@@ -99,4 +103,5 @@ def test_format_text_summarizes_acceptance_boundaries() -> None:
 
     assert "reviewer acceptance report passed" in text
     assert "live_smoke=passed score=100 telegram_callback=rejected bitrix24_drain=31" in text
+    assert "sandbox_run=success" in text
     assert "secret_boundaries=secrets_printed=False mutating_external_calls=False" in text

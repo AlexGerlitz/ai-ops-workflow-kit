@@ -16,6 +16,7 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 | LLM runtime | https://saleops.duckdns.org/llm/runtime |
 | Credential preflight | Public no-secret evidence plus target-specific modes: `--require-target telegram` and `--require-target bitrix24` |
 | Owner-run sandbox workflow | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/credentialed-sandbox-preflight.yml |
+| Latest live Telegram sandbox run | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178 -> `telegram=configured=True get_me=passed webhook=passed`, sanitized artifact committed in `docs/evidence/` |
 | Profile Pages route | https://alexgerlitz.github.io/AlexGerlitz/ |
 | Public resume PDF | Published from the profile repo and linked from the Pages route |
 
@@ -28,7 +29,7 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 5. Read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
 6. Read [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
 7. Read [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
-8. If sandbox secrets are configured, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
+8. Inspect the latest live Telegram sandbox run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178
 9. Run `bash scripts/smoke_live_demo.sh https://saleops.duckdns.org`.
 10. Run `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh`.
 
@@ -36,5 +37,5 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 
 - Public demo mode intentionally avoids customer data, real Telegram sends, real Bitrix24 writes, and committed secrets.
 - Live runtime may report an older deployed app Git SHA when the latest repository changes are docs, tests, or verification scripts only. CI proves those repository changes; live smoke proves the deployed workflow remains healthy.
-- Real sandbox credentials should be validated with `python3 scripts/credentialed_sandbox_preflight.py --require-target telegram` and `python3 scripts/credentialed_sandbox_preflight.py --require-target bitrix24` before enabling writes.
+- Telegram sandbox credentials have been validated through the owner-run workflow; Bitrix24 remains target-specific until a `BITRIX24_WEBHOOK_URL` secret is configured.
 - Private sandbox artifacts should be generated through the manual GitHub Actions workflow or a local run, then inspected as sanitized evidence instead of committing secrets.

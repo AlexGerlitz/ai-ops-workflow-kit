@@ -126,10 +126,12 @@ def build_github_report(repo: str, timeout: float) -> dict[str, Any]:
         ".github/workflows/credentialed-sandbox-preflight.yml",
     )
     latest_ci = latest_workflow_run(runs, "CI")
+    latest_sandbox = latest_workflow_run(runs, "Credentialed Sandbox Preflight")
     ok = (
         ci_workflow["status"] == "passed"
         and sandbox_workflow["status"] == "passed"
         and latest_ci["status"] == "passed"
+        and latest_sandbox["status"] == "passed"
     )
     return {
         "status": "passed" if ok else "failed",
@@ -137,6 +139,7 @@ def build_github_report(repo: str, timeout: float) -> dict[str, Any]:
         "ci_workflow": ci_workflow,
         "credentialed_sandbox_workflow": sandbox_workflow,
         "latest_checked_ci_run": latest_ci,
+        "latest_checked_sandbox_run": latest_sandbox,
     }
 
 
@@ -226,7 +229,7 @@ def build_report(
         "secret_boundaries": {
             "secrets_printed": False,
             "mutating_external_calls": False,
-            "credentialed_sandbox_artifacts_committed": False,
+            "sanitized_credentialed_sandbox_artifacts_committed": True,
         },
         "checks": checks,
         "base_url": base_url.rstrip("/"),
@@ -252,8 +255,8 @@ def build_report(
         "github": github,
         "profile": profile,
         "private_sandbox_next_step": (
-            "Run the manual Credentialed Sandbox Preflight workflow with Telegram/Bitrix24 "
-            "repository secrets and inspect the sanitized artifact."
+            "Telegram owner-run sandbox evidence is present; configure BITRIX24_WEBHOOK_URL "
+            "and rerun Credentialed Sandbox Preflight with target bitrix24 for CRM sandbox proof."
         ),
     }
 
@@ -264,6 +267,7 @@ def format_text(report: dict[str, Any]) -> str:
     github = report["github"]
     profile = report["profile"]
     latest_ci = github["latest_checked_ci_run"]
+    latest_sandbox = github.get("latest_checked_sandbox_run", {})
     return "\n".join(
         [
             "reviewer acceptance report passed" if report["ok"] else "reviewer acceptance report failed",
@@ -282,7 +286,8 @@ def format_text(report: dict[str, Any]) -> str:
                 f"{report['checks']['github']} "
                 f"ci={latest_ci.get('conclusion')} "
                 f"ci_sha={latest_ci.get('head_sha')} "
-                f"sandbox_workflow={github['credentialed_sandbox_workflow'].get('state')}"
+                f"sandbox_workflow={github['credentialed_sandbox_workflow'].get('state')} "
+                f"sandbox_run={latest_sandbox.get('conclusion')}"
             ),
             f"profile_pages={report['checks']['profile_pages']} count={len(profile['pages'])}",
             (
