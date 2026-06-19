@@ -680,6 +680,56 @@ def test_telegram_callback_secret_is_enforced_when_configured(monkeypatch) -> No
         assert accepted.json()["approval_status"] == "rejected"
 
 
+def test_telegram_callback_answers_query_when_live(monkeypatch) -> None:
+    calls: list[dict[str, object]] = []
+
+    class Response:
+        def raise_for_status(self) -> None:
+            return None
+
+    def fake_post(url: str, json: dict[str, object], timeout: float) -> Response:
+        calls.append({"url": url, "json": json, "timeout": timeout})
+        return Response()
+
+    monkeypatch.setattr(settings, "telegram_dry_run", False)
+    monkeypatch.setattr(settings, "telegram_bot_token", "token-for-test")
+    monkeypatch.setattr("app.integrations.httpx.post", fake_post)
+
+    with TestClient(app) as client:
+        approval = client.post(
+            "/approvals",
+            json={
+                "kind": "content_review",
+                "title": "Answer callback",
+                "draft": "Approve this item.",
+                "context": {"source": "callback-answer-test"},
+            },
+        )
+        assert approval.status_code == 200
+        approval_id = approval.json()["id"]
+
+        callback = client.post(
+            "/webhooks/telegram/approval",
+            json={
+                "update_id": 3001,
+                "callback_query": {
+                    "id": "callback-answer",
+                    "from": {"id": 7003, "username": "saleslead"},
+                    "data": f"approve:{approval_id}",
+                },
+            },
+        )
+
+    assert callback.status_code == 200
+    assert calls == [
+        {
+            "url": "https://api.telegram.org/bottoken-for-test/answerCallbackQuery",
+            "json": {"callback_query_id": "callback-answer", "text": "Approve"},
+            "timeout": 5,
+        }
+    ]
+
+
 def test_offer_demo_call_transcript_queues_crm_handoff_after_approval() -> None:
     with TestClient(app) as client:
         playbook = client.post(

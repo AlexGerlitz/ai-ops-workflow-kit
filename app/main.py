@@ -16,6 +16,7 @@ from app.demo_payloads import DEMO_CALL_AUDIO, DEMO_SALES_PLAYBOOK
 from app.embeddings import HashEmbeddingProvider
 from app.integrations import (
     GOOGLE_DRIVE_ADAPTER_KEY,
+    answer_telegram_callback,
     dispatch_bitrix24_event,
     dispatch_telegram_approval,
     integration_runtime,
@@ -450,6 +451,7 @@ def telegram_approval_webhook(
     else:
         raise HTTPException(status_code=400, detail="unsupported callback action")
 
+    answer_telegram_callback(callback.id, action.title(), settings)
     runtime_stats.increment("telegram_callbacks_total")
     return TelegramWebhookOut(
         ok=True,

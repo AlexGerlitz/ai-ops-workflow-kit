@@ -131,6 +131,24 @@ def dispatch_telegram_approval(approval: ApprovalOut, config: Settings) -> Integ
     )
 
 
+def answer_telegram_callback(callback_query_id: str, text: str, config: Settings) -> None:
+    if config.telegram_dry_run or not config.telegram_bot_token:
+        return
+
+    url = f"https://api.telegram.org/bot{config.telegram_bot_token}/answerCallbackQuery"
+    try:
+        response = httpx.post(
+            url,
+            json={"callback_query_id": callback_query_id, "text": text[:200]},
+            timeout=5,
+        )
+        response.raise_for_status()
+    except httpx.HTTPError:
+        # The approval is already processed by this point; do not fail the webhook
+        # only because Telegram could not clear the client-side button spinner.
+        return
+
+
 def build_bitrix24_handoff_payload(event: IntegrationEventOut) -> dict[str, object]:
     method = "crm.lead.update" if event.operation == "upsert_lead_follow_up" else event.operation
     bitrix_request = (
