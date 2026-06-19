@@ -251,7 +251,7 @@ bash scripts/verify_public.sh
 ```
 
 The gate runs tests, runs the offer demo, runs the production readiness drill, and validates that
-Google Drive import, RAG retrieval, LLM provider boundary, transcription provider boundary, approval,
+Document/CRM knowledge intake, RAG retrieval, LLM provider boundary, transcription provider boundary, approval,
 dry-run Bitrix24 handoff, runtime metrics, outbox dispatch state, webhook auth, retry/dead-letter behavior, retry scheduling,
 idempotency, and worker dry-run guard are present in the output.
 
@@ -266,7 +266,7 @@ bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 ```
 
-This verifies the public Caddy/HAProxy route, browser demo HTML, `/demo/run`, Google Drive import,
+This verifies the public Caddy/HAProxy route, browser demo HTML, `/demo/run`, Document/CRM knowledge intake,
 approval callback base URL, Telegram callback webhook, runtime evidence, metrics endpoint, and
 dry-run integration contracts. It also checks `/llm/runtime` and `/transcription/runtime`.
 

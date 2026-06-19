@@ -10,7 +10,8 @@ fi
 
 home_payload="$(curl -fsS "$BASE_URL/")"
 grep -q "AI Sales Ops Control Tower" <<<"$home_payload"
-grep -q "Google Drive import" <<<"$home_payload"
+grep -q "Document/CRM knowledge intake" <<<"$home_payload"
+grep -q "Document/CRM intake" <<<"$home_payload"
 grep -q "Call audio transcription" <<<"$home_payload"
 grep -q "Telegram callback approval" <<<"$home_payload"
 grep -q "Outbox drain" <<<"$home_payload"

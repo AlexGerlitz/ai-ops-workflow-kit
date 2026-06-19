@@ -59,7 +59,7 @@ The gate runs the test suite, runs the offer demo, parses the demo output, and a
 workflow produced:
 
 - RAG context sources;
-- Google Drive import into the same RAG store;
+- Document/CRM knowledge intake into the same RAG store;
 - OpenAI, Claude/Anthropic, Gemini, and local fallback provider boundary;
 - OpenAI Whisper, Deepgram, and local transcription provider boundary;
 - call-audio metadata converted into normalized transcript segments;

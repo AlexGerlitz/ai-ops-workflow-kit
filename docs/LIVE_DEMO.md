@@ -22,7 +22,7 @@ as a narrower alias for the scoring surface.
 
 1. Open `https://saleops.duckdns.org/`.
 2. Click `Run demo workflow`.
-3. Verify the response shows a Google Drive import, LLM provider boundary, transcription status,
+3. Verify the response shows Document/CRM knowledge intake, LLM provider boundary, transcription status,
    high lead score, approved review state, dry-run Telegram payload, dry-run Bitrix24 dispatch,
    outbox drain count, and public worker state.
 4. Upload an `.m4a`, `.mp3`, or `.wav` call recording in the live audio panel when a Deepgram key

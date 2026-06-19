@@ -106,7 +106,7 @@ workflow runs the same read-only checks and uploads sanitized artifacts for revi
 
 - Google Drive and Bitrix24 are dry-run by default so reviewers can inspect contracts without credentials.
 - The synthetic public demo keeps Telegram dry-run; live Telegram approval is proven through the owner-run evidence artifact.
-- Google Drive import is dry-run/public-safe: the demo accepts exported text and metadata, not live Drive credentials.
+- The knowledge-source import is dry-run/public-safe: the demo accepts exported text and metadata, not live Drive credentials.
 - Transcription is dry-run/public-safe by default: the demo accepts audio metadata and returns normalized segments through a local fixture, while live OpenAI Whisper/Deepgram provider calls are contract-tested behind the same boundary.
 - The public demo does not store real customer calls, CRM data, bot tokens, or Google credentials.
 - The Bitrix24 outbox worker is visible but disabled in the public dry-run deployment.

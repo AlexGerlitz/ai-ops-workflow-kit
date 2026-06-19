@@ -7,12 +7,12 @@ AI Ops Workflow Kit separates orchestration from durable application logic.
 | Layer | Responsibility |
 | --- | --- |
 | n8n | Webhooks, connector routing, scheduling, Telegram notifications, and external workflow edges. |
-| FastAPI service | Google Drive import, RAG ingestion/query, call-audio transcription boundary, transcript scoring, approval state, integration contracts. |
+| FastAPI service | Document/CRM knowledge intake, RAG ingestion/query, call-audio transcription boundary, transcript scoring, approval state, integration contracts. |
 | PostgreSQL + pgvector | Durable document chunks, metadata, vector search, approval records. |
 | LLM adapter | Provider boundary for OpenAI, Claude/Anthropic, Gemini, and deterministic local fallback. |
 | Transcription adapter | Provider boundary for local fixture, OpenAI Whisper, and Deepgram/diarization contracts. |
 | Integration event store | Idempotent outbox boundary for CRM handoff after human approval. |
-| Integration adapters | Dry-run or real Google Drive import, Telegram approval, and Bitrix24 dispatch clients. |
+| Integration adapters | Dry-run or real knowledge-source imports, Telegram approval, and Bitrix24 dispatch clients. |
 
 ## Core Flows
 
