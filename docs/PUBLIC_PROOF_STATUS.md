@@ -16,7 +16,7 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 | LLM runtime | https://saleops.duckdns.org/llm/runtime |
 | Credential preflight | Public no-secret evidence plus target-specific modes: `--require-target telegram` and `--require-target bitrix24` |
 | Owner-run sandbox workflow | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/credentialed-sandbox-preflight.yml |
-| Latest live Telegram sandbox run | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178 -> `telegram=configured=True get_me=passed webhook=passed`, sanitized artifact committed in `docs/evidence/` |
+| Latest live combined sandbox run | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429 -> `telegram=configured=True get_me=passed webhook=passed`, `bitrix24=configured=True profile=passed crm_lead_fields=passed`, sanitized artifact committed in `docs/evidence/` |
 | Bitrix24 contract evidence | `docs/evidence/bitrix24-contract.txt` -> `method=crm.lead.update`, `request_shape=True`, `secret_token_leaked=False` |
 | Live Bitrix24 read-only sandbox | `docs/evidence/bitrix24-sandbox-preflight.txt` -> `profile=passed`, `crm_lead_fields=passed`, `origin=https://b24-jgkzt9.bitrix24.ru` |
 | Profile Pages route | https://alexgerlitz.github.io/AlexGerlitz/ |
@@ -31,7 +31,7 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 5. Read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
 6. Read [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
 7. Read [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
-8. Inspect the latest live Telegram sandbox run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178
+8. Inspect the latest live combined sandbox run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429
 9. Inspect `docs/evidence/bitrix24-contract.txt` and `docs/evidence/bitrix24-sandbox-preflight.txt`.
 10. Run `bash scripts/smoke_live_demo.sh https://saleops.duckdns.org`.
 11. Run `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh`.

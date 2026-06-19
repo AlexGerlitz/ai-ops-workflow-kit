@@ -27,7 +27,7 @@ prompt demo.
 | [Production readiness drill](docs/PRODUCTION_READINESS_DRILL.md) | Deterministic failure-mode proof for webhook auth, retry/dead-letter, drain scheduling, idempotency, and worker dry-run guard. |
 | [Credentialed sandbox preflight](docs/CREDENTIALED_SANDBOX_PREFLIGHT.md) | Read-only Telegram/Bitrix24 credential boundary check that never prints tokens or writes CRM records. |
 | [Owner-run sandbox workflow](.github/workflows/credentialed-sandbox-preflight.yml) | Manual GitHub Actions path for running Telegram/Bitrix24 sandbox checks from repository secrets and uploading sanitized evidence. |
-| [Live Telegram sandbox run](https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178) | Owner-run credentialed preflight against Telegram secrets: `getMe=passed`, `webhook=passed`, sanitized artifact uploaded. |
+| [Live combined sandbox run](https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429) | Owner-run credentialed preflight against Telegram and Bitrix24 secrets: `telegram getMe=passed`, `webhook=passed`, `bitrix24 profile=passed`, `crm_lead_fields=passed`. |
 | [Bitrix24 contract evidence](docs/evidence/bitrix24-contract.txt) | Sanitized proof of the `crm.lead.update` REST request shape, idempotency boundary, dry-run guard, and token redaction. |
 | [Bitrix24 sandbox preflight](docs/evidence/bitrix24-sandbox-preflight.txt) | Sanitized read-only proof that the Bitrix24 incoming webhook can call `profile` and CRM `crm.lead.fields` without writing records. |
 | [Evidence map](docs/EVIDENCE_MAP.md) | Maps the repo to AI automation, RAG, approval flow, Bitrix24, Telegram, and self-hosting requirements. |
@@ -61,7 +61,7 @@ Fast evaluation path:
 6. Run `python3 scripts/production_readiness_drill.py`.
 7. Run `python3 scripts/credentialed_sandbox_preflight.py`.
 8. If sandbox credentials exist, run `python3 scripts/credentialed_sandbox_preflight.py --require-target telegram` or `--require-target bitrix24`.
-9. Inspect the latest live Telegram sandbox run: `https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178`.
+9. Inspect the latest live combined sandbox run: `https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429`.
 10. Run `python3 scripts/bitrix24_contract_evidence.py`.
 11. Run `bash scripts/smoke_live_demo.sh`.
 12. Run `bash scripts/verify_public.sh`.

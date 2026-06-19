@@ -290,8 +290,8 @@ def build_report(
         "profile": profile,
         "bitrix24_contract": bitrix24_contract,
         "private_sandbox_next_step": (
-            "Telegram owner-run sandbox evidence is present. Bitrix24 CRM read-only sandbox "
-            "can be rerun through Credentialed Sandbox Preflight with target bitrix24."
+            "Combined Telegram and Bitrix24 owner-run sandbox evidence is present; rerun "
+            "Credentialed Sandbox Preflight when rotating either secret."
         ),
     }
 

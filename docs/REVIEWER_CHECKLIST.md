@@ -110,8 +110,8 @@ When repository secrets are configured, the owner can also run the manual
 `all`. The workflow uploads sanitized evidence artifacts and runs a secret leakage check before
 finishing.
 
-Current live Telegram evidence is already available at
-https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178 and in
+Current live combined Telegram + Bitrix24 evidence is already available at
+https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429 and in
 `docs/evidence/credentialed-sandbox-preflight.*`.
 
 Current live Bitrix24 read-only evidence is available in

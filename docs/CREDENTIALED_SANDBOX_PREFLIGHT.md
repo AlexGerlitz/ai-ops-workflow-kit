@@ -45,15 +45,15 @@ The workflow uses the same script, keeps Telegram and Bitrix24 dry-run flags ena
 the sanitized artifacts do not contain configured secret values, and uploads only the redacted
 evidence files.
 
-Current committed live Telegram evidence:
+Current committed live combined Telegram + Bitrix24 evidence:
 
 ```text
-run=https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27797326178
+run=https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429
 mode=live
-required_targets=telegram missing_required_targets=none
+required_targets=bitrix24,telegram missing_required_targets=none
 public_base_url=https://saleops.duckdns.org
 telegram=configured=True get_me=passed webhook=passed
-bitrix24=configured=False profile=skipped origin=None
+bitrix24=configured=True profile=passed crm_lead_fields=passed origin=https://b24-jgkzt9.bitrix24.ru
 secret_boundaries=secrets_printed=False mutating_external_calls=False
 ```
 
