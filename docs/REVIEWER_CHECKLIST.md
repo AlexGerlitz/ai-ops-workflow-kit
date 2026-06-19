@@ -25,7 +25,7 @@ technical reviewer snapshot passed
 
 The snapshot checks the public deployment, `/runtime`, `/llm/runtime`, `/transcription/runtime`, `/integrations/runtime`,
 `/metrics`, and `/demo/run`. It summarizes the deployed Git SHA, selected LLM provider, supported
-providers, transcription provider, Google Drive/RAG source, score, approval state, synthetic Telegram dry-run
+providers, transcription provider, document/RAG source, score, approval state, synthetic Telegram dry-run
 state, Bitrix24 dry-run state, CRM idempotency key, worker state, and metrics availability.
 
 Read: [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).

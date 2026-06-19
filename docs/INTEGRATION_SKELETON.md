@@ -1,6 +1,6 @@
 # Integration Skeleton
 
-This skeleton prepares the project for real Google Drive intake, Telegram approval, and Bitrix24 CRM
+This skeleton prepares the project for real document intake through a Google Drive export adapter, Telegram approval, and Bitrix24 CRM
 handoff without committing credentials or making public demo runs depend on external accounts.
 
 ## Runtime URL
@@ -48,7 +48,7 @@ curl http://127.0.0.1:8080/integrations/runtime
 
 The response shows whether each adapter is configured and whether dry-run is enabled.
 
-## Google Drive Intake Skeleton
+## Document Intake / Google Drive Adapter Skeleton
 
 Endpoint:
 

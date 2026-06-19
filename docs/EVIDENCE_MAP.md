@@ -10,7 +10,7 @@ For current CI, live smoke, local gate, and public boundary status, read
 | Requirement | Evidence |
 | --- | --- |
 | AI workflow orchestration | `app/main.py`, `infra/n8n/call-audio-transcription-approval.json`, `infra/n8n/call-transcript-approval.json`, `infra/n8n/google-drive-sales-ops-approval.json`, `docs/N8N_APPROVAL_FLOW.md` |
-| Google Drive intake | `POST /integrations/google-drive/import`, `GoogleDriveImportIn`, `docs/INTEGRATION_SKELETON.md` |
+| Document intake / Google Drive adapter | `POST /integrations/google-drive/import`, `GoogleDriveImportIn`, `docs/INTEGRATION_SKELETON.md` |
 | LLM API provider boundary | `app/llm.py`, `GET /llm/runtime`, OpenAI, Claude/Anthropic, Gemini payload tests |
 | Call-audio transcription boundary | `app/transcription.py`, `GET /transcription/runtime`, `POST /webhooks/n8n/call-audio`, `POST /demo/audio/upload`, `infra/n8n/call-audio-transcription-approval.json` |
 | RAG and embeddings | `app/chunking.py`, `app/embeddings.py`, `app/store.py`, `POST /documents`, `POST /query` |
@@ -36,7 +36,7 @@ For current CI, live smoke, local gate, and public boundary status, read
 - The backend owns retrieval, scoring, approvals, and integration contracts.
 - External write integrations are dry-run by default, so a public reviewer can inspect payloads without secrets.
 - The synthetic public demo keeps Telegram dry-run; owner-run evidence proves the real Telegram approval callback path.
-- Google Drive import is normalized before RAG storage, so connector code does not own retrieval logic.
+- Document intake through the Google Drive adapter is normalized before RAG storage, so connector code does not own retrieval logic.
 - Local embeddings and LLM fallback are deterministic, so tests and demo output are repeatable without API keys.
 - OpenAI, Claude/Anthropic, and Gemini provider wiring is contract-tested without committing secrets.
 - OpenAI Whisper and Deepgram transcription wiring is implemented behind a provider boundary; deterministic smoke uses a local fixture, and the browser upload endpoint can process a real temporary recording when a provider key is configured.
