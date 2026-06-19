@@ -96,7 +96,7 @@ can route generation to the external model.
 
 ### Why have a transcription boundary?
 
-Call recordings should not be mixed directly into n8n node logic or prompt templates. The backend
+Call recordings should not be mixed directly into n8n node logic or prompt-only workflow steps. The backend
 accepts audio metadata, exposes provider contracts for OpenAI Whisper and Deepgram, returns
 normalized text and speaker segments, and then reuses the same transcript analysis path. Public mode
 uses a local fixture so reviewers can verify the workflow without uploading real call recordings or

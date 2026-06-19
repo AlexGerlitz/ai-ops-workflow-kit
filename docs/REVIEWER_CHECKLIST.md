@@ -192,7 +192,7 @@ Then open:
 | [Bitrix24 Contract Evidence](./evidence/bitrix24-contract.txt) | Sanitized REST request contract for the Bitrix24 CRM dispatch adapter. |
 | [Owner-run Sandbox Workflow](../.github/workflows/credentialed-sandbox-preflight.yml) | Manual GitHub Actions path for sanitized Telegram/Bitrix24 sandbox evidence from repository secrets. |
 | [Evidence Map](./EVIDENCE_MAP.md) | Requirement-by-requirement proof map for AI automation roles. |
-| [Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md) | Vacancy-style AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
+| [Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md) | Role-level AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
 | [Live Demo](./LIVE_DEMO.md) | Public deployment URL and public smoke checks. |
 | [Architecture](./ARCHITECTURE.md) | FastAPI/n8n/PostgreSQL/LLM boundaries and state ownership. |
 | [Operations](./OPERATIONS.md) | Local runtime, health checks, smoke test, logs, and handoff. |

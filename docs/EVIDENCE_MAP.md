@@ -1,7 +1,7 @@
 # Evidence Map
 
 This map connects the repository to the work expected from an AI automation engineer.
-For a vacancy-style checklist with verification commands and production boundaries, read
+For a role-level checklist with verification commands and production boundaries, read
 [AI Automation Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md). For a 10-15 minute reviewer route,
 read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 For current CI, live smoke, local gate, and public boundary status, read

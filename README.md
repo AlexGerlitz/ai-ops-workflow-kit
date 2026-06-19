@@ -25,7 +25,7 @@ prompt demo.
 | [Technical review packet](docs/TECHNICAL_REVIEW_PACKET.md) | 10-15 minute reviewer route covering live snapshot, architecture decisions, failure modes, and rollout boundaries. |
 | [Production readiness drill](docs/PRODUCTION_READINESS_DRILL.md) | Failure-mode proof for webhook auth, retry/dead-letter, drain scheduling, idempotency, and worker dry-run guard. |
 | [Credentialed sandbox preflight](docs/CREDENTIALED_SANDBOX_PREFLIGHT.md) | Read-only Telegram/Bitrix24 credential boundary check that never prints tokens or writes CRM records. |
-| [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Vacancy-style AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
+| [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Role-level AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
 
 Best-fit evidence:
 
