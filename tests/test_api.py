@@ -278,7 +278,7 @@ def test_public_demo_page_is_available() -> None:
     assert response.status_code == 200
     assert "AI Sales Ops Control Tower" in response.text
     assert "Run demo workflow" in response.text
-    assert "Google Drive import" in response.text
+    assert "Document/CRM knowledge intake" in response.text
     assert "Telegram callback approval" in response.text
     assert "Outbox drain" in response.text
     assert "Worker state" in response.text

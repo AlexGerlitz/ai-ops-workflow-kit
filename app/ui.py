@@ -166,7 +166,7 @@ DEMO_PAGE_HTML = """
     <header>
       <div>
         <h1>AI Sales Ops Control Tower</h1>
-        <p class="subtitle">Google Drive import, call audio transcription, RAG-backed transcript analysis, OpenAI/Claude/Gemini provider boundary, Telegram callback approval, idempotent Bitrix24 outbox drain, and worker-visible CRM handoff in one reproducible workflow.</p>
+        <p class="subtitle">Document/CRM knowledge intake, call audio transcription, RAG-backed transcript analysis, OpenAI/Claude/Gemini provider boundary, Telegram callback approval, idempotent Bitrix24 outbox drain, and worker-visible CRM handoff in one reproducible workflow.</p>
       </div>
       <button id="run">Run demo workflow</button>
     </header>
@@ -217,7 +217,7 @@ DEMO_PAGE_HTML = """
 
       <div class="panel span-7">
         <div class="row">
-          <span class="pill">Google Drive</span>
+          <span class="pill">Document/CRM intake</span>
           <span class="pill">Call audio transcription</span>
           <span class="pill">OpenAI/Claude/Gemini</span>
           <span class="pill">Transcript</span>
@@ -228,7 +228,7 @@ DEMO_PAGE_HTML = """
           <span class="pill">Worker state</span>
         </div>
         <div class="stack" style="margin-top: 16px;">
-          <div class="step" data-endpoint="/integrations/google-drive/import"><div class="num">1</div><div><b>Import Google Drive playbook</b><div class="small" id="step1">Not run yet</div></div></div>
+          <div class="step" data-endpoint="/integrations/google-drive/import"><div class="num">1</div><div><b>Import knowledge playbook</b><div class="small" id="step1">Not run yet</div></div></div>
           <div class="step"><div class="num">2</div><div><b>Transcribe call audio</b><div class="small" id="step2">Not run yet</div></div></div>
           <div class="step"><div class="num">3</div><div><b>Analyze transcript</b><div class="small" id="step3">Not run yet</div></div></div>
           <div class="step"><div class="num">4</div><div><b>Build approval payload</b><div class="small" id="step4">Not run yet</div></div></div>
