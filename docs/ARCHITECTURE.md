@@ -7,9 +7,10 @@ AI Ops Workflow Kit separates orchestration from durable application logic.
 | Layer | Responsibility |
 | --- | --- |
 | n8n | Webhooks, connector routing, scheduling, Telegram notifications, and external workflow edges. |
-| FastAPI service | Google Drive import, RAG ingestion/query, transcript scoring, approval state, integration contracts. |
+| FastAPI service | Google Drive import, RAG ingestion/query, call-audio transcription boundary, transcript scoring, approval state, integration contracts. |
 | PostgreSQL + pgvector | Durable document chunks, metadata, vector search, approval records. |
 | LLM adapter | Provider boundary for OpenAI, Claude/Anthropic, Gemini, and deterministic local fallback. |
+| Transcription adapter | Provider boundary for local fixture, OpenAI Whisper, and Deepgram/diarization contracts. |
 | Integration event store | Idempotent outbox boundary for CRM handoff after human approval. |
 | Integration adapters | Dry-run or real Google Drive import, Telegram approval, and Bitrix24 dispatch clients. |
 
@@ -36,9 +37,23 @@ AI Ops Workflow Kit separates orchestration from durable application logic.
 required environment variables without exposing secrets. This keeps provider wiring inspectable in
 public demos while API keys stay in deployment configuration.
 
+### Call Audio To Transcript
+
+1. Telephony, Google Drive, or n8n sends call audio metadata to `POST /webhooks/n8n/call-audio`.
+2. The API selects the transcription provider: deterministic local fixture for public demos, or an
+   OpenAI Whisper/Deepgram contract when configured.
+3. The transcription adapter returns normalized transcript text, speaker segments, language,
+   duration, status, and the provider request contract without leaking secrets.
+4. The API stores audio provenance in transcript metadata and continues into the same transcript
+   analysis path.
+
+`GET /transcription/runtime` exposes the requested provider, selected provider, supported providers,
+required environment variables, and dry-run state. Public mode does not call external audio services;
+it proves the boundary and the downstream business workflow.
+
 ### Call Transcript Review
 
-1. Telephony or n8n sends a normalized transcript event.
+1. Telephony, n8n, or the call-audio route sends a normalized transcript event.
 2. The API retrieves sales-playbook context before storing the transcript.
 3. The API stores the transcript as searchable context.
 4. A deterministic scorer extracts basic sales signals.
@@ -55,7 +70,7 @@ adapter path. In public mode it returns the exact outgoing payload in dry-run mo
 
 Approval and CRM mutation are separate steps. This keeps the workflow auditable:
 
-1. `POST /webhooks/n8n/call-transcript` creates a pending approval.
+1. `POST /webhooks/n8n/call-audio` or `POST /webhooks/n8n/call-transcript` creates a pending approval.
 2. `POST /approvals/{id}/approve` records the reviewer decision.
 3. The backend queues a `bitrix24.mock/upsert_lead_follow_up` integration event.
 4. The event has a deterministic idempotency key so repeated approval handoff code does not create
@@ -85,3 +100,5 @@ inspectable without accidentally consuming synthetic events.
 - Queue CRM handoffs after approval so idempotency, retry timing, dead-letter state, and audit can
   be handled outside the user-facing webhook.
 - Keep background workers explicit and observable through runtime metadata.
+- Keep speech-to-text as an adapter boundary so Whisper, Deepgram, storage signed URLs, and
+  diarization quality can evolve without rewriting the sales workflow.

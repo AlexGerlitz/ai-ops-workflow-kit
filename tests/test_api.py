@@ -65,6 +65,26 @@ def test_llm_runtime_endpoint_exposes_provider_boundary_without_secrets() -> Non
     assert "AAG" not in serialized
 
 
+def test_transcription_runtime_exposes_provider_boundary_without_secrets() -> None:
+    with TestClient(app) as client:
+        response = client.get("/transcription/runtime")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["selected_provider"] in {"local_stub", "openai_whisper", "deepgram"}
+    assert body["dry_run"] is True
+    provider_names = {provider["provider"] for provider in body["providers"]}
+    assert provider_names == {"local_stub", "openai_whisper", "deepgram"}
+    required_env = {
+        provider["provider"]: provider["required_env"] for provider in body["providers"]
+    }
+    assert required_env["local_stub"] == []
+    assert required_env["openai_whisper"] == ["OPENAI_API_KEY"]
+    assert required_env["deepgram"] == ["DEEPGRAM_API_KEY"]
+    serialized = json.dumps(body)
+    assert "sk-" not in serialized
+    assert "AAG" not in serialized
+
+
 def test_llm_client_selects_configured_provider_and_falls_back_locally() -> None:
     local_client = LLMClient(provider="auto")
     assert local_client.selected_provider == "local"
@@ -154,6 +174,9 @@ def test_n8n_workflow_artifacts_cover_drive_import_and_transcript_analysis() -> 
     drive_workflow = json.loads(
         (workflow_dir / "google-drive-sales-ops-approval.json").read_text(encoding="utf-8")
     )
+    audio_workflow = json.loads(
+        (workflow_dir / "call-audio-transcription-approval.json").read_text(encoding="utf-8")
+    )
 
     transcript_urls = {
         node.get("parameters", {}).get("url")
@@ -182,6 +205,16 @@ def test_n8n_workflow_artifacts_cover_drive_import_and_transcript_analysis() -> 
         "Analyze Transcript"
     )
 
+    audio_urls = {
+        node.get("parameters", {}).get("url")
+        for node in audio_workflow["nodes"]
+        if node["type"] == "n8n-nodes-base.httpRequest"
+    }
+    assert "http://api:8080/webhooks/n8n/call-audio" in audio_urls
+    assert audio_workflow["connections"]["Call Audio Webhook"]["main"][0][0]["node"] == (
+        "Transcribe And Analyze Audio"
+    )
+
 
 def test_public_demo_run_proves_workflow_contract() -> None:
     with TestClient(app) as client:
@@ -194,6 +227,11 @@ def test_public_demo_run_proves_workflow_contract() -> None:
     assert body["google_drive_import"]["source"] == "gdrive://demo-sales-playbook"
     assert body["google_drive_import"]["chunks"] == body["ingestion"]["chunks"]
     assert body["rag_context_sources"]
+    assert body["transcription"]["provider"] == "local_stub"
+    assert body["transcription"]["status"] == "dry_run"
+    assert body["transcription"]["audio_uri"].startswith("gdrive://")
+    assert body["transcription"]["segments"]
+    assert body["transcription"]["request_contract"]["secret_fields"] == []
     assert body["call_analysis"]["score"] >= 80
     assert body["approval"]["status"] == "approved"
     assert body["telegram_approval"]["status"] == "dry_run"
@@ -204,6 +242,7 @@ def test_public_demo_run_proves_workflow_contract() -> None:
     assert body["bitrix24_dispatch"]["status"] == "dry_run"
     runtime = client.get("/runtime").json()
     assert runtime["counters"]["demo_runs_total"] >= 1
+    assert runtime["counters"]["audio_transcriptions_total"] >= 1
     assert runtime["counters"]["crm_handoffs_queued_total"] >= 1
 
 
@@ -281,6 +320,52 @@ def test_google_drive_import_contract_feeds_rag_store() -> None:
 
         runtime = client.get("/runtime").json()
         assert runtime["counters"]["google_drive_imports_total"] >= 1
+
+
+def test_call_audio_webhook_transcribes_and_continues_to_approval_flow() -> None:
+    with TestClient(app) as client:
+        playbook = client.post(
+            "/documents",
+            json={
+                "source": "drive://audio-sales-playbook",
+                "text": "Audio call follow-up should be reviewed before CRM updates are sent.",
+                "metadata": {"team": "sales", "demo": True},
+            },
+        )
+        assert playbook.status_code == 200
+
+        response = client.post(
+            "/webhooks/n8n/call-audio",
+            json={
+                "call_id": "CALL-AUDIO-1",
+                "customer_id": "LEAD-42",
+                "audio_uri": "gdrive://calls/CALL-AUDIO-1.mp3",
+                "audio_mime_type": "audio/mpeg",
+                "duration_seconds": 90,
+                "language": "en",
+                "transcript_hint": (
+                    "Manager: The director approved the budget. "
+                    "Client: We need the workflow this month. "
+                    "Manager: The next step is a meeting tomorrow."
+                ),
+                "metadata": {"source": "audio-webhook-test"},
+            },
+        )
+        assert response.status_code == 200
+        body = response.json()
+        assert body["transcription"]["status"] == "dry_run"
+        assert body["transcription"]["provider"] == "local_stub"
+        assert body["transcription"]["segments"]
+        assert body["transcript_result"]["call_id"] == "CALL-AUDIO-1"
+        assert body["transcript_result"]["score"] >= 80
+        assert body["transcript_result"]["approval"]["status"] == "pending"
+        assert body["transcript_result"]["analysis"]["crm_update"]["customer_id"] == "LEAD-42"
+        assert body["transcript_result"]["analysis"]["crm_update"]["adapter"] == "bitrix24.mock"
+
+        runtime = client.get("/runtime").json()
+        assert runtime["counters"]["audio_webhooks_total"] >= 1
+        assert runtime["counters"]["audio_transcriptions_total"] >= 1
+        assert runtime["counters"]["transcript_webhooks_total"] >= 1
 
 
 def test_telegram_approval_notification_dry_run_contract() -> None:

@@ -11,11 +11,13 @@ fi
 home_payload="$(curl -fsS "$BASE_URL/")"
 grep -q "AI Sales Ops Control Tower" <<<"$home_payload"
 grep -q "Google Drive import" <<<"$home_payload"
+grep -q "Call audio transcription" <<<"$home_payload"
 grep -q "Telegram callback approval" <<<"$home_payload"
 grep -q "Outbox drain" <<<"$home_payload"
 grep -q "Worker state" <<<"$home_payload"
 runtime_payload="$(curl -fsS "$BASE_URL/runtime")"
 llm_runtime_payload="$(curl -fsS "$BASE_URL/llm/runtime")"
+transcription_runtime_payload="$(curl -fsS "$BASE_URL/transcription/runtime")"
 metrics_payload="$(curl -fsS "$BASE_URL/metrics")"
 payload="$(curl -fsS -X POST "$BASE_URL/demo/run")"
 approval_payload="$(curl -fsS -X POST "$BASE_URL/approvals" \
@@ -48,7 +50,7 @@ telegram_callback_response="$(curl -fsS -X POST "$BASE_URL/webhooks/telegram/app
   -H "content-type: application/json" \
   -d "$telegram_callback_payload")"
 drain_response="$(curl -fsS -X POST "$BASE_URL/integrations/bitrix24/drain?limit=100")"
-RUNTIME_PAYLOAD="$runtime_payload" LLM_RUNTIME_PAYLOAD="$llm_runtime_payload" METRICS_PAYLOAD="$metrics_payload" PAYLOAD="$payload" TELEGRAM_CALLBACK_RESPONSE="$telegram_callback_response" DRAIN_RESPONSE="$drain_response" python3 - "$BASE_URL" "$CALLBACK_BASE_URL" <<'PY'
+RUNTIME_PAYLOAD="$runtime_payload" LLM_RUNTIME_PAYLOAD="$llm_runtime_payload" TRANSCRIPTION_RUNTIME_PAYLOAD="$transcription_runtime_payload" METRICS_PAYLOAD="$metrics_payload" PAYLOAD="$payload" TELEGRAM_CALLBACK_RESPONSE="$telegram_callback_response" DRAIN_RESPONSE="$drain_response" python3 - "$BASE_URL" "$CALLBACK_BASE_URL" <<'PY'
 import json
 import os
 import sys
@@ -58,6 +60,7 @@ expected_callback_base_url = sys.argv[2].rstrip("/")
 payload = json.loads(os.environ["PAYLOAD"])
 runtime_payload = json.loads(os.environ["RUNTIME_PAYLOAD"])
 llm_runtime_payload = json.loads(os.environ["LLM_RUNTIME_PAYLOAD"])
+transcription_runtime_payload = json.loads(os.environ["TRANSCRIPTION_RUNTIME_PAYLOAD"])
 metrics_payload = os.environ["METRICS_PAYLOAD"]
 telegram_callback_response = json.loads(os.environ["TELEGRAM_CALLBACK_RESPONSE"])
 drain_response = json.loads(os.environ["DRAIN_RESPONSE"])
@@ -72,10 +75,25 @@ assert set(runtime_payload["llm"]["supported_providers"]) == {
     "gemini",
 }
 assert llm_runtime_payload["selected_provider"] == runtime_payload["llm"]["selected_provider"]
+assert (
+    transcription_runtime_payload["selected_provider"]
+    == runtime_payload["transcription"]["selected_provider"]
+)
+assert set(transcription_runtime_payload["supported_providers"]) == {
+    "local_stub",
+    "openai_whisper",
+    "deepgram",
+}
 required_env = {
     env for provider in llm_runtime_payload["providers"] for env in provider["required_env"]
 }
 assert {"OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"} <= required_env
+transcription_required_env = {
+    env
+    for provider in transcription_runtime_payload["providers"]
+    for env in provider["required_env"]
+}
+assert "DEEPGRAM_API_KEY" in transcription_required_env
 assert "demo_runs_total" in runtime_payload["counters"]
 assert runtime_payload["workers"]["bitrix24_outbox"]["enabled"] is False
 assert runtime_payload["workers"]["bitrix24_outbox"]["active"] is False
@@ -84,6 +102,8 @@ assert payload["runtime"]["ok"] is True
 assert payload["runtime"]["llm"]["selected_provider"] == runtime_payload["llm"]["selected_provider"]
 assert payload["google_drive_import"]["adapter_key"] == "google_drive"
 assert payload["google_drive_import"]["source"].startswith("gdrive://")
+assert payload["transcription"]["status"] == "dry_run"
+assert payload["transcription"]["segments"]
 assert payload["call_analysis"]["score"] >= 80
 assert payload["approval"]["status"] == "approved"
 assert payload["telegram_approval"]["status"] == "dry_run"
@@ -114,6 +134,7 @@ print(f"git_sha={runtime_payload['git_sha']}")
 print(f"llm={runtime_payload['llm']['selected_provider']}")
 print(f"score={payload['call_analysis']['score']}")
 print(f"google_drive={payload['google_drive_import']['source']}")
+print(f"transcription={payload['transcription']['provider']}:{payload['transcription']['status']}")
 print(f"approval={payload['approval']['status']}")
 print(f"telegram_callback={telegram_callback_response['approval_status']}")
 print(f"telegram={payload['telegram_approval']['status']}")

@@ -127,7 +127,7 @@ DEMO_PAGE_HTML = """
     <header>
       <div>
         <h1>AI Sales Ops Control Tower</h1>
-        <p class="subtitle">Google Drive import, RAG-backed transcript analysis, OpenAI/Claude/Gemini provider boundary, Telegram callback approval, idempotent Bitrix24 outbox drain, and worker-visible CRM handoff in one reproducible workflow.</p>
+        <p class="subtitle">Google Drive import, call audio transcription, RAG-backed transcript analysis, OpenAI/Claude/Gemini provider boundary, Telegram callback approval, idempotent Bitrix24 outbox drain, and worker-visible CRM handoff in one reproducible workflow.</p>
       </div>
       <button id="run">Run demo workflow</button>
     </header>
@@ -143,6 +143,11 @@ DEMO_PAGE_HTML = """
           <div class="label">LLM</div>
           <div id="llm" class="value">--</div>
           <div id="llm-sub" class="small">Provider boundary pending</div>
+        </div>
+        <div class="panel">
+          <div class="label">Transcription</div>
+          <div id="transcription" class="value">--</div>
+          <div id="transcription-sub" class="small">Call audio transcription pending</div>
         </div>
         <div class="panel">
           <div class="label">Lead score</div>
@@ -174,6 +179,7 @@ DEMO_PAGE_HTML = """
       <div class="panel span-7">
         <div class="row">
           <span class="pill">Google Drive</span>
+          <span class="pill">Call audio transcription</span>
           <span class="pill">OpenAI/Claude/Gemini</span>
           <span class="pill">Transcript</span>
           <span class="pill">RAG</span>
@@ -184,10 +190,10 @@ DEMO_PAGE_HTML = """
         </div>
         <div class="stack" style="margin-top: 16px;">
           <div class="step" data-endpoint="/integrations/google-drive/import"><div class="num">1</div><div><b>Import Google Drive playbook</b><div class="small" id="step1">Not run yet</div></div></div>
-          <div class="step"><div class="num">2</div><div><b>Analyze call</b><div class="small" id="step2">Not run yet</div></div></div>
-          <div class="step"><div class="num">3</div><div><b>Build approval payload</b><div class="small" id="step3">Not run yet</div></div></div>
-          <div class="step"><div class="num">4</div><div><b>Queue CRM handoff</b><div class="small" id="step4">Not run yet</div></div></div>
-          <div class="step"><div class="num">5</div><div><b>Drain Bitrix24 outbox</b><div class="small" id="step5">Not run yet</div></div></div>
+          <div class="step"><div class="num">2</div><div><b>Transcribe call audio</b><div class="small" id="step2">Not run yet</div></div></div>
+          <div class="step"><div class="num">3</div><div><b>Analyze transcript</b><div class="small" id="step3">Not run yet</div></div></div>
+          <div class="step"><div class="num">4</div><div><b>Build approval payload</b><div class="small" id="step4">Not run yet</div></div></div>
+          <div class="step"><div class="num">5</div><div><b>Queue and drain Bitrix24 handoff</b><div class="small" id="step5">Not run yet</div></div></div>
         </div>
       </div>
       <div class="panel span-5">
@@ -263,6 +269,8 @@ DEMO_PAGE_HTML = """
         setText("runtime", data.runtime.storage);
         setText("runtime-sub", data.integrations.public_base_url);
         renderLlmState(runtimeState);
+        setText("transcription", data.transcription.status);
+        setText("transcription-sub", `${data.transcription.provider}: ${data.transcription.segments.length} segment(s)`);
         setText("score", `${data.call_analysis.score}/100`);
         setText("risk", `Risk: ${data.call_analysis.risk_level}`);
         setText("approval", data.approval.status);
@@ -270,12 +278,12 @@ DEMO_PAGE_HTML = """
         setText("crm", data.crm_handoff.status);
         setText("crm-sub", `${data.bitrix24_dispatch.method} / ${data.bitrix24_dispatch.status}`);
         setText("step1", `${data.google_drive_import.source}: ${data.ingestion.chunks} chunk(s), ${data.rag_context_sources.length} source(s) retrieved`);
-        setText("step2", `${data.call_analysis.next_action}`);
-        setText("step3", `${data.telegram_approval.adapter_key} ${data.telegram_approval.status}`);
-        setText("step4", `${data.crm_handoff.operation} -> ${data.bitrix24_dispatch.status}`);
+        setText("step2", `${data.transcription.provider} ${data.transcription.status}: ${data.transcription.segments.length} segment(s)`);
+        setText("step3", `${data.call_analysis.next_action}`);
+        setText("step4", `${data.telegram_approval.adapter_key} ${data.telegram_approval.status}`);
         setText("outbox", `${drain.dry_run}`);
         setText("outbox-sub", `${drain.dispatched} event(s), ${drain.dead_letter} dead-letter`);
-        setText("step5", `${drain.adapter_key} drain dry-run: ${drain.dry_run} event(s)`);
+        setText("step5", `${data.crm_handoff.operation} -> ${data.bitrix24_dispatch.status}; drain dry-run: ${drain.dry_run} event(s)`);
         renderWorkerState(runtimeState);
         renderIntegrations(data.integrations);
         output.textContent = pretty({ workflow: data, bitrix24_outbox_drain: drain, runtime: runtimeState });

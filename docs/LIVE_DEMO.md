@@ -15,15 +15,16 @@ https://leadscore.duckdns.org/
 ```
 
 `saleops` is the main project name because the workflow covers more than a lead score:
-RAG retrieval, transcript analysis, approval routing, and CRM handoff. `leadscore` is kept
+RAG retrieval, call-audio transcription, transcript analysis, approval routing, and CRM handoff. `leadscore` is kept
 as a narrower alias for the scoring surface.
 
 ## Browser Path
 
 1. Open `https://saleops.duckdns.org/`.
 2. Click `Run demo workflow`.
-3. Verify the response shows a Google Drive import, LLM provider boundary, high lead score, approved review state,
-   dry-run Telegram payload, dry-run Bitrix24 dispatch, outbox drain count, and public worker state.
+3. Verify the response shows a Google Drive import, LLM provider boundary, transcription status,
+   high lead score, approved review state, dry-run Telegram payload, dry-run Bitrix24 dispatch,
+   outbox drain count, and public worker state.
 
 ## Command-Line Smoke
 
@@ -53,6 +54,7 @@ git_sha=<deployed-sha>
 llm=local
 score=100
 google_drive=gdrive://demo-sales-playbook
+transcription=local_stub:dry_run
 approval=approved
 telegram_callback=rejected
 telegram=dry_run
@@ -63,10 +65,10 @@ worker_active=False
 ```
 
 The smoke check proves that the public edge route, FastAPI runtime, workflow endpoint,
-approval callback base URL, LLM provider runtime, runtime evidence, metrics endpoint, and integration dry-run
-contracts are aligned. It also verifies that the browser UI exposes the current reviewer proof
-labels: Google Drive import, OpenAI/Claude/Gemini provider boundary, Telegram callback approval,
-outbox drain, and worker state.
+approval callback base URL, LLM provider runtime, transcription boundary, runtime evidence, metrics endpoint,
+and integration dry-run contracts are aligned. It also verifies that the browser UI exposes the current
+reviewer proof labels: Google Drive import, call audio transcription, OpenAI/Claude/Gemini provider boundary,
+Telegram callback approval, outbox drain, and worker state.
 The `leadscore` alias intentionally keeps approval callbacks on the primary `saleops` URL.
 
 For the complete reviewer route, read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
@@ -77,13 +79,16 @@ For committed live evidence, read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_P
 - The API is a real deployed service, not a static mock.
 - The workflow runs through the same `/demo/run` endpoint used by local tests.
 - The workflow imports exported Google Drive text into the same RAG store as direct document ingestion.
+- The workflow accepts call-audio metadata and returns normalized transcript segments before scoring.
 - The callback contract uses the public HTTPS base URL.
 - The smoke check creates a synthetic approval and proves the Telegram callback webhook can reject it.
 - `/llm/runtime` exposes OpenAI, Claude/Anthropic, Gemini, and local fallback state without returning secrets.
+- `/transcription/runtime` exposes local fixture, OpenAI Whisper, and Deepgram provider state without returning secrets.
 - Production deployments can enable `TELEGRAM_WEBHOOK_SECRET`; the public demo leaves it unset so smoke checks remain inspectable.
 - `/runtime` exposes deployed version, Git SHA, public callback base URL, integration readiness, and counters.
 - `/metrics` exposes Prometheus-style runtime and workflow counters.
 - Google Drive, Telegram, and Bitrix24 remain in dry-run mode until credentials are configured.
+- Speech-to-text remains dry-run/local-fixture in the public demo until audio storage and a provider key are configured.
 - Bitrix24 dry-run leaves CRM events queued; production mode records idempotency, attempts, `next_retry_at`, `last_error`, and `dead_letter`.
 - The live smoke also calls `POST /integrations/bitrix24/drain` to prove the worker-style queue drain surface.
 - `GET /runtime` shows the Bitrix24 outbox worker is disabled in the public dry-run demo.

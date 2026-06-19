@@ -130,6 +130,70 @@ class TranscriptWebhookOut(BaseModel):
     approval: ApprovalOut
 
 
+class TranscriptionStatus(str, Enum):
+    dry_run = "dry_run"
+    transcribed = "transcribed"
+    not_configured = "not_configured"
+    failed = "failed"
+
+
+class CallAudioWebhookIn(BaseModel):
+    call_id: str = Field(min_length=1, max_length=160)
+    customer_id: str = Field(min_length=1, max_length=160)
+    audio_uri: str = Field(min_length=1, max_length=500)
+    audio_mime_type: str = Field(default="audio/mpeg", min_length=1, max_length=120)
+    duration_seconds: float | None = Field(default=None, ge=0)
+    language: str = Field(default="ru", min_length=2, max_length=16)
+    provider: str | None = Field(default=None, max_length=80)
+    transcript_hint: str | None = Field(default=None, min_length=1)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class TranscriptionSegmentOut(BaseModel):
+    speaker: str | None = None
+    start_seconds: float | None = None
+    end_seconds: float | None = None
+    text: str
+
+
+class TranscriptionOut(BaseModel):
+    provider: str
+    status: TranscriptionStatus
+    audio_uri: str
+    audio_mime_type: str
+    language: str
+    duration_seconds: float | None = None
+    transcript: str
+    segments: list[TranscriptionSegmentOut]
+    confidence: float | None = None
+    detail: str
+    request_contract: dict[str, Any]
+
+
+class CallAudioWebhookOut(BaseModel):
+    call_id: str
+    customer_id: str
+    transcription: TranscriptionOut
+    transcript_result: TranscriptWebhookOut
+
+
+class TranscriptionProviderRuntimeOut(BaseModel):
+    provider: str
+    configured: bool
+    selected: bool
+    dry_run: bool
+    required_env: list[str]
+    notes: str
+
+
+class TranscriptionRuntimeOut(BaseModel):
+    requested_provider: str
+    selected_provider: str
+    dry_run: bool
+    supported_providers: list[str]
+    providers: list[TranscriptionProviderRuntimeOut]
+
+
 class TelegramUser(BaseModel):
     id: int
     username: str | None = None
@@ -243,6 +307,7 @@ class OfferDemoRunOut(BaseModel):
     ingestion: DocumentOut
     google_drive_import: GoogleDriveImportOut
     rag_context_sources: list[dict[str, Any]]
+    transcription: dict[str, Any]
     call_analysis: dict[str, Any]
     approval: dict[str, Any]
     telegram_approval: dict[str, Any]

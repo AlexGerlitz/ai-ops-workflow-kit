@@ -7,13 +7,14 @@ The demo proves an end-to-end AI workflow automation scenario:
 1. import an exported Google Drive sales playbook into the RAG store;
 2. query the knowledge base with source context;
 3. expose the LLM provider boundary and local fallback state;
-4. accept a call transcript through the n8n-facing webhook;
-5. score the lead and build a structured call analysis;
-6. create a human approval item for the follow-up draft;
-7. build a dry-run Telegram approval payload;
-8. approve the item;
-9. queue a mock Bitrix24 CRM handoff event;
-10. build a dry-run Bitrix24 dispatch payload with idempotent outbox event state.
+4. accept call-audio metadata through the n8n-facing webhook;
+5. build a transcription provider contract and normalize the transcript;
+6. score the lead and build a structured call analysis;
+7. create a human approval item for the follow-up draft;
+8. build a dry-run Telegram approval payload;
+9. approve the item;
+10. queue a dry-run Bitrix24 CRM handoff event;
+11. build a dry-run Bitrix24 dispatch payload with idempotent outbox event state.
 
 The point is not to show a prompt wrapper. The point is to show the production
 boundary: n8n routes events, while the backend owns retrieval, scoring, state,
@@ -64,10 +65,11 @@ The output contains these sections:
 | `ingestion` | Sales playbook was chunked and stored. |
 | `google_drive_import` | Exported Google Drive document text was normalized and imported into the RAG store. |
 | `rag_context_sources` | Retrieval returned explicit source context. |
+| `transcription` | Call-audio metadata passed through the selected transcription boundary and returned normalized speaker segments. |
 | `call_analysis` | Transcript was scored and converted into structured business action. |
 | `approval` | Human-in-the-loop state transition happened before CRM handoff. |
 | `telegram_approval` | Telegram approval payload and approve/reject callback contract were built in dry-run mode. |
-| `crm_handoff` | A mock Bitrix24 adapter event was queued after approval, with idempotency key, attempt count, retry timing, and last error state. |
+| `crm_handoff` | A dry-run Bitrix24 adapter event was queued after approval, with idempotency key, attempt count, retry timing, and last error state. |
 | `bitrix24_dispatch` | Bitrix24 dispatch payload was built in dry-run mode for the queued event and reports event state. |
 
 Example high-level result:
@@ -85,6 +87,14 @@ Example high-level result:
     "adapter_key": "google_drive",
     "source": "gdrive://demo-sales-playbook",
     "chunks": 1
+  },
+  "transcription": {
+    "provider": "local_stub",
+    "status": "dry_run",
+    "audio_uri": "gdrive://demo-call-audio.mp3",
+    "segments": [
+      { "speaker": "manager", "text": "The client said the price may be expensive..." }
+    ]
   },
   "call_analysis": {
     "score": 100,
@@ -127,14 +137,15 @@ Example high-level result:
 ## Business Scenario
 
 A sales manager keeps the playbook in Google Drive and finishes a call. n8n or another connector
-exports the document text and sends it to the backend. The transcript arrives from telephony or n8n.
-The backend searches the playbook, extracts qualification signals, identifies objections, drafts a
-follow-up, and creates an approval item. Only after a human reviewer approves the item does the
-backend queue the CRM handoff.
+exports the document text and sends it to the backend. The call recording metadata arrives from
+telephony, Drive, or n8n. The backend converts it through the transcription boundary, searches the
+playbook, extracts qualification signals, identifies objections, drafts a follow-up, and creates an
+approval item. Only after a human reviewer approves the item does the backend queue the CRM handoff.
 
 That maps directly to real AI automation work:
 
 - call analysis;
+- call-audio transcription boundary;
 - Google Drive knowledge intake;
 - RAG-backed generation;
 - OpenAI/Claude/Gemini provider boundary with local fallback;
@@ -154,5 +165,5 @@ That maps directly to real AI automation work:
 - Disable dry-run after adding Telegram Bot API and Bitrix24 webhook credentials.
 - Replace deterministic local embeddings with OpenAI or another embedding API.
 - Set `LLM_PROVIDER=openai`, `LLM_PROVIDER=claude`, or `LLM_PROVIDER=gemini` with the matching API key.
-- Add Deepgram/Whisper before the transcript webhook.
+- Set `TRANSCRIPTION_PROVIDER=openai_whisper` or `TRANSCRIPTION_PROVIDER=deepgram` after adding audio storage and the matching provider key.
 - Move the outbox worker into a separate process if the deployment needs independent scaling.

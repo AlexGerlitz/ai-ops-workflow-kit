@@ -31,6 +31,7 @@ https://leadscore.duckdns.org/
 curl http://127.0.0.1:8080/health
 curl http://127.0.0.1:8080/runtime
 curl http://127.0.0.1:8080/llm/runtime
+curl http://127.0.0.1:8080/transcription/runtime
 curl http://127.0.0.1:8080/metrics
 ```
 
@@ -57,6 +58,7 @@ development, not for production.
 - storage mode;
 - public callback base URL;
 - selected LLM provider and configured provider names;
+- selected transcription provider and configured provider names;
 - integration readiness;
 - worker readiness;
 - workflow counters.
@@ -64,6 +66,10 @@ development, not for production.
 `GET /llm/runtime` reports the provider boundary in more detail: requested provider, selected
 provider, supported providers, required env vars, and whether each provider is configured. It does
 not return API keys.
+
+`GET /transcription/runtime` reports the speech-to-text boundary in more detail: local fixture,
+OpenAI Whisper, Deepgram, required env vars, dry-run state, and selected provider. It does not return
+API keys.
 
 `GET /metrics` exposes the same runtime identity and workflow counters in Prometheus text format.
 This is intentionally dependency-light so it works in local review, Docker, and the public demo.
@@ -95,6 +101,30 @@ GEMINI_MODEL=gemini-2.5-flash
 ```
 
 Provider API keys stay in deployment configuration and are never committed.
+
+## Transcription Providers
+
+The public demo uses a deterministic local fixture:
+
+```env
+TRANSCRIPTION_PROVIDER=local_stub
+TRANSCRIPTION_DRY_RUN=true
+```
+
+For production rollout, configure audio storage and then select a provider:
+
+```env
+TRANSCRIPTION_PROVIDER=openai_whisper
+WHISPER_MODEL=whisper-1
+OPENAI_API_KEY=...
+
+TRANSCRIPTION_PROVIDER=deepgram
+DEEPGRAM_MODEL=nova-3
+DEEPGRAM_API_KEY=...
+```
+
+Keep `TRANSCRIPTION_DRY_RUN=true` until the audio URL policy, retention policy, provider payload,
+and diarization quality are reviewed.
 
 ## Logs
 
@@ -151,10 +181,11 @@ The demo uses synthetic sales payloads and proves:
 - playbook ingestion;
 - RAG query with source context;
 - LLM provider runtime and local fallback state;
+- call-audio transcription boundary;
 - transcript webhook analysis;
 - approval creation;
 - approval transition;
-- mock Bitrix24 integration event queued after approval.
+- dry-run Bitrix24 integration event queued after approval.
 - Bitrix24 dispatch state with idempotency, attempts, retry timing, last error, and dead-letter handling.
 - browser-visible control tower at `/`.
 
@@ -173,6 +204,7 @@ showing the exact payloads that will be sent after credentials are configured:
 
 ```bash
 curl http://127.0.0.1:8080/integrations/runtime
+curl http://127.0.0.1:8080/transcription/runtime
 curl -X POST http://127.0.0.1:8080/integrations/google-drive/import \
   -H "content-type: application/json" \
   -d '{"file_id":"ops-playbook","name":"Ops playbook","mime_type":"application/vnd.google-apps.document","text":"Approval workflows need RAG context and explicit handoff state.","metadata":{"source":"ops"}}'
@@ -207,8 +239,8 @@ bash scripts/verify_public.sh
 ```
 
 The gate runs tests, runs the offer demo, runs the production readiness drill, and validates that
-Google Drive import, RAG retrieval, LLM provider boundary, approval, mock Bitrix24 handoff, runtime
-metrics, outbox dispatch state, webhook auth, retry/dead-letter behavior, retry scheduling,
+Google Drive import, RAG retrieval, LLM provider boundary, transcription provider boundary, approval,
+dry-run Bitrix24 handoff, runtime metrics, outbox dispatch state, webhook auth, retry/dead-letter behavior, retry scheduling,
 idempotency, and worker dry-run guard are present in the output.
 
 ## Live Deployment Smoke
@@ -224,7 +256,7 @@ bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 
 This verifies the public Caddy/HAProxy route, browser demo HTML, `/demo/run`, Google Drive import,
 approval callback base URL, Telegram callback webhook, runtime evidence, metrics endpoint, and
-dry-run integration contracts. It also checks `/llm/runtime`.
+dry-run integration contracts. It also checks `/llm/runtime` and `/transcription/runtime`.
 
 For a concise live evidence report that reviewers can paste into an evaluation note:
 
@@ -282,10 +314,13 @@ Import one of these workflows into n8n, then set the API URL in the HTTP Request
 
 ```text
 infra/n8n/call-transcript-approval.json
+infra/n8n/call-audio-transcription-approval.json
 infra/n8n/google-drive-sales-ops-approval.json
 ```
 
-The transcript workflow accepts a transcript webhook, sends it to the FastAPI service, and returns
+The call-audio workflow accepts audio metadata, sends it to the FastAPI service, and returns
+transcription status, speaker segments, score, approval item, and CRM operation summary. The
+transcript workflow accepts a normalized transcript webhook, sends it to the FastAPI service, and returns
 the approval item. The Google Drive workflow first sends exported Drive text to
 `POST /integrations/google-drive/import`, then sends the transcript event to
 `POST /webhooks/n8n/call-transcript`.

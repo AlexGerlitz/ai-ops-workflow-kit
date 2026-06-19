@@ -10,7 +10,7 @@ from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import HTMLResponse, PlainTextResponse
 
 from app.chunking import chunk_text
-from app.demo_payloads import DEMO_SALES_PLAYBOOK, DEMO_TRANSCRIPT
+from app.demo_payloads import DEMO_CALL_AUDIO, DEMO_SALES_PLAYBOOK
 from app.embeddings import HashEmbeddingProvider
 from app.integrations import (
     GOOGLE_DRIVE_ADAPTER_KEY,
@@ -26,6 +26,8 @@ from app.schemas import (
     ApprovalIn,
     ApprovalOut,
     ApprovalStatus,
+    CallAudioWebhookIn,
+    CallAudioWebhookOut,
     DocumentIn,
     DocumentOut,
     GoogleDriveImportIn,
@@ -44,10 +46,12 @@ from app.schemas import (
     TelegramWebhookOut,
     TranscriptWebhookIn,
     TranscriptWebhookOut,
+    TranscriptionRuntimeOut,
 )
 from app.scoring import score_transcript
 from app.settings import settings
 from app.store import ChunkRecord, build_store
+from app.transcription import transcribe_call_audio, transcription_runtime
 from app.ui import DEMO_PAGE_HTML
 
 embedding_provider = HashEmbeddingProvider(settings.embedding_dim)
@@ -115,6 +119,7 @@ def runtime() -> dict[str, object]:
         "embedding_dim": settings.embedding_dim,
         "public_base_url": settings.public_base_url,
         "llm": get_llm_runtime(),
+        "transcription": get_transcription_runtime(),
         "integrations": get_integration_runtime(),
         "workers": integration_workers_runtime(),
         "counters": runtime_stats.snapshot(),
@@ -143,6 +148,11 @@ def get_integration_runtime() -> IntegrationRuntimeOut:
 @app.get("/llm/runtime", response_model=LLMRuntimeOut)
 def get_llm_runtime() -> LLMRuntimeOut:
     return LLMRuntimeOut(**llm.runtime())
+
+
+@app.get("/transcription/runtime", response_model=TranscriptionRuntimeOut)
+def get_transcription_runtime() -> TranscriptionRuntimeOut:
+    return transcription_runtime(settings)
 
 
 def integration_workers_runtime() -> dict[str, object]:
@@ -180,7 +190,8 @@ async def run_demo_workflow() -> OfferDemoRunOut:
             top_k=3,
         )
     )
-    analysis = call_transcript_webhook(TranscriptWebhookIn(**DEMO_TRANSCRIPT))
+    audio = call_audio_webhook(CallAudioWebhookIn(**DEMO_CALL_AUDIO))
+    analysis = audio.transcript_result
     telegram = notify_approval_in_telegram(analysis.approval.id)
     approved = approve(
         analysis.approval.id,
@@ -204,6 +215,23 @@ async def run_demo_workflow() -> OfferDemoRunOut:
             {"source": context.source, "score": context.score}
             for context in rag.contexts
         ],
+        transcription={
+            "provider": audio.transcription.provider,
+            "status": audio.transcription.status.value,
+            "audio_uri": audio.transcription.audio_uri,
+            "language": audio.transcription.language,
+            "duration_seconds": audio.transcription.duration_seconds,
+            "segments": [
+                {
+                    "speaker": segment.speaker,
+                    "start_seconds": segment.start_seconds,
+                    "end_seconds": segment.end_seconds,
+                    "text": segment.text,
+                }
+                for segment in audio.transcription.segments
+            ],
+            "request_contract": audio.transcription.request_contract,
+        },
         call_analysis={
             "call_id": analysis.call_id,
             "customer_id": analysis.customer_id,
@@ -544,6 +572,42 @@ def call_transcript_webhook(payload: TranscriptWebhookIn) -> TranscriptWebhookOu
         signals=transcript_score.signals,
         analysis=analysis,
         approval=approval,
+    )
+
+
+@app.post("/webhooks/n8n/call-audio", response_model=CallAudioWebhookOut)
+def call_audio_webhook(payload: CallAudioWebhookIn) -> CallAudioWebhookOut:
+    runtime_stats.increment("audio_webhooks_total")
+    try:
+        transcription = transcribe_call_audio(payload, settings)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if not transcription.transcript:
+        raise HTTPException(
+            status_code=503,
+            detail=f"transcription unavailable: {transcription.detail}",
+        )
+    runtime_stats.increment("audio_transcriptions_total")
+    transcript_result = call_transcript_webhook(
+        TranscriptWebhookIn(
+            call_id=payload.call_id,
+            customer_id=payload.customer_id,
+            transcript=transcription.transcript,
+            metadata={
+                **payload.metadata,
+                "audio_uri": payload.audio_uri,
+                "audio_mime_type": payload.audio_mime_type,
+                "transcription_provider": transcription.provider,
+                "transcription_status": transcription.status.value,
+                "transcription_segments": len(transcription.segments),
+            },
+        )
+    )
+    return CallAudioWebhookOut(
+        call_id=payload.call_id,
+        customer_id=payload.customer_id,
+        transcription=transcription,
+        transcript_result=transcript_result,
     )
 
 

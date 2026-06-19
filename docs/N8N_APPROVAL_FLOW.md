@@ -7,9 +7,17 @@ This project keeps n8n useful at the edge while the backend owns durable workflo
 Import either workflow:
 
 ```text
+infra/n8n/call-audio-transcription-approval.json
 infra/n8n/call-transcript-approval.json
 infra/n8n/google-drive-sales-ops-approval.json
 ```
+
+`call-audio-transcription-approval.json` does four things:
+
+1. accepts a call-audio webhook with audio URI, duration, language, and metadata;
+2. sends it to `POST /webhooks/n8n/call-audio`;
+3. receives transcription status, speaker segments, score, analysis, approval item, and CRM update;
+4. returns a Telegram-ready approval item with transcription and CRM operation summary.
 
 `call-transcript-approval.json` does four things:
 
@@ -29,12 +37,14 @@ When n8n runs inside `docker compose`, the API URL is:
 
 ```text
 http://api:8080/integrations/google-drive/import
+http://api:8080/webhooks/n8n/call-audio
 http://api:8080/webhooks/n8n/call-transcript
 ```
 
 When n8n runs outside Docker, use the host API URL instead:
 
 ```text
+http://127.0.0.1:8080/webhooks/n8n/call-audio
 http://127.0.0.1:8080/webhooks/n8n/call-transcript
 ```
 
@@ -45,6 +55,25 @@ https://saleops.duckdns.org
 ```
 
 ## Input Contract
+
+Call-audio workflow:
+
+```json
+{
+  "call_id": "CALL-2026-001",
+  "customer_id": "LEAD-ACME-42",
+  "audio_uri": "gdrive://calls/CALL-2026-001.mp3",
+  "audio_mime_type": "audio/mpeg",
+  "duration_seconds": 186,
+  "language": "en",
+  "provider": "local_stub",
+  "transcript_hint": "Manager: Client approved budget...\nClient: We need delivery this month...",
+  "metadata": {
+    "source": "telephony",
+    "manager": "sales-demo"
+  }
+}
+```
 
 Transcript-only workflow:
 
@@ -90,6 +119,7 @@ Google Drive + transcript workflow:
 
 The backend returns:
 
+- transcription provider, status, request contract, and speaker segments for call-audio events;
 - lead score;
 - extracted sales signals;
 - structured analysis;

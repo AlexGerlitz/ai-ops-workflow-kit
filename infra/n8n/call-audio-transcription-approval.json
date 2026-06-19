@@ -1,0 +1,126 @@
+{
+  "name": "Call Audio Transcription Approval Flow",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "call-audio",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "WebhookIn",
+      "name": "Call Audio Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 260]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://api:8080/webhooks/n8n/call-audio",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify($json.body || $json) }}"
+      },
+      "id": "TranscribeAndAnalyzeAudio",
+      "name": "Transcribe And Analyze Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [540, 260]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "transcription_status",
+              "name": "transcription_status",
+              "value": "={{ $json.transcription.status }}",
+              "type": "string"
+            },
+            {
+              "id": "speaker_segments",
+              "name": "speaker_segments",
+              "value": "={{ $json.transcription.segments.length }}",
+              "type": "number"
+            },
+            {
+              "id": "approval_id",
+              "name": "approval_id",
+              "value": "={{ $json.transcript_result.approval.id }}",
+              "type": "string"
+            },
+            {
+              "id": "telegram_text",
+              "name": "telegram_text",
+              "value": "={{ 'Approve follow-up for ' + $json.customer_id + '\\nTranscription: ' + $json.transcription.provider + '/' + $json.transcription.status + '\\nScore: ' + $json.transcript_result.score + '/100\\nRisk: ' + $json.transcript_result.analysis.risk_level + '\\nNext action: ' + $json.transcript_result.analysis.next_action + '\\nApproval ID: ' + $json.transcript_result.approval.id }}",
+              "type": "string"
+            },
+            {
+              "id": "crm_operation",
+              "name": "crm_operation",
+              "value": "={{ $json.transcript_result.analysis.crm_update.adapter + '/' + $json.transcript_result.analysis.crm_update.operation }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "BuildTelegramApprovalPayload",
+      "name": "Build Telegram Approval Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [840, 260]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "Respond",
+      "name": "Return Audio Approval Item",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1120, 260]
+    }
+  ],
+  "connections": {
+    "Call Audio Webhook": {
+      "main": [
+        [
+          {
+            "node": "Transcribe And Analyze Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe And Analyze Audio": {
+      "main": [
+        [
+          {
+            "node": "Build Telegram Approval Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Telegram Approval Payload": {
+      "main": [
+        [
+          {
+            "node": "Return Audio Approval Item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ai-ops-workflow-kit"
+}

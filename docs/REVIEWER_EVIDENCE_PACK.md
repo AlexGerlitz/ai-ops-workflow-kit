@@ -9,7 +9,7 @@ that regenerates it.
 | --- | --- |
 | [`docs/evidence/reviewer-snapshot.sanitized.json`](./evidence/reviewer-snapshot.sanitized.json) | Machine-readable live snapshot with dynamic CRM idempotency key redacted. |
 | [`docs/evidence/reviewer-snapshot.txt`](./evidence/reviewer-snapshot.txt) | Human-readable summary of the same live snapshot. |
-| [`scripts/capture_reviewer_evidence.py`](../scripts/capture_reviewer_evidence.py) | Rebuilds the evidence from `/runtime`, `/llm/runtime`, `/integrations/runtime`, `/metrics`, and `/demo/run`. |
+| [`scripts/capture_reviewer_evidence.py`](../scripts/capture_reviewer_evidence.py) | Rebuilds the evidence from `/runtime`, `/llm/runtime`, `/transcription/runtime`, `/integrations/runtime`, `/metrics`, and `/demo/run`. |
 | [`scripts/reviewer_snapshot.py`](../scripts/reviewer_snapshot.py) | Fails fast if the public workflow, RAG context, approval state, dry-run integrations, worker state, or metrics are inconsistent. |
 | [`docs/PRODUCTION_READINESS_DRILL.md`](./PRODUCTION_READINESS_DRILL.md) | Complements the live snapshot with deterministic failure-mode evidence. |
 | [`docs/CREDENTIALED_SANDBOX_PREFLIGHT.md`](./CREDENTIALED_SANDBOX_PREFLIGHT.md) | Shows the read-only Telegram/Bitrix24 credential boundary and sanitized evidence output, including the latest live combined owner-run. |
@@ -30,14 +30,17 @@ python3 scripts/capture_reviewer_evidence.py --base-url https://leadscore.duckdn
 
 The generated JSON intentionally redacts only the per-run CRM idempotency key. Provider state,
 integration dry-run state, RAG source context, score, approval result, Bitrix24 queue state, worker
-state, metrics availability, deployed version, and deployed Git SHA stay visible.
+state, transcription provider state, metrics availability, deployed version, and deployed Git SHA stay visible.
 
 ## What A Reviewer Should See
 
 - The public API returns runtime identity and worker state.
 - The LLM boundary exposes local fallback plus OpenAI, Claude/Anthropic, and Gemini provider slots
   without exposing secrets.
+- The transcription boundary exposes local fixture, OpenAI Whisper, and Deepgram provider slots
+  without exposing secrets.
 - The demo imports Google Drive text into RAG and returns source context.
+- The demo accepts call-audio metadata and returns normalized transcript segments before scoring.
 - Transcript analysis produces a lead score and approval item.
 - Telegram and Bitrix24 contracts are exercised in dry-run mode.
 - The owner-run Telegram sandbox preflight proves the real bot token and webhook boundary without sending messages.

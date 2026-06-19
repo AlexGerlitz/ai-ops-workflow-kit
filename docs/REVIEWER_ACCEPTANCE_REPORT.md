@@ -22,7 +22,7 @@ Generated evidence:
 
 | Check | Evidence |
 | --- | --- |
-| Live API snapshot | `/runtime`, `/llm/runtime`, `/integrations/runtime`, `/metrics`, and `/demo/run` through `scripts/reviewer_snapshot.py`. |
+| Live API snapshot | `/runtime`, `/llm/runtime`, `/transcription/runtime`, `/integrations/runtime`, `/metrics`, and `/demo/run` through `scripts/reviewer_snapshot.py`. |
 | Live browser/workflow smoke | `scripts/smoke_live_demo.sh https://saleops.duckdns.org`, including Telegram callback rejection and Bitrix24 dry-run drain. |
 | GitHub proof state | Public CI workflow, latest checked CI run, owner-run `Credentialed Sandbox Preflight` workflow, and latest checked sandbox run are successful. |
 | Profile proof route | GitHub Pages surfaces link to AI Ops public proof status and owner-run sandbox workflow. |

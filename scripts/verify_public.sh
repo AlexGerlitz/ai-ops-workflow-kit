@@ -42,6 +42,10 @@ assert payload["google_drive_import"]["adapter_key"] == "google_drive"
 assert payload["google_drive_import"]["source"].startswith("gdrive://")
 assert payload["google_drive_import"]["chunks"] == payload["ingestion"]["chunks"]
 assert payload["rag_context_sources"], "RAG retrieval returned no sources"
+assert payload["transcription"]["provider"] in {"local_stub", "openai_whisper", "deepgram"}
+assert payload["transcription"]["status"] == "dry_run"
+assert payload["transcription"]["segments"], "Transcription returned no segments"
+assert payload["transcription"]["request_contract"]["method"]
 assert payload["call_analysis"]["score"] >= 80
 assert payload["approval"]["status"] == "approved"
 assert payload["telegram_approval"]["adapter_key"] == "telegram.approval"
@@ -65,6 +69,7 @@ assert "COMMENTS" in payload["bitrix24_dispatch"]["bitrix_request"]["fields"]
 
 workflow_dir = Path("infra/n8n")
 for workflow_name in (
+    "call-audio-transcription-approval.json",
     "call-transcript-approval.json",
     "google-drive-sales-ops-approval.json",
 ):
@@ -74,7 +79,11 @@ for workflow_name in (
         for node in workflow["nodes"]
         if node["type"] == "n8n-nodes-base.httpRequest"
     }
-    assert "http://api:8080/webhooks/n8n/call-transcript" in node_urls
+    if workflow_name.startswith("call-audio"):
+        assert "http://api:8080/webhooks/n8n/call-audio" in node_urls
+        assert "Call Audio Webhook" in workflow["connections"]
+    else:
+        assert "http://api:8080/webhooks/n8n/call-transcript" in node_urls
     if workflow_name.startswith("google-drive"):
         assert "http://api:8080/integrations/google-drive/import" in node_urls
         assert "Sales Ops Webhook" in workflow["connections"]
@@ -140,12 +149,42 @@ with TestClient(app) as client:
     llm_runtime_response = client.get("/llm/runtime")
     assert llm_runtime_response.status_code == 200
     llm_runtime = llm_runtime_response.json()
+    transcription_runtime_response = client.get("/transcription/runtime")
+    assert transcription_runtime_response.status_code == 200
+    transcription_runtime = transcription_runtime_response.json()
+    audio_response = client.post(
+        "/webhooks/n8n/call-audio",
+        json={
+            "call_id": "VERIFY-AUDIO-1",
+            "customer_id": "VERIFY-LEAD-1",
+            "audio_uri": "gdrive://verify-audio-1.mp3",
+            "audio_mime_type": "audio/mpeg",
+            "duration_seconds": 64,
+            "language": "en",
+            "transcript_hint": (
+                "Manager: The buyer approved budget and wants delivery this month.\n"
+                "Client: The next step is a technical review tomorrow."
+            ),
+            "metadata": {"source": "verify_public"},
+        },
+    )
+    assert audio_response.status_code == 200
+    audio_body = audio_response.json()
+    assert audio_body["transcription"]["status"] == "dry_run"
+    assert audio_body["transcription"]["segments"]
+    assert audio_body["transcript_result"]["score"] >= 80
     metrics = client.get("/metrics").text
 
 assert runtime["ok"] is True
 assert runtime["llm"]["selected_provider"] in {"local", "openai", "claude", "gemini"}
 assert set(runtime["llm"]["supported_providers"]) == {"local", "openai", "claude", "gemini"}
 assert llm_runtime["selected_provider"] == runtime["llm"]["selected_provider"]
+assert transcription_runtime["selected_provider"] in {"local_stub", "openai_whisper", "deepgram"}
+assert set(transcription_runtime["supported_providers"]) == {
+    "local_stub",
+    "openai_whisper",
+    "deepgram",
+}
 assert "OPENAI_API_KEY" in {
     env for provider in llm_runtime["providers"] for env in provider["required_env"]
 }
@@ -155,9 +194,13 @@ assert "ANTHROPIC_API_KEY" in {
 assert "GEMINI_API_KEY" in {
     env for provider in llm_runtime["providers"] for env in provider["required_env"]
 }
+assert "DEEPGRAM_API_KEY" in {
+    env for provider in transcription_runtime["providers"] for env in provider["required_env"]
+}
 assert runtime["counters"]["demo_runs_total"] >= 1
 assert runtime["counters"]["crm_handoffs_queued_total"] >= 1
 assert runtime["counters"]["telegram_callbacks_total"] >= 1
+assert runtime["counters"]["audio_transcriptions_total"] >= 1
 assert "bitrix24_dispatch_failures_total" in runtime["counters"]
 assert "integration_dead_letters_total" in runtime["counters"]
 assert "integration_events_drained_total" in runtime["counters"]
@@ -169,6 +212,7 @@ assert runtime["workers"]["bitrix24_outbox"]["enabled"] is False
 assert runtime["workers"]["bitrix24_outbox"]["active"] is False
 assert "aiops_runtime_info" in metrics
 assert "aiops_demo_runs_total" in metrics
+assert "aiops_audio_transcriptions_total" in metrics
 
 print("public verification passed")
 PY

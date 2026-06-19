@@ -23,10 +23,10 @@ Expected result:
 technical reviewer snapshot passed
 ```
 
-The snapshot checks the public deployment, `/runtime`, `/llm/runtime`, `/integrations/runtime`,
+The snapshot checks the public deployment, `/runtime`, `/llm/runtime`, `/transcription/runtime`, `/integrations/runtime`,
 `/metrics`, and `/demo/run`. It summarizes the deployed Git SHA, selected LLM provider, supported
-providers, Google Drive/RAG source, score, approval state, Telegram dry-run state, Bitrix24 dry-run
-state, CRM idempotency key, worker state, and metrics availability.
+providers, transcription provider, Google Drive/RAG source, score, approval state, Telegram dry-run
+state, Bitrix24 dry-run state, CRM idempotency key, worker state, and metrics availability.
 
 Read: [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 For the current CI/live-smoke/local-gate status, read
@@ -51,7 +51,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-31 passed
+36 passed
 public verification passed
 ```
 
@@ -61,6 +61,8 @@ workflow produced:
 - RAG context sources;
 - Google Drive import into the same RAG store;
 - OpenAI, Claude/Anthropic, Gemini, and local fallback provider boundary;
+- OpenAI Whisper, Deepgram, and local transcription provider boundary;
+- call-audio metadata converted into normalized transcript segments;
 - transcript score;
 - structured call analysis;
 - approved human review item;
@@ -171,6 +173,7 @@ Then open:
 - API health: http://127.0.0.1:8080/health
 - Runtime evidence: http://127.0.0.1:8080/runtime
 - LLM provider evidence: http://127.0.0.1:8080/llm/runtime
+- Transcription provider evidence: http://127.0.0.1:8080/transcription/runtime
 - Metrics: http://127.0.0.1:8080/metrics
 - FastAPI docs: http://127.0.0.1:8080/docs
 - n8n UI: http://127.0.0.1:5678
@@ -193,7 +196,7 @@ Then open:
 | [Live Demo](./LIVE_DEMO.md) | Public deployment URL and public smoke checks. |
 | [Architecture](./ARCHITECTURE.md) | FastAPI/n8n/PostgreSQL/LLM boundaries and state ownership. |
 | [Operations](./OPERATIONS.md) | Local runtime, health checks, smoke test, logs, and handoff. |
-| [n8n Approval Flow](./N8N_APPROVAL_FLOW.md) | How importable transcript and Google Drive workflow routing, Telegram payloads, and approval callbacks connect. |
+| [n8n Approval Flow](./N8N_APPROVAL_FLOW.md) | How importable call-audio, transcript, and Google Drive workflow routing, Telegram payloads, and approval callbacks connect. |
 | [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Google Drive, Telegram, and Bitrix24 dry-run contracts become real credentials later. |
 | [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, CRM handoff, idempotency, drain, background worker, and integration retry/dead-letter behavior. |
 
@@ -203,6 +206,7 @@ Then open:
 - The project has a browser-visible demo, not only README claims.
 - n8n is used as orchestration glue and connector routing, not as hidden domain logic.
 - LLM/RAG behavior has deterministic local fallbacks and OpenAI/Claude/Gemini provider contracts for repeatable review.
+- Speech-to-text behavior has a deterministic local fixture and OpenAI Whisper/Deepgram provider contracts for repeatable review.
 - CRM mutation is queued only after explicit human approval.
 - CRM dispatch failures become retry/dead-letter state with `next_retry_at`, not invisible log-only errors.
 - Retry timing, webhook auth, idempotency, and worker dry-run guard are captured by a deterministic drill.
@@ -213,5 +217,6 @@ Then open:
 - Production Telegram callbacks can be protected with `X-Telegram-Bot-Api-Secret-Token`.
 - Runtime and metrics endpoints expose deploy identity and workflow counters.
 - `/llm/runtime` exposes provider state without exposing secrets.
+- `/transcription/runtime` exposes provider state without exposing secrets.
 - Runtime exposes whether the Bitrix24 outbox worker is enabled and active.
 - The project has a public verification command and CI gate.

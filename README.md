@@ -3,8 +3,8 @@
 [![CI](https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml)
 
 Production-minded reference implementation for AI workflow orchestration around business operations:
-Google Drive import, document ingestion, RAG retrieval, transcript analysis, approval queues, and
-n8n/Telegram integration surfaces.
+Google Drive import, document ingestion, RAG retrieval, call-audio transcription contracts,
+transcript analysis, approval queues, and n8n/Telegram integration surfaces.
 
 The project keeps the workflow engine thin and moves stateful logic into a backend service. n8n can own
 webhooks, retries, notifications, and human-in-the-loop routing while the API owns RAG, scoring, audit-friendly
@@ -32,12 +32,12 @@ prompt demo.
 | [Bitrix24 sandbox preflight](docs/evidence/bitrix24-sandbox-preflight.txt) | Sanitized read-only proof that the Bitrix24 incoming webhook can call `profile` and CRM `crm.lead.fields` without writing records. |
 | [Evidence map](docs/EVIDENCE_MAP.md) | Maps the repo to AI automation, RAG, approval flow, Bitrix24, Telegram, and self-hosting requirements. |
 | [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Maps common AI automation vacancy requirements to exact files, endpoints, verification commands, and production boundaries. |
-| [Offer demo](docs/OFFER_DEMO.md) | One-command proof of Google Drive import -> RAG -> transcript scoring -> Telegram approval -> idempotent outbox drain -> mock Bitrix CRM handoff. |
+| [Offer demo](docs/OFFER_DEMO.md) | One-command proof of Google Drive import -> RAG -> call-audio transcription boundary -> transcript scoring -> Telegram approval -> idempotent outbox drain -> dry-run Bitrix24 CRM handoff. |
 | [Reviewer checklist](docs/REVIEWER_CHECKLIST.md) | Single public gate for tests, offer demo, and output validation. |
 | [Live demo notes](docs/LIVE_DEMO.md) | Public URLs and smoke checks for the deployed service. |
 | [Architecture notes](docs/ARCHITECTURE.md) | Shows the FastAPI/n8n/PostgreSQL boundary and why stateful logic stays in the backend. |
 | [Operations notes](docs/OPERATIONS.md) | Shows how the system is run, checked, and handed off. |
-| [n8n approval flow](docs/N8N_APPROVAL_FLOW.md) | Shows importable transcript and Google Drive workflows, Telegram payloads, approval callbacks, and CRM handoff boundaries. |
+| [n8n approval flow](docs/N8N_APPROVAL_FLOW.md) | Shows importable call-audio, transcript, and Google Drive workflows, Telegram payloads, approval callbacks, and CRM handoff boundaries. |
 | [Integration skeleton](docs/INTEGRATION_SKELETON.md) | Shows dry-run Telegram, Bitrix24, idempotency, retry scheduling, drain, opt-in worker, and dead-letter contracts before credentials are connected. |
 | [Tests](tests/) | Shows deterministic coverage around chunking, retrieval, approvals, and API behavior. |
 | [CI workflow](.github/workflows/ci.yml) | Shows the public verification gate. |
@@ -45,10 +45,10 @@ prompt demo.
 
 Best-fit evidence:
 
-- RAG/backend ownership: Google Drive import, ingestion, chunking, retrieval, pgvector-ready storage, and OpenAI/Claude/Gemini LLM boundary;
+- RAG/backend ownership: Google Drive import, ingestion, chunking, retrieval, pgvector-ready storage, OpenAI/Claude/Gemini LLM boundary, and Whisper/Deepgram transcription boundary;
 - human-in-the-loop workflow ownership: approval queue, explicit state transitions, and Telegram/n8n
   integration shape;
-- business automation ownership: transcript webhook, scoring, context capture, and review routing;
+- business automation ownership: call-audio webhook, transcription normalization, transcript scoring, context capture, and review routing;
 - engineering discipline: deterministic local embeddings, tests, Docker runtime, docs, and CI.
 
 Fast evaluation path:
@@ -73,9 +73,10 @@ Fast evaluation path:
 
 ```mermaid
 flowchart LR
-  Drive[Google Drive / CRM / transcripts] --> N8N[n8n workflows]
+  Drive[Google Drive / CRM / call audio / transcripts] --> N8N[n8n workflows]
   Telegram[Telegram approval bot] <--> N8N
   N8N --> API[FastAPI workflow API]
+  API --> STT[Whisper / Deepgram / local fixture]
   API --> Vector[(PostgreSQL + pgvector)]
   API --> LLM[LLM API adapter]
   API --> Queue[Approval queue]
@@ -87,10 +88,12 @@ flowchart LR
 - FastAPI service boundary for AI workflow orchestration.
 - Browser-visible Sales Ops Control Tower demo at `/`.
 - Google Drive import contract for exported document text from n8n or another connector.
+- Call-audio webhook that converts audio metadata through a transcription provider boundary into normalized transcript text.
+- Transcription runtime endpoint for OpenAI Whisper, Deepgram, and deterministic local fixture without exposing secrets.
 - RAG ingestion and retrieval with deterministic local embeddings for repeatable development.
 - pgvector-ready schema and Docker Compose runtime.
 - Transcript webhook that produces a structured analysis and a human approval item.
-- Mock Bitrix24 CRM handoff event queued only after human approval.
+- Dry-run Bitrix24 CRM handoff event queued only after human approval.
 - CRM outbox state with idempotency keys, attempt counters, retry scheduling, last error, and dead-letter handling.
 - Optional background worker for Bitrix24 outbox drain, disabled in public dry-run mode.
 - Dry-run Google Drive, Telegram approval, and Bitrix24 dispatch contracts ready for real credentials.
@@ -111,8 +114,8 @@ python3 scripts/run_offer_demo.py
 The script runs a complete synthetic sales workflow without external API keys:
 
 ```text
-Google Drive playbook import -> RAG retrieval -> call transcript webhook -> AI scoring
--> follow-up approval -> Telegram callback -> outbox drain -> mock Bitrix24 CRM handoff event
+Google Drive playbook import -> RAG retrieval -> call audio transcription -> transcript analysis
+-> follow-up approval -> Telegram callback -> outbox drain -> dry-run Bitrix24 CRM handoff event
 ```
 
 See [docs/OFFER_DEMO.md](docs/OFFER_DEMO.md) for the reviewer path and expected output shape.
@@ -163,6 +166,7 @@ API:
 curl http://127.0.0.1:8080/health
 curl http://127.0.0.1:8080/runtime
 curl http://127.0.0.1:8080/llm/runtime
+curl http://127.0.0.1:8080/transcription/runtime
 curl http://127.0.0.1:8080/metrics
 ```
 
@@ -199,8 +203,9 @@ curl -X POST http://127.0.0.1:8080/approvals \
 | `GET /runtime` | Runtime version, build SHA, deploy environment, public callback URL, LLM provider state, integrations, worker state, and counters. |
 | `GET /metrics` | Prometheus-style runtime and workflow counters. |
 | `GET /llm/runtime` | Inspect the OpenAI, Claude, Gemini, and local fallback provider boundary without exposing secrets. |
+| `GET /transcription/runtime` | Inspect the local fixture, OpenAI Whisper, and Deepgram transcription boundary without exposing secrets. |
 | `GET /integrations/runtime` | Inspect Google Drive, Telegram, and Bitrix24 adapter configuration/dry-run status. |
-| `POST /demo/run` | Run the synthetic Google Drive import -> transcript -> RAG -> approval -> Telegram/Bitrix dry-run demo. |
+| `POST /demo/run` | Run the synthetic Google Drive import -> call-audio transcription -> transcript -> RAG -> approval -> Telegram/Bitrix dry-run demo. |
 | `POST /documents` | Chunk and ingest text into the vector store. |
 | `POST /integrations/google-drive/import` | Import exported Google Drive document text into the RAG store with Drive metadata. |
 | `POST /query` | Retrieve context and produce an answer draft. |
@@ -214,6 +219,7 @@ curl -X POST http://127.0.0.1:8080/approvals \
 | `GET /integration-events` | Inspect CRM/integration handoff events, optionally filtered by adapter or status. |
 | `POST /integration-events/{id}/dispatch/bitrix24` | Dry-run or send a queued CRM event through Bitrix24, recording attempts and dead-letter state outside dry-run mode. |
 | `POST /integrations/bitrix24/drain` | Worker-style drain for due queued/retry CRM events. |
+| `POST /webhooks/n8n/call-audio` | Accept call audio metadata, build a transcription contract, normalize transcript text, and continue into transcript analysis. |
 | `POST /webhooks/n8n/call-transcript` | Accept a transcript event, score it, ingest it, and create approval work. |
 
 ## Repository Layout
@@ -240,6 +246,7 @@ bash scripts/verify_public.sh
 
 - The default local embedding provider is deterministic, so tests and development runs are stable without API keys.
 - LLM calls are isolated behind a provider boundary. `LLM_PROVIDER=auto` can select OpenAI, Claude/Anthropic, or Gemini when the matching API key is configured; otherwise the API returns an extractive draft from retrieved context.
+- Speech-to-text is isolated behind a provider boundary. Public mode uses a deterministic local fixture; OpenAI Whisper and Deepgram request contracts are visible through `/transcription/runtime` and `POST /webhooks/n8n/call-audio`.
 - Postgres/pgvector owns durable retrieval data; n8n owns workflow routing and external connectors.
 - Approval transitions are explicit and narrow: `pending -> approved` or `pending -> rejected`.
 - The webhook contract is structured so Bitrix, telephony, Google Drive, or Telegram can be connected without rewriting RAG logic.

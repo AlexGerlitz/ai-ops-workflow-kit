@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     anthropic_model: str = "claude-sonnet-4-20250514"
     gemini_api_key: str | None = None
     gemini_model: str = "gemini-2.5-flash"
+    transcription_provider: str = "local_stub"
+    transcription_dry_run: bool = True
+    whisper_model: str = "whisper-1"
+    deepgram_api_key: str | None = None
+    deepgram_model: str = "nova-3"
     public_base_url: str = "http://127.0.0.1:8080"
     telegram_bot_token: str | None = None
     telegram_approval_chat_id: str | None = None

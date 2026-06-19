@@ -50,6 +50,7 @@ def integration_mode(runtime: dict[str, Any], adapter_key: str) -> str:
 def assert_snapshot(snapshot: dict[str, Any]) -> None:
     runtime = snapshot["runtime_raw"]
     llm_runtime = snapshot["llm_runtime_raw"]
+    transcription_runtime = snapshot["transcription_runtime_raw"]
     demo = snapshot["demo_raw"]
     metrics = snapshot["metrics_raw"]
 
@@ -57,6 +58,22 @@ def assert_snapshot(snapshot: dict[str, Any]) -> None:
     assert runtime["storage"] in {"memory", "postgres"}
     assert runtime["llm"]["selected_provider"] in {"local", "openai", "claude", "gemini"}
     assert set(runtime["llm"]["supported_providers"]) == {"local", "openai", "claude", "gemini"}
+    assert runtime["transcription"]["selected_provider"] in {
+        "local_stub",
+        "openai_whisper",
+        "deepgram",
+    }
+    assert set(runtime["transcription"]["supported_providers"]) == {
+        "local_stub",
+        "openai_whisper",
+        "deepgram",
+    }
+    assert transcription_runtime["selected_provider"] == runtime["transcription"]["selected_provider"]
+    assert set(transcription_runtime["supported_providers"]) == {
+        "local_stub",
+        "openai_whisper",
+        "deepgram",
+    }
     assert llm_runtime["selected_provider"] == runtime["llm"]["selected_provider"]
     assert {"OPENAI_API_KEY", "ANTHROPIC_API_KEY", "GEMINI_API_KEY"} <= provider_required_env(
         llm_runtime
@@ -70,6 +87,9 @@ def assert_snapshot(snapshot: dict[str, Any]) -> None:
     assert demo["google_drive_import"]["source"].startswith("gdrive://")
     assert demo["google_drive_import"]["chunks"] >= 1
     assert demo["rag_context_sources"], "RAG returned no source context"
+    assert demo["transcription"]["status"] == "dry_run"
+    assert demo["transcription"]["provider"] in {"local_stub", "openai_whisper", "deepgram"}
+    assert demo["transcription"]["segments"], "Transcription returned no speaker segments"
     assert demo["call_analysis"]["score"] >= 80
     assert demo["approval"]["status"] == "approved"
     assert demo["telegram_approval"]["status"] == "dry_run"
@@ -82,6 +102,7 @@ def assert_snapshot(snapshot: dict[str, Any]) -> None:
 def build_snapshot(base_url: str, timeout: float) -> dict[str, Any]:
     runtime = fetch_json(base_url, "GET", "/runtime", timeout)
     llm_runtime = fetch_json(base_url, "GET", "/llm/runtime", timeout)
+    transcription_runtime = fetch_json(base_url, "GET", "/transcription/runtime", timeout)
     integrations = fetch_json(base_url, "GET", "/integrations/runtime", timeout)
     metrics = fetch_text(base_url, "/metrics", timeout)
     demo = fetch_json(base_url, "POST", "/demo/run", timeout)
@@ -90,6 +111,7 @@ def build_snapshot(base_url: str, timeout: float) -> dict[str, Any]:
         "base_url": normalize_base_url(base_url),
         "runtime_raw": runtime,
         "llm_runtime_raw": llm_runtime,
+        "transcription_runtime_raw": transcription_runtime,
         "integrations_raw": integrations,
         "metrics_raw": metrics,
         "demo_raw": demo,
@@ -127,6 +149,21 @@ def build_snapshot(base_url: str, timeout: float) -> dict[str, Any]:
             "supported_providers": llm_runtime["supported_providers"],
             "providers": providers,
         },
+        "transcription": {
+            "requested_provider": transcription_runtime["requested_provider"],
+            "selected_provider": transcription_runtime["selected_provider"],
+            "dry_run": transcription_runtime["dry_run"],
+            "supported_providers": transcription_runtime["supported_providers"],
+            "providers": [
+                {
+                    "provider": provider["provider"],
+                    "configured": provider["configured"],
+                    "selected": provider["selected"],
+                    "required_env": provider["required_env"],
+                }
+                for provider in transcription_runtime["providers"]
+            ],
+        },
         "integrations": {
             "google_drive": capabilities.get("google_drive")
             or {"mode": integration_mode(runtime, "google_drive")},
@@ -138,6 +175,9 @@ def build_snapshot(base_url: str, timeout: float) -> dict[str, Any]:
         "workflow": {
             "google_drive_source": demo["google_drive_import"]["source"],
             "rag_context_sources": demo["rag_context_sources"],
+            "transcription_provider": demo["transcription"]["provider"],
+            "transcription_status": demo["transcription"]["status"],
+            "transcription_segments": len(demo["transcription"]["segments"]),
             "score": demo["call_analysis"]["score"],
             "risk_level": demo["call_analysis"]["risk_level"],
             "approval_status": demo["approval"]["status"],
@@ -156,6 +196,7 @@ def build_snapshot(base_url: str, timeout: float) -> dict[str, Any]:
             "deployed API responds with runtime identity",
             "LLM boundary exposes OpenAI, Claude, Gemini, and local fallback without secrets",
             "demo imports Google Drive text into RAG and returns source context",
+            "demo accepts call audio metadata and converts it into a transcript boundary",
             "transcript analysis produces a high lead score and approval item",
             "Telegram and Bitrix24 remain dry-run in public mode",
             "CRM handoff is queued with an idempotency key after approval",
@@ -172,6 +213,10 @@ def format_text(snapshot: dict[str, Any]) -> str:
     integration_lines = [
         f"  - {name}: configured={value.get('configured')} dry_run={value.get('dry_run')}"
         for name, value in snapshot["integrations"].items()
+    ]
+    transcription_lines = [
+        f"  - {item['provider']}: configured={item['configured']} selected={item['selected']}"
+        for item in snapshot["transcription"]["providers"]
     ]
     conclusion_lines = [f"  - {item}" for item in snapshot["reviewer_conclusion"]]
     workflow = snapshot["workflow"]
@@ -193,6 +238,8 @@ def format_text(snapshot: dict[str, Any]) -> str:
             ),
             "providers:",
             *provider_lines,
+            "transcription_providers:",
+            *transcription_lines,
             "integrations:",
             *integration_lines,
             (
@@ -201,9 +248,15 @@ def format_text(snapshot: dict[str, Any]) -> str:
                 f"score={workflow['score']} "
                 f"risk={workflow['risk_level']} "
                 f"approval={workflow['approval_status']} "
+                f"transcription={workflow['transcription_status']} "
                 f"telegram={workflow['telegram_status']} "
                 f"bitrix24={workflow['bitrix24_status']} "
                 f"crm={workflow['crm_event_status']}"
+            ),
+            (
+                "transcription="
+                f"provider={workflow['transcription_provider']} "
+                f"segments={workflow['transcription_segments']}"
             ),
             f"crm_idempotency_key={workflow['crm_idempotency_key']}",
             (

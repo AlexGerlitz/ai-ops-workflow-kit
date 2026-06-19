@@ -9,9 +9,10 @@ For current CI, live smoke, local gate, and public boundary status, read
 
 | Requirement | Evidence |
 | --- | --- |
-| AI workflow orchestration | `app/main.py`, `infra/n8n/call-transcript-approval.json`, `infra/n8n/google-drive-sales-ops-approval.json`, `docs/N8N_APPROVAL_FLOW.md` |
+| AI workflow orchestration | `app/main.py`, `infra/n8n/call-audio-transcription-approval.json`, `infra/n8n/call-transcript-approval.json`, `infra/n8n/google-drive-sales-ops-approval.json`, `docs/N8N_APPROVAL_FLOW.md` |
 | Google Drive intake | `POST /integrations/google-drive/import`, `GoogleDriveImportIn`, `docs/INTEGRATION_SKELETON.md` |
 | LLM API provider boundary | `app/llm.py`, `GET /llm/runtime`, OpenAI, Claude/Anthropic, Gemini payload tests |
+| Call-audio transcription boundary | `app/transcription.py`, `GET /transcription/runtime`, `POST /webhooks/n8n/call-audio`, `infra/n8n/call-audio-transcription-approval.json` |
 | RAG and embeddings | `app/chunking.py`, `app/embeddings.py`, `app/store.py`, `POST /documents`, `POST /query` |
 | pgvector-ready persistence | `app/store.py`, `docker-compose.yml`, `docs/ARCHITECTURE.md` |
 | Transcript analysis and scoring | `app/scoring.py`, `app/sales_workflow.py`, `demo/call-transcript.json` |
@@ -37,6 +38,7 @@ For current CI, live smoke, local gate, and public boundary status, read
 - Google Drive import is normalized before RAG storage, so connector code does not own retrieval logic.
 - Local embeddings and LLM fallback are deterministic, so tests and demo output are repeatable without API keys.
 - OpenAI, Claude/Anthropic, and Gemini provider wiring is contract-tested without committing secrets.
+- OpenAI Whisper and Deepgram transcription wiring is kept behind a request-contract boundary, while public mode uses a local fixture and never needs real call recordings.
 - CRM handoff is queued only after an explicit approval transition.
 - Bitrix24 handoff is modeled as an outbox event with idempotency keys, attempt counters, `next_retry_at`, retry-safe drain, and `dead_letter` state.
 - Bitrix24 proof covers both the production request contract and a real read-only sandbox check for `profile` plus CRM `crm.lead.fields`.
@@ -64,7 +66,8 @@ For current CI, live smoke, local gate, and public boundary status, read
 10. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
 11. Run `bash scripts/smoke_live_demo.sh`.
 12. Open `https://saleops.duckdns.org/llm/runtime`.
-13. Run `bash scripts/verify_public.sh`.
-14. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-15. Read `docs/ARCHITECTURE.md`.
-16. Read `docs/INTEGRATION_SKELETON.md`.
+13. Open `https://saleops.duckdns.org/transcription/runtime`.
+14. Run `bash scripts/verify_public.sh`.
+15. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+16. Read `docs/ARCHITECTURE.md`.
+17. Read `docs/INTEGRATION_SKELETON.md`.
