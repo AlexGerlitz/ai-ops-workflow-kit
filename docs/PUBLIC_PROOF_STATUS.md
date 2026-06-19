@@ -44,7 +44,7 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 
 - Public synthetic demo mode intentionally avoids customer data, real call recordings, real Telegram sends, real Bitrix24 writes, and committed secrets.
 - Live runtime may report an older deployed app Git SHA when the latest repository changes are docs, tests, or verification scripts only. CI proves those repository changes; live smoke proves the deployed workflow remains healthy.
-- Telegram sandbox credentials have been validated through the owner-run workflow; owner-triggered approval messages can be live while `/demo/run` remains dry-run.
+- Telegram sandbox credentials have been validated through the manual sandbox workflow; operator-triggered approval messages can be live while `/demo/run` remains dry-run.
 - Bitrix24 sandbox evidence validates the incoming webhook with read-only `profile` and CRM `crm.lead.fields`; public CRM writes remain dry-run and production-gated.
 - Synthetic smoke stays dry-run/public-safe through the local fixture; the browser upload flow can use live Deepgram for owner-provided recordings without committing secrets or permanent audio files.
 - Private sandbox artifacts should be generated through the manual GitHub Actions workflow or a local run, then inspected as sanitized evidence instead of committing secrets.

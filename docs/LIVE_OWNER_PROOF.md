@@ -19,12 +19,12 @@ uploaded call / approval item -> live Telegram approval message -> inline Approv
 | Evidence | Purpose |
 | --- | --- |
 | [`docs/evidence/live-telegram-approval.sanitized.json`](./evidence/live-telegram-approval.sanitized.json) | Machine-readable proof that a real Telegram approval was approved and queued a CRM handoff. |
-| [`docs/evidence/live-telegram-approval.txt`](./evidence/live-telegram-approval.txt) | Human-readable summary of the same owner-run proof. |
+| [`docs/evidence/live-telegram-approval.txt`](./evidence/live-telegram-approval.txt) | Human-readable summary of the same live approval proof. |
 | [`scripts/live_telegram_approval_evidence.py`](../scripts/live_telegram_approval_evidence.py) | Regenerates the sanitized evidence from a known approved live approval id. |
 
 ## Boundary
 
-- Telegram can be live for owner-triggered approval messages.
+- Telegram can be live for operator-triggered approval messages.
 - `/demo/run` keeps Telegram dry-run, so public visitors cannot spam the owner bot.
 - Bitrix24 stays dry-run by default; the project proves request shape, idempotency, retries, and read-only sandbox access without requiring a paid Bitrix24 subscription.
 - Deepgram can run for owner-provided uploaded recordings; uploaded files are temporary and are deleted after processing.

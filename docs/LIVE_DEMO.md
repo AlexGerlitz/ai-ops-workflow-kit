@@ -95,7 +95,7 @@ For committed live evidence, read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_P
 - `/runtime` exposes deployed version, Git SHA, public callback base URL, integration readiness, and counters.
 - `/metrics` exposes Prometheus-style runtime and workflow counters.
 - Google Drive and Bitrix24 remain in dry-run mode until credentials are configured.
-- `/demo/run` keeps Telegram dry-run for public safety; owner-triggered approval messages can use
+- `/demo/run` keeps Telegram dry-run for public safety; operator-triggered approval messages can use
   the real Telegram bot and are documented in [Live Owner Proof](./LIVE_OWNER_PROOF.md).
 - The one-click synthetic smoke remains dry-run/local-fixture for deterministic review; the upload panel
   can run live Deepgram transcription when `DEEPGRAM_API_KEY` is configured.

@@ -70,7 +70,7 @@ https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429 or u
 | Telegram is a real contract surface | Public smoke creates a synthetic approval and verifies Telegram callback handling through `POST /webhooks/telegram/approval`. |
 | Bitrix24 handoff is safe | CRM writes are modeled as idempotent outbox events with attempt counters, retry timing, and dead-letter state. |
 | Bitrix24 sandbox is real | Sanitized evidence proves the incoming webhook can call read-only `profile` and CRM `crm.lead.fields`; the committed contract shows the `crm.lead.update` request body. |
-| Public mode is safe | The synthetic public workflow keeps Telegram and Bitrix24 dry-run; owner-triggered Telegram approvals can be live without opening CRM writes. |
+| Public mode is safe | The synthetic public workflow keeps Telegram and Bitrix24 dry-run; operator-triggered Telegram approvals can be live without opening CRM writes. |
 | Operations are visible | `/runtime`, `/metrics`, smoke scripts, Docker, CI, and docs give a reviewer reproducible evidence. |
 | Acceptance can be checked in one pass | `scripts/reviewer_acceptance_report.py` verifies live API, smoke, GitHub Actions workflows, Pages links, and public PDF. |
 | Evidence is reproducible | `scripts/capture_reviewer_evidence.py` writes a sanitized live snapshot to `docs/evidence/`. |

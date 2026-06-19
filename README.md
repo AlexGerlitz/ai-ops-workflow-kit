@@ -3,8 +3,8 @@
 [![CI](https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml)
 
 Production-minded reference implementation for AI workflow orchestration around business operations:
-document intake, Google Drive export adapter, RAG retrieval, call-audio transcription contracts,
-transcript analysis, approval queues, and n8n/Telegram integration surfaces.
+document/CRM/call intake, RAG retrieval, call-audio transcription contracts, transcript analysis,
+approval queues, outbox handoff, and n8n/Telegram/CRM integration surfaces.
 
 The project keeps the workflow engine thin and moves stateful logic into a backend service. n8n can own
 webhooks, retries, notifications, and human-in-the-loop routing while the API owns RAG, scoring, audit-friendly
@@ -20,7 +20,7 @@ prompt demo.
 | What to check | Why it matters |
 | --- | --- |
 | [Live demo](https://saleops.duckdns.org/) | Browser-visible Sales Ops workflow with document/RAG intake, call-audio path, scoring, approval, and CRM handoff boundary. |
-| [Live owner proof](docs/LIVE_OWNER_PROOF.md) | Real Telegram approval callback proof: approved item -> queued CRM handoff, while Bitrix24 stays dry-run. |
+| [Live approval proof](docs/LIVE_OWNER_PROOF.md) | Real Telegram approval callback proof: approved item -> queued CRM handoff, while Bitrix24 stays dry-run. |
 | [Reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md) | One-command acceptance pass across live API, live smoke, GitHub Actions state, Pages route, and public PDF. |
 | [Technical review packet](docs/TECHNICAL_REVIEW_PACKET.md) | 10-15 minute reviewer route covering live snapshot, architecture decisions, failure modes, and rollout boundaries. |
 | [Production readiness drill](docs/PRODUCTION_READINESS_DRILL.md) | Failure-mode proof for webhook auth, retry/dead-letter, drain scheduling, idempotency, and worker dry-run guard. |
@@ -29,7 +29,7 @@ prompt demo.
 
 Best-fit evidence:
 
-- RAG/backend ownership: document intake, Google Drive export adapter, chunking, retrieval, pgvector-ready storage, OpenAI/Claude/Gemini LLM boundary, and Whisper/Deepgram transcription boundary;
+- RAG/backend ownership: document and CRM intake contracts, connector/export adapters, chunking, retrieval, pgvector-ready storage, OpenAI/Claude/Gemini LLM boundary, and Whisper/Deepgram transcription boundary;
 - human-in-the-loop workflow ownership: approval queue, explicit state transitions, Telegram inline callback handling, and n8n integration shape;
 - business automation ownership: call-audio webhook, transcription normalization, transcript scoring, context capture, and review routing;
 - engineering discipline: deterministic local embeddings, tests, Docker runtime, docs, and CI.
@@ -39,19 +39,10 @@ Fast evaluation path:
 1. Open `https://saleops.duckdns.org/` and run the browser demo.
 2. Open `docs/PUBLIC_PROOF_STATUS.md`.
 3. Run `python3 scripts/reviewer_acceptance_report.py`.
-4. Open `docs/REVIEWER_EVIDENCE_PACK.md`.
-5. Run `python3 scripts/reviewer_snapshot.py`.
-6. Run `python3 scripts/production_readiness_drill.py`.
-7. Run `python3 scripts/credentialed_sandbox_preflight.py`.
-8. If sandbox credentials exist, run `python3 scripts/credentialed_sandbox_preflight.py --require-target telegram` or `--require-target bitrix24`.
-9. Open `docs/LIVE_OWNER_PROOF.md` and `docs/evidence/live-telegram-approval.txt`.
-10. Inspect the latest live combined sandbox run: `https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429`.
-11. Run `python3 scripts/bitrix24_contract_evidence.py`.
-12. Run `bash scripts/smoke_live_demo.sh`.
-13. Run `bash scripts/verify_public.sh`.
-14. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-15. Read `docs/ROLE_REQUIREMENTS_MAP.md`.
-16. Review `infra/n8n/` to see the external workflow boundary.
+4. Run `bash scripts/verify_public.sh`.
+5. Open `docs/TECHNICAL_REVIEW_PACKET.md`.
+6. Open `docs/PRODUCTION_READINESS_DRILL.md`.
+7. Review `infra/n8n/` to see the orchestration boundary.
 
 ## Deep Proof Index
 
@@ -86,7 +77,7 @@ flowchart LR
 
 - FastAPI service boundary for AI workflow orchestration.
 - Browser-visible Sales Ops Control Tower demo at `/`.
-- Google Drive import contract for exported document text from n8n or another connector.
+- Document intake contracts for exported document text from n8n, Google Drive, CRM, or another connector.
 - Call-audio webhook and browser upload endpoint that convert audio through a transcription provider boundary into normalized transcript text.
 - Transcription runtime endpoint for OpenAI Whisper, Deepgram, and deterministic local fixture without exposing secrets.
 - RAG ingestion and retrieval with deterministic local embeddings for repeatable development.
@@ -95,12 +86,12 @@ flowchart LR
 - Dry-run Bitrix24 CRM handoff event queued only after human approval; the Bitrix adapter can be credentialed later without changing the approval/RAG flow.
 - CRM outbox state with idempotency keys, attempt counters, retry scheduling, last error, and dead-letter handling.
 - Optional background worker for Bitrix24 outbox drain, disabled in public dry-run mode.
-- Dry-run Google Drive and Bitrix24 dispatch contracts ready for real credentials.
-- Telegram approval can run live for owner-triggered approvals while the public synthetic demo stays dry-run.
+- Dry-run document intake and Bitrix24 dispatch contracts ready for real credentials.
+- Telegram approval can run live for operator-triggered approvals while the public synthetic demo stays dry-run.
 - Telegram callback webhook for inline approve/reject decisions.
 - Optional Telegram webhook secret verification for production callbacks.
 - Approval state machine for Telegram, CRM, or internal review loops.
-- n8n workflow examples for Google Drive-to-RAG and webhook-to-API-to-approval routing.
+- n8n workflow examples for document-to-RAG and webhook-to-API-to-approval routing.
 - Runtime evidence endpoints for version, deploy environment, counters, and Prometheus-style metrics.
 - Tests around chunking, embeddings, retrieval, and approval state transitions.
 
@@ -114,7 +105,7 @@ python3 scripts/run_offer_demo.py
 The script runs a complete synthetic sales workflow without external API keys:
 
 ```text
-Google Drive playbook import -> RAG retrieval -> call audio transcription -> transcript analysis
+Document playbook import -> RAG retrieval -> call audio transcription -> transcript analysis
 -> follow-up approval -> Telegram callback -> outbox drain -> dry-run Bitrix24 CRM handoff event
 ```
 
@@ -252,7 +243,7 @@ bash scripts/verify_public.sh
 - Approval transitions are explicit and narrow: `pending -> approved` or `pending -> rejected`.
 - The webhook contract is structured so Bitrix, telephony, Google Drive, or Telegram can be connected without rewriting RAG logic.
 - Google Drive and Bitrix24 are dry-run by default, so public checks prove payload shape without exposing secrets.
-- The synthetic public demo keeps Telegram dry-run; owner-triggered approvals can use the real Telegram bot and are captured as sanitized evidence.
+- The synthetic public demo keeps Telegram dry-run; operator-triggered approvals can use the real Telegram bot and are captured as sanitized evidence.
 - Bitrix24 evidence includes a read-only live sandbox check for `profile` and `crm.lead.fields`, plus a committed contract artifact for the `crm.lead.update` request body.
 - Real Bitrix24 dispatches are recorded as integration attempts; retryable failures set `next_retry_at`, and repeated failures move the event to `dead_letter` with `last_error`.
 - The Bitrix24 worker is opt-in and starts only when dry-run is disabled, so public demos cannot accidentally consume synthetic events.
