@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
 import re
 from typing import Any
+from urllib.parse import unquote, urlparse
+
+import httpx
 
 from app.schemas import (
     CallAudioWebhookIn,
@@ -14,6 +18,7 @@ from app.schemas import (
 from app.settings import Settings
 
 SUPPORTED_TRANSCRIPTION_PROVIDERS = ("local_stub", "openai_whisper", "deepgram")
+DEFAULT_TRANSCRIPTION_TIMEOUT_SECONDS = 60.0
 
 
 def transcription_runtime(config: Settings) -> TranscriptionRuntimeOut:
@@ -68,6 +73,15 @@ def provider_runtime(
 
 
 def transcribe_call_audio(payload: CallAudioWebhookIn, config: Settings) -> TranscriptionOut:
+    with httpx.Client(timeout=DEFAULT_TRANSCRIPTION_TIMEOUT_SECONDS) as client:
+        return transcribe_call_audio_with_client(payload, config, client)
+
+
+def transcribe_call_audio_with_client(
+    payload: CallAudioWebhookIn,
+    config: Settings,
+    client: httpx.Client,
+) -> TranscriptionOut:
     provider = select_provider(payload.provider or config.transcription_provider)
     request_contract = build_request_contract(provider, payload, config)
     transcript = normalize_transcript(payload.transcript_hint or "")
@@ -122,7 +136,228 @@ def transcribe_call_audio(payload: CallAudioWebhookIn, config: Settings) -> Tran
             request_contract=request_contract,
         )
 
-    raise ValueError(f"{provider} live transcription is not enabled in this public skeleton")
+    try:
+        if provider == "openai_whisper":
+            return transcribe_openai_whisper(payload, config, request_contract, client)
+        if provider == "deepgram":
+            return transcribe_deepgram(payload, config, request_contract, client)
+    except (httpx.HTTPError, ValueError) as exc:
+        return TranscriptionOut(
+            provider=provider,
+            status=TranscriptionStatus.failed,
+            audio_uri=payload.audio_uri,
+            audio_mime_type=payload.audio_mime_type,
+            language=payload.language,
+            duration_seconds=payload.duration_seconds,
+            transcript="",
+            segments=[],
+            confidence=None,
+            detail=f"{provider} transcription failed: {exc}",
+            request_contract=request_contract,
+        )
+
+    raise ValueError(f"unsupported live transcription provider: {provider}")
+
+
+def transcribe_openai_whisper(
+    payload: CallAudioWebhookIn,
+    config: Settings,
+    request_contract: dict[str, Any],
+    client: httpx.Client,
+) -> TranscriptionOut:
+    audio = load_audio_bytes(payload.audio_uri, client)
+    response = client.post(
+        "https://api.openai.com/v1/audio/transcriptions",
+        headers={"authorization": f"Bearer {config.openai_api_key}"},
+        data={
+            "model": config.whisper_model,
+            "language": payload.language,
+            "response_format": "verbose_json",
+        },
+        files={
+            "file": (
+                audio["filename"],
+                audio["content"],
+                payload.audio_mime_type,
+            )
+        },
+    )
+    response.raise_for_status()
+    result = response.json()
+    transcript = normalize_transcript(str(result.get("text") or ""))
+    segments = openai_segments(result)
+    if not transcript and segments:
+        transcript = normalize_transcript("\n".join(segment.text for segment in segments))
+    if not transcript:
+        raise ValueError("OpenAI Whisper returned an empty transcript")
+    return TranscriptionOut(
+        provider="openai_whisper",
+        status=TranscriptionStatus.transcribed,
+        audio_uri=payload.audio_uri,
+        audio_mime_type=payload.audio_mime_type,
+        language=payload.language,
+        duration_seconds=payload.duration_seconds,
+        transcript=transcript,
+        segments=segments or build_segments(transcript, payload.duration_seconds),
+        confidence=None,
+        detail="OpenAI Whisper returned a live transcript.",
+        request_contract=request_contract,
+    )
+
+
+def transcribe_deepgram(
+    payload: CallAudioWebhookIn,
+    config: Settings,
+    request_contract: dict[str, Any],
+    client: httpx.Client,
+) -> TranscriptionOut:
+    headers = {"authorization": f"Token {config.deepgram_api_key}"}
+    params = {
+        "model": config.deepgram_model,
+        "diarize": "true",
+        "smart_format": "true",
+        "language": payload.language,
+    }
+    if is_http_uri(payload.audio_uri):
+        response = client.post(
+            "https://api.deepgram.com/v1/listen",
+            headers=headers,
+            params=params,
+            json={"url": payload.audio_uri},
+        )
+    else:
+        audio = load_audio_bytes(payload.audio_uri, client)
+        response = client.post(
+            "https://api.deepgram.com/v1/listen",
+            headers={**headers, "content-type": payload.audio_mime_type},
+            params=params,
+            content=audio["content"],
+        )
+    response.raise_for_status()
+    result = response.json()
+    transcript, segments, confidence = parse_deepgram_response(result, payload.duration_seconds)
+    if not transcript:
+        raise ValueError("Deepgram returned an empty transcript")
+    return TranscriptionOut(
+        provider="deepgram",
+        status=TranscriptionStatus.transcribed,
+        audio_uri=payload.audio_uri,
+        audio_mime_type=payload.audio_mime_type,
+        language=payload.language,
+        duration_seconds=payload.duration_seconds,
+        transcript=transcript,
+        segments=segments or build_segments(transcript, payload.duration_seconds),
+        confidence=confidence,
+        detail="Deepgram returned a live transcript.",
+        request_contract=request_contract,
+    )
+
+
+def load_audio_bytes(audio_uri: str, client: httpx.Client) -> dict[str, Any]:
+    parsed = urlparse(audio_uri)
+    if parsed.scheme in {"http", "https"}:
+        response = client.get(audio_uri)
+        response.raise_for_status()
+        filename = Path(parsed.path).name or "call-audio"
+        return {"filename": filename, "content": response.content}
+    if parsed.scheme == "file":
+        path = Path(unquote(parsed.path))
+        return {"filename": path.name or "call-audio", "content": path.read_bytes()}
+    if not parsed.scheme:
+        path = Path(audio_uri)
+        return {"filename": path.name or "call-audio", "content": path.read_bytes()}
+    raise ValueError(
+        "audio_uri must be an http(s) URL or a readable file path for live transcription"
+    )
+
+
+def is_http_uri(audio_uri: str) -> bool:
+    return urlparse(audio_uri).scheme in {"http", "https"}
+
+
+def openai_segments(result: dict[str, Any]) -> list[TranscriptionSegmentOut]:
+    segments = []
+    for item in result.get("segments") or []:
+        text = str(item.get("text") or "").strip()
+        if not text:
+            continue
+        segments.append(
+            TranscriptionSegmentOut(
+                speaker=None,
+                start_seconds=as_float(item.get("start")),
+                end_seconds=as_float(item.get("end")),
+                text=text,
+            )
+        )
+    return segments
+
+
+def parse_deepgram_response(
+    result: dict[str, Any],
+    duration_seconds: float | None,
+) -> tuple[str, list[TranscriptionSegmentOut], float | None]:
+    channels = result.get("results", {}).get("channels") or []
+    alternatives = channels[0].get("alternatives", []) if channels else []
+    if not alternatives:
+        return "", [], None
+    alternative = alternatives[0]
+    transcript = normalize_transcript(str(alternative.get("transcript") or ""))
+    confidence = as_float(alternative.get("confidence"))
+    words = alternative.get("words") or []
+    segments = deepgram_word_segments(words)
+    if not transcript and segments:
+        transcript = normalize_transcript("\n".join(segment.text for segment in segments))
+    if not segments and transcript:
+        segments = build_segments(transcript, duration_seconds)
+    return transcript, segments, confidence
+
+
+def deepgram_word_segments(words: list[dict[str, Any]]) -> list[TranscriptionSegmentOut]:
+    segments: list[TranscriptionSegmentOut] = []
+    current_speaker: str | None = None
+    current_words: list[str] = []
+    start: float | None = None
+    end: float | None = None
+    for word in words:
+        text = str(word.get("punctuated_word") or word.get("word") or "").strip()
+        if not text:
+            continue
+        speaker_value = word.get("speaker")
+        speaker = f"speaker_{speaker_value}" if speaker_value is not None else None
+        if current_words and speaker != current_speaker:
+            segments.append(
+                TranscriptionSegmentOut(
+                    speaker=current_speaker,
+                    start_seconds=start,
+                    end_seconds=end,
+                    text=" ".join(current_words),
+                )
+            )
+            current_words = []
+            start = None
+        current_speaker = speaker
+        current_words.append(text)
+        start = start if start is not None else as_float(word.get("start"))
+        end = as_float(word.get("end")) or end
+    if current_words:
+        segments.append(
+            TranscriptionSegmentOut(
+                speaker=current_speaker,
+                start_seconds=start,
+                end_seconds=end,
+                text=" ".join(current_words),
+            )
+        )
+    return segments
+
+
+def as_float(value: Any) -> float | None:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def select_provider(provider: str) -> str:

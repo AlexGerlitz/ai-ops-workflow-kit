@@ -3,6 +3,7 @@ import time
 from pathlib import Path
 from uuid import UUID
 
+import httpx
 from fastapi.testclient import TestClient
 
 from app.llm import (
@@ -15,7 +16,9 @@ from app.llm import (
     parse_openai_response,
 )
 from app.main import app, queue_crm_handoff_if_needed, settings, store
-from app.schemas import RetrievedContext
+from app.schemas import CallAudioWebhookIn, RetrievedContext
+from app.settings import Settings
+from app.transcription import transcribe_call_audio_with_client
 
 
 def test_health_endpoint_reports_runtime() -> None:
@@ -83,6 +86,130 @@ def test_transcription_runtime_exposes_provider_boundary_without_secrets() -> No
     serialized = json.dumps(body)
     assert "sk-" not in serialized
     assert "AAG" not in serialized
+
+
+def test_openai_whisper_live_transcription_contract_is_parsed() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if request.method == "GET":
+            return httpx.Response(200, content=b"fake mp3 bytes")
+        assert request.url == "https://api.openai.com/v1/audio/transcriptions"
+        assert request.headers["authorization"] == "Bearer openai-test-key"
+        assert request.headers["content-type"].startswith("multipart/form-data")
+        return httpx.Response(
+            200,
+            json={
+                "text": "Manager: Budget approved.\nClient: Start this month.",
+                "segments": [
+                    {"start": 0.0, "end": 2.5, "text": "Manager: Budget approved."},
+                    {"start": 2.5, "end": 5.0, "text": "Client: Start this month."},
+                ],
+            },
+        )
+
+    payload = CallAudioWebhookIn(
+        call_id="CALL-OPENAI-1",
+        customer_id="LEAD-OPENAI-1",
+        audio_uri="https://storage.example/calls/openai.mp3",
+        audio_mime_type="audio/mpeg",
+        language="en",
+    )
+    config = Settings(
+        transcription_provider="openai_whisper",
+        transcription_dry_run=False,
+        openai_api_key="openai-test-key",
+    )
+    with httpx.Client(transport=httpx.MockTransport(handler)) as http_client:
+        result = transcribe_call_audio_with_client(payload, config, http_client)
+
+    assert [request.method for request in requests] == ["GET", "POST"]
+    assert result.status == "transcribed"
+    assert result.provider == "openai_whisper"
+    assert "Budget approved" in result.transcript
+    assert len(result.segments) == 2
+    assert result.request_contract["secret_fields"] == ["OPENAI_API_KEY"]
+    assert "openai-test-key" not in json.dumps(result.model_dump())
+
+
+def test_deepgram_live_transcription_contract_is_parsed() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        assert request.url.host == "api.deepgram.com"
+        assert request.headers["authorization"] == "Token deepgram-test-key"
+        return httpx.Response(
+            200,
+            json={
+                "results": {
+                    "channels": [
+                        {
+                            "alternatives": [
+                                {
+                                    "transcript": "Budget approved. Start this month.",
+                                    "confidence": 0.93,
+                                    "words": [
+                                        {
+                                            "word": "Budget",
+                                            "punctuated_word": "Budget",
+                                            "start": 0.0,
+                                            "end": 0.3,
+                                            "speaker": 0,
+                                        },
+                                        {
+                                            "word": "approved",
+                                            "punctuated_word": "approved.",
+                                            "start": 0.3,
+                                            "end": 0.8,
+                                            "speaker": 0,
+                                        },
+                                        {
+                                            "word": "Start",
+                                            "punctuated_word": "Start",
+                                            "start": 0.8,
+                                            "end": 1.1,
+                                            "speaker": 1,
+                                        },
+                                        {
+                                            "word": "month",
+                                            "punctuated_word": "month.",
+                                            "start": 1.1,
+                                            "end": 1.7,
+                                            "speaker": 1,
+                                        },
+                                    ],
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+        )
+
+    payload = CallAudioWebhookIn(
+        call_id="CALL-DEEPGRAM-1",
+        customer_id="LEAD-DEEPGRAM-1",
+        audio_uri="https://storage.example/calls/deepgram.mp3",
+        audio_mime_type="audio/mpeg",
+        language="en",
+    )
+    config = Settings(
+        transcription_provider="deepgram",
+        transcription_dry_run=False,
+        deepgram_api_key="deepgram-test-key",
+    )
+    with httpx.Client(transport=httpx.MockTransport(handler)) as http_client:
+        result = transcribe_call_audio_with_client(payload, config, http_client)
+
+    assert len(requests) == 1
+    assert requests[0].headers["content-type"] == "application/json"
+    assert result.status == "transcribed"
+    assert result.provider == "deepgram"
+    assert result.confidence == 0.93
+    assert [segment.speaker for segment in result.segments] == ["speaker_0", "speaker_1"]
+    assert "deepgram-test-key" not in json.dumps(result.model_dump())
 
 
 def test_llm_client_selects_configured_provider_and_falls_back_locally() -> None:

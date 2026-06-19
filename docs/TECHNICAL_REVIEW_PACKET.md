@@ -122,6 +122,7 @@ allows retry, dead-letter handling, and audit without changing the LLM/RAG contr
 | No transcription provider key | `TRANSCRIPTION_PROVIDER=local_stub` keeps public review deterministic; `/transcription/runtime` reports Whisper/Deepgram required env vars. |
 | External LLM unavailable | Provider calls are isolated in `app/llm.py`; fallback behavior is testable and does not move workflow state into prompts. |
 | Audio transcription unavailable | `/webhooks/n8n/call-audio` fails before CRM mutation; downstream transcript analysis only runs after normalized transcript text exists. |
+| Provider response drift | Contract tests parse OpenAI Whisper verbose JSON and Deepgram diarized words without real network calls. |
 | Empty or weak retrieval | Query responses expose retrieved source context; tests assert RAG sources are returned. |
 | Duplicate approval handoff | CRM event gets deterministic idempotency key. |
 | Bitrix24 temporary failure | Dispatch records attempt count, `last_error`, `next_retry_at`, and can move to `dead_letter`. |
@@ -184,7 +185,7 @@ python3 scripts/reviewer_snapshot.py http://127.0.0.1:8080
 | --- | --- |
 | `app/main.py` | API boundary, demo route, runtime endpoints, approvals, webhooks, and integration handoff. |
 | `app/llm.py` | OpenAI, Claude/Anthropic, Gemini, and local fallback provider boundary. |
-| `app/transcription.py` | Local fixture, OpenAI Whisper, and Deepgram transcription provider boundary. |
+| `app/transcription.py` | Local fixture plus live OpenAI Whisper and Deepgram transcription providers. |
 | `app/store.py` | In-memory/PostgreSQL storage boundary, approvals, and integration events. |
 | `app/sales_workflow.py` | Transcript analysis, scoring context, approval payload, and CRM payload shape. |
 | `app/integrations.py` | Google Drive, Telegram, and Bitrix24 adapter contracts. |

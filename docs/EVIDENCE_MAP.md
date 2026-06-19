@@ -38,7 +38,7 @@ For current CI, live smoke, local gate, and public boundary status, read
 - Google Drive import is normalized before RAG storage, so connector code does not own retrieval logic.
 - Local embeddings and LLM fallback are deterministic, so tests and demo output are repeatable without API keys.
 - OpenAI, Claude/Anthropic, and Gemini provider wiring is contract-tested without committing secrets.
-- OpenAI Whisper and Deepgram transcription wiring is kept behind a request-contract boundary, while public mode uses a local fixture and never needs real call recordings.
+- OpenAI Whisper and Deepgram transcription wiring is implemented behind a provider boundary, while public mode uses a local fixture and never needs real call recordings.
 - CRM handoff is queued only after an explicit approval transition.
 - Bitrix24 handoff is modeled as an outbox event with idempotency keys, attempt counters, `next_retry_at`, retry-safe drain, and `dead_letter` state.
 - Bitrix24 proof covers both the production request contract and a real read-only sandbox check for `profile` plus CRM `crm.lead.fields`.

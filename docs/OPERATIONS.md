@@ -126,6 +126,16 @@ DEEPGRAM_API_KEY=...
 Keep `TRANSCRIPTION_DRY_RUN=true` until the audio URL policy, retention policy, provider payload,
 and diarization quality are reviewed.
 
+When `TRANSCRIPTION_DRY_RUN=false`, the backend performs live speech-to-text calls:
+
+- `openai_whisper` downloads a fetchable `audio_uri`, uploads the audio to OpenAI Whisper, parses
+  verbose JSON text and segments, and then continues into transcript analysis.
+- `deepgram` sends a remote HTTP(S) audio URL directly to Deepgram, or uploads bytes from a readable
+  file path, parses diarized words into speaker segments, and then continues into transcript analysis.
+
+`gdrive://` demo URIs are public-review placeholders. Real STT mode needs an HTTP(S) URL reachable
+from the API container or a file path mounted into the container.
+
 ## Logs
 
 ```bash

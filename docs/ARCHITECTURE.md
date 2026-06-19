@@ -40,8 +40,8 @@ public demos while API keys stay in deployment configuration.
 ### Call Audio To Transcript
 
 1. Telephony, Google Drive, or n8n sends call audio metadata to `POST /webhooks/n8n/call-audio`.
-2. The API selects the transcription provider: deterministic local fixture for public demos, or an
-   OpenAI Whisper/Deepgram contract when configured.
+2. The API selects the transcription provider: deterministic local fixture for public demos, live
+   OpenAI Whisper, or live Deepgram.
 3. The transcription adapter returns normalized transcript text, speaker segments, language,
    duration, status, and the provider request contract without leaking secrets.
 4. The API stores audio provenance in transcript metadata and continues into the same transcript
@@ -49,7 +49,8 @@ public demos while API keys stay in deployment configuration.
 
 `GET /transcription/runtime` exposes the requested provider, selected provider, supported providers,
 required environment variables, and dry-run state. Public mode does not call external audio services;
-it proves the boundary and the downstream business workflow.
+production mode can switch to OpenAI Whisper or Deepgram without changing the downstream
+scoring/approval/CRM contract.
 
 ### Call Transcript Review
 
