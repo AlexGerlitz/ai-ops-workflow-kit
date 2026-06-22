@@ -117,7 +117,7 @@ workflow runs the same read-only checks and uploads sanitized artifacts for revi
 
 ## What A Reviewer Should Conclude
 
-This is not a ChatGPT wrapper. The repository demonstrates an AI workflow system with backend-owned
+This is not a thin chatbot wrapper. The repository demonstrates an AI workflow system with backend-owned
 state, document and connector intake, RAG boundaries, approval transitions, Telegram callback handling,
 OpenAI/Claude/Gemini provider boundaries, Whisper/Deepgram transcription boundaries, CRM outbox
 semantics, runtime evidence, Docker deployment, CI, and public smoke checks.

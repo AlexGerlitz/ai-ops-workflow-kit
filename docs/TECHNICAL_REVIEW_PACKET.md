@@ -1,7 +1,7 @@
 # Technical Review Packet
 
 This packet is for reviewers who want to evaluate whether this is a production-minded AI workflow
-system rather than a ChatGPT wrapper or a no-code node chain.
+system rather than a thin chatbot wrapper or a no-code node chain.
 
 ## Fastest Review Path
 
