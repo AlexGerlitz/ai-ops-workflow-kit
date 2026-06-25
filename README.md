@@ -19,10 +19,11 @@ prompt demo.
 
 | What to check | Why it matters |
 | --- | --- |
-| [Live demo](https://saleops.duckdns.org/) | Browser-visible Sales Ops workflow with document/RAG intake, call-audio path, scoring, approval, and CRM handoff boundary. |
+| [Stable reviewer route](docs/PUBLIC_PROOF_STATUS.md) | Current proof status, CI, local gate, committed evidence, live-runtime boundary, and fallback review path in one page. |
+| [Runtime demo notes](docs/LIVE_DEMO.md) | Availability-dependent VPS demo notes for the browser-visible Sales Ops workflow; use them after the public proof status page confirms the edge is reachable. |
 | [Live approval proof](docs/LIVE_OWNER_PROOF.md) | Real Telegram approval callback proof: approved item -> queued CRM handoff, while Bitrix24 stays dry-run. |
-| [Reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md) | One-command acceptance pass across live API, live smoke, GitHub Actions state, Pages route, and public PDF. |
-| [Public proof status](docs/PUBLIC_PROOF_STATUS.md) | Current CI, live smoke, local verification gate, Pages route, and public boundary status. |
+| [Reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md) | Live-runtime acceptance pass across API, smoke, GitHub Actions state, Pages route, and public PDF when the VPS edge is reachable. |
+| [Public proof status](docs/PUBLIC_PROOF_STATUS.md) | Current CI, local verification gate, committed evidence, runtime boundary, Pages route, and public boundary status. |
 | [CI workflow](.github/workflows/ci.yml) | Deterministic tests for workflow state, RAG boundaries, integration contracts, and public verification. |
 | [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Role-level AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
 
@@ -35,10 +36,10 @@ Best-fit evidence:
 
 Fast evaluation path:
 
-1. Open `https://saleops.duckdns.org/` and run the browser demo.
-2. Open `docs/PUBLIC_PROOF_STATUS.md`.
-3. Run `python3 scripts/reviewer_acceptance_report.py`.
-4. Run `bash scripts/verify_public.sh`.
+1. Open `docs/PUBLIC_PROOF_STATUS.md`.
+2. Run `bash scripts/verify_public.sh`.
+3. Open `docs/LIVE_OWNER_PROOF.md`.
+4. Run `python3 scripts/reviewer_acceptance_report.py` when `https://saleops.duckdns.org/` is reachable.
 5. Open `docs/ROLE_REQUIREMENTS_MAP.md`.
 6. Review `infra/n8n/` to see the orchestration boundary.
 
@@ -46,7 +47,7 @@ Fast evaluation path:
 
 | Surface | Proof |
 | --- | --- |
-| Public status | [Public proof status](docs/PUBLIC_PROOF_STATUS.md) with current CI, live smoke, local gate, Pages route, and public boundary. |
+| Public status | [Public proof status](docs/PUBLIC_PROOF_STATUS.md) with current CI, local gate, committed evidence, runtime reachability boundary, Pages route, and public boundary. |
 | Live approval proof | [Live approval proof](docs/LIVE_OWNER_PROOF.md) for Telegram callback approval and CRM-safe outbox handoff. |
 | Integration boundaries | [Public proof status](docs/PUBLIC_PROOF_STATUS.md), [reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md), and committed sanitized artifacts for Telegram and Bitrix24 boundary checks. |
 | Offer demo | [Offer demo](docs/OFFER_DEMO.md) for document import -> RAG -> call-audio transcription boundary -> transcript scoring -> Telegram approval -> outbox drain -> dry-run Bitrix24 handoff. |

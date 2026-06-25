@@ -2,10 +2,16 @@
 
 This checklist is the fastest way to verify that AI Ops Workflow Kit is more than a prompt wrapper.
 
-## 1. Run The Live Reviewer Snapshot
+## 1. Run The Stable Reviewer Gate
 
-For a full public acceptance pass across live API, live smoke, GitHub Actions, Pages, and public PDF,
-run:
+Start with the local public gate and committed evidence:
+
+```bash
+bash scripts/verify_public.sh
+```
+
+For a live-runtime acceptance pass across API, smoke, GitHub Actions, Pages, and public PDF
+when the external edge is reachable, run:
 
 ```bash
 python3 scripts/reviewer_acceptance_report.py
@@ -183,8 +189,8 @@ Then open:
 | File | What to check |
 | --- | --- |
 | [README](../README.md) | Reviewer snapshot, API surface, repository layout, and checks. |
-| [Public Proof Status](./PUBLIC_PROOF_STATUS.md) | Current CI, live smoke, local public gate, Pages route, and public demo boundary. |
-| [Reviewer Acceptance Report](./REVIEWER_ACCEPTANCE_REPORT.md) | One-command public acceptance check across live API, live smoke, GitHub Actions, Pages, and PDF. |
+| [Public Proof Status](./PUBLIC_PROOF_STATUS.md) | Current CI, local public gate, committed evidence, runtime reachability boundary, Pages route, and public demo boundary. |
+| [Reviewer Acceptance Report](./REVIEWER_ACCEPTANCE_REPORT.md) | Live-runtime acceptance check across API, smoke, GitHub Actions, Pages, and PDF when the external edge is reachable. |
 | [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md) | Live snapshot, architecture decisions, failure modes, production rollout checklist, and public demo boundary. |
 | [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live evidence and regeneration command. |
 | [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md) | Failure-mode evidence for auth, retry/dead-letter, drain scheduling, idempotency, and worker guard. |

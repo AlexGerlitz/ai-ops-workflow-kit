@@ -276,7 +276,8 @@ For a concise live evidence report that reviewers can paste into an evaluation n
 python3 scripts/reviewer_snapshot.py --json
 ```
 
-For a full public acceptance pass across live API, live smoke, GitHub Actions, Pages, and public PDF:
+For a live-runtime acceptance pass across API, smoke, GitHub Actions, Pages, and public PDF
+when the external edge is reachable:
 
 ```bash
 python3 scripts/reviewer_acceptance_report.py

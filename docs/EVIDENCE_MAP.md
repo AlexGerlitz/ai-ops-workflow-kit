@@ -4,7 +4,7 @@ This map connects the repository to the work expected from an AI automation engi
 For a role-level checklist with verification commands and production boundaries, read
 [AI Automation Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md). For a 10-15 minute reviewer route,
 read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
-For current CI, live smoke, local gate, and public boundary status, read
+For current CI, local gate, committed evidence, runtime reachability, and public boundary status, read
 [Public Proof Status](./PUBLIC_PROOF_STATUS.md).
 
 | Requirement | Evidence |
@@ -26,8 +26,8 @@ For current CI, live smoke, local gate, and public boundary status, read
 | Reviewer evidence pack | `docs/REVIEWER_EVIDENCE_PACK.md`, `docs/evidence/reviewer-snapshot.sanitized.json`, `scripts/capture_reviewer_evidence.py` |
 | Failure-mode evidence | `docs/PRODUCTION_READINESS_DRILL.md`, `docs/evidence/production-readiness-drill.sanitized.json`, `scripts/production_readiness_drill.py` |
 | Credentialed sandbox boundary | `docs/CREDENTIALED_SANDBOX_PREFLIGHT.md`, `docs/evidence/credentialed-sandbox-preflight.sanitized.json`, `scripts/credentialed_sandbox_preflight.py`, `.github/workflows/credentialed-sandbox-preflight.yml` |
-| Current public proof status | `docs/PUBLIC_PROOF_STATUS.md`, latest CI, live smoke output, public gate output, profile Pages route |
-| Public proof | `https://saleops.duckdns.org/`, `scripts/reviewer_snapshot.py`, `scripts/smoke_live_demo.sh` |
+| Current public proof status | `docs/PUBLIC_PROOF_STATUS.md`, latest CI, local public gate output, committed live-smoke evidence, runtime reachability boundary, profile Pages route |
+| Runtime proof | `https://saleops.duckdns.org/`, `scripts/reviewer_snapshot.py`, `scripts/smoke_live_demo.sh` when the external edge is reachable |
 | Verification discipline | `scripts/verify_public.sh`, `.github/workflows/ci.yml`, `tests/` |
 
 ## Design Signals
@@ -44,7 +44,7 @@ For current CI, live smoke, local gate, and public boundary status, read
 - Bitrix24 handoff is modeled as an outbox event with idempotency keys, attempt counters, `next_retry_at`, retry-safe drain, and `dead_letter` state.
 - Bitrix24 proof covers both the production request contract and a real read-only sandbox check for `profile` plus CRM `crm.lead.fields`.
 - Runtime identity, worker state, and counters are public, so a reviewer can verify the deployed build without server access.
-- Reviewer acceptance report combines live API, smoke, GitHub Actions, Pages, and PDF checks in one command.
+- Reviewer acceptance report combines live API, smoke, GitHub Actions, Pages, and PDF checks in one command when the external edge is reachable.
 - Telegram callbacks can be verified with Telegram's webhook secret header in production.
 - Repeated Telegram approval taps are handled idempotently so the client receives a callback answer instead of spinning.
 - Failure-mode evidence is captured without external credentials, so reviewers can inspect retry,
@@ -56,9 +56,9 @@ For current CI, live smoke, local gate, and public boundary status, read
 
 ## Review Order
 
-1. Open the live demo: `https://saleops.duckdns.org/`.
-2. Open `docs/PUBLIC_PROOF_STATUS.md`.
-3. Run `python3 scripts/reviewer_acceptance_report.py`.
+1. Open `docs/PUBLIC_PROOF_STATUS.md`.
+2. Run `bash scripts/verify_public.sh`.
+3. Read `docs/evidence/reviewer-acceptance-report.txt`.
 4. Open `docs/REVIEWER_EVIDENCE_PACK.md`.
 5. Run `python3 scripts/capture_reviewer_evidence.py`.
 6. Run `python3 scripts/reviewer_snapshot.py`.
@@ -67,10 +67,10 @@ For current CI, live smoke, local gate, and public boundary status, read
 9. Open `docs/LIVE_OWNER_PROOF.md`.
 10. Run `python3 scripts/bitrix24_contract_evidence.py`.
 11. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
-12. Run `bash scripts/smoke_live_demo.sh`.
-13. Open `https://saleops.duckdns.org/llm/runtime`.
-14. Open `https://saleops.duckdns.org/transcription/runtime`.
-15. Run `bash scripts/verify_public.sh`.
+12. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
+13. If runtime proof is needed, run `bash scripts/smoke_live_demo.sh`.
+14. If runtime proof is needed, open `https://saleops.duckdns.org/llm/runtime`.
+15. If runtime proof is needed, open `https://saleops.duckdns.org/transcription/runtime`.
 16. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
 17. Read `docs/ARCHITECTURE.md`.
 18. Read `docs/INTEGRATION_SKELETON.md`.

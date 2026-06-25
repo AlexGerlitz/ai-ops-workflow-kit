@@ -1,6 +1,9 @@
 # Live Demo
 
 The public demo is deployed as a self-hosted FastAPI service behind Caddy/HAProxy.
+Treat it as a live runtime check, not the only proof route. If the VPS edge is unavailable,
+start with [Public Proof Status](./PUBLIC_PROOF_STATUS.md), the committed evidence under
+`docs/evidence/`, and the local public gate.
 
 Primary URL:
 
@@ -20,7 +23,7 @@ as a narrower alias for the scoring surface.
 
 ## Browser Path
 
-1. Open `https://saleops.duckdns.org/`.
+1. Confirm `https://saleops.duckdns.org/` is reachable, then open it.
 2. Click `Run demo workflow`.
 3. Verify the response shows Document/CRM knowledge intake, LLM provider boundary, transcription status,
    high lead score, approved review state, dry-run Telegram payload, dry-run Bitrix24 dispatch,
@@ -111,3 +114,6 @@ If the public VPS is unavailable, run the same proof locally:
 python3 -m pip install -r requirements.txt
 bash scripts/verify_public.sh
 ```
+
+The stable reviewer route is [Public Proof Status](./PUBLIC_PROOF_STATUS.md); the public runtime
+URLs are useful when the deployment edge is online, but they are not the only evidence path.
