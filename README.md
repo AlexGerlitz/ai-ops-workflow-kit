@@ -10,6 +10,10 @@ The project keeps the workflow engine thin and moves stateful logic into a backe
 webhooks, retries, notifications, and human-in-the-loop routing while the API owns RAG, scoring, audit-friendly
 state transitions, and integration contracts.
 
+Profile / contact route: [DriveDesk AI Operator proof route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html),
+[portfolio](https://alexgerlitz.github.io/AlexGerlitz/), and
+[inbound brief](https://alexgerlitz.github.io/AlexGerlitz/INTAKE_BRIEF.md).
+
 ![AI Sales Ops Control Tower](docs/assets/live-demo-control-tower.png)
 
 ## 60-Second Reviewer Snapshot
