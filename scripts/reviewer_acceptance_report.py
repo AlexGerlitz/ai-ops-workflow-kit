@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import urllib.error
@@ -30,9 +31,13 @@ LIVE_TELEGRAM_APPROVAL_EVIDENCE = (
 
 
 def fetch_json_url(url: str, timeout: float) -> dict[str, Any]:
+    headers = {"accept": "application/vnd.github+json", "user-agent": USER_AGENT}
+    token = os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
+    if token:
+        headers["authorization"] = f"Bearer {token}"
     request = urllib.request.Request(
         url,
-        headers={"accept": "application/vnd.github+json", "user-agent": USER_AGENT},
+        headers=headers,
     )
     with urllib.request.urlopen(request, timeout=timeout) as response:
         return json.loads(response.read().decode("utf-8"))
@@ -413,7 +418,7 @@ def main() -> int:
     parser.add_argument("--profile-base-url", default=DEFAULT_PROFILE_BASE_URL)
     parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
     parser.add_argument("--timeout", type=float, default=15.0)
-    parser.add_argument("--smoke-timeout", type=float, default=45.0)
+    parser.add_argument("--smoke-timeout", type=float, default=120.0)
     parser.add_argument("--json", action="store_true", help="Print JSON instead of text.")
     args = parser.parse_args()
 

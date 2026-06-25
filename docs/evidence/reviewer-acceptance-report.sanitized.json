@@ -1,6 +1,6 @@
 {
   "evidence_schema": "reviewer_acceptance_report_v1",
-  "generated_at": "2026-06-19T18:35:28.399520+00:00",
+  "generated_at": "2026-06-25T13:01:50.726763+00:00",
   "ok": true,
   "sanitized": true,
   "secret_boundaries": {
@@ -118,10 +118,10 @@
       "telegram": "dry_run",
       "bitrix24": "dry_run",
       "crm_event_status": "queued",
-      "bitrix24_drain": "8",
+      "bitrix24_drain": "18",
       "worker_active": "False"
     },
-    "console_tail": "live demo smoke passed\nbase_url=https://saleops.duckdns.org\ncallback_base_url=https://saleops.duckdns.org\nversion=0.2.0\ngit_sha=a908262d6ada8c19b16107b590c2a2bd33e1ce30\nllm=local\nscore=100\ngoogle_drive=gdrive://demo-sales-playbook\ntranscription=local_stub:dry_run\napproval=approved\ntelegram_callback=rejected\ntelegram=dry_run\nbitrix24=dry_run\ncrm_event_status=queued\nbitrix24_drain=8\nworker_active=False\n"
+    "console_tail": "live demo smoke passed\nbase_url=https://saleops.duckdns.org\ncallback_base_url=https://saleops.duckdns.org\nversion=0.2.0\ngit_sha=a908262d6ada8c19b16107b590c2a2bd33e1ce30\nllm=local\nscore=100\ngoogle_drive=gdrive://demo-sales-playbook\ntranscription=local_stub:dry_run\napproval=approved\ntelegram_callback=rejected\ntelegram=dry_run\nbitrix24=dry_run\ncrm_event_status=queued\nbitrix24_drain=18\nworker_active=False\n"
   },
   "github": {
     "status": "passed",
@@ -146,9 +146,9 @@
       "status": "passed",
       "name": "CI",
       "conclusion": "success",
-      "head_sha": "a908262d6ada8c19b16107b590c2a2bd33e1ce30",
-      "html_url": "https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27839133476",
-      "created_at": "2026-06-19T17:10:50Z"
+      "head_sha": "81659c2fb1c0b0723b8d7422fb5f682e0fb599a7",
+      "html_url": "https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/28170669049",
+      "created_at": "2026-06-25T12:38:54Z"
     },
     "latest_checked_sandbox_run": {
       "status": "passed",
@@ -191,7 +191,7 @@
       {
         "status": "passed",
         "url": "https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-remote-ai-automation-resume.pdf",
-        "bytes": 189799,
+        "bytes": 189672,
         "pdf_header_present": true
       }
     ]
