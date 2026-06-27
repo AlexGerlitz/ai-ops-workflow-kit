@@ -41,3 +41,20 @@ DEMO_CALL_AUDIO = {
         "telephony_provider": "demo-recorder",
     },
 }
+
+DEMO_RAG_EVAL_QUESTIONS = [
+    {
+        "question": "What should discovery calls confirm?",
+        "expected_source": "gdrive://demo-sales-playbook",
+        "required_terms": ["budget", "decision authority", "timeline", "dated next step"],
+        "top_k": 5,
+        "score_floor": 0.05,
+    },
+    {
+        "question": "What must happen before CRM updates are sent?",
+        "expected_source": "gdrive://demo-sales-playbook",
+        "required_terms": ["reviewed by a human", "CRM updates"],
+        "top_k": 5,
+        "score_floor": 0.05,
+    },
+]

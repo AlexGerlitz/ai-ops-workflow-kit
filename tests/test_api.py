@@ -362,6 +362,11 @@ def test_public_demo_run_proves_workflow_contract() -> None:
     assert body["google_drive_import"]["source"] == "gdrive://demo-sales-playbook"
     assert body["google_drive_import"]["chunks"] == body["ingestion"]["chunks"]
     assert body["rag_context_sources"]
+    assert body["rag_quality"]["ok"] is True
+    assert body["rag_quality"]["total"] == 2
+    assert body["rag_quality"]["passed"] == 2
+    assert all(result["passed"] for result in body["rag_quality"]["results"])
+    assert all(result["citations"] for result in body["rag_quality"]["results"])
     assert body["transcription"]["provider"] == "local_stub"
     assert body["transcription"]["status"] == "dry_run"
     assert body["transcription"]["audio_uri"].startswith("gdrive://")
@@ -386,6 +391,8 @@ def test_public_demo_run_proves_workflow_contract() -> None:
     assert body["bitrix24_dispatch"]["status"] == "dry_run"
     runtime = client.get("/runtime").json()
     assert runtime["counters"]["demo_runs_total"] >= 1
+    assert runtime["counters"]["rag_evaluations_total"] >= 1
+    assert runtime["counters"]["rag_eval_failures_total"] == 0
     assert runtime["counters"]["audio_transcriptions_total"] >= 1
     assert runtime["counters"]["crm_handoffs_queued_total"] >= 1
     assert runtime["counters"]["privacy_redacted_transcripts_total"] >= 1
@@ -460,6 +467,27 @@ def test_ingest_query_and_approval_flow() -> None:
         )
         assert query.status_code == 200
         assert query.json()["contexts"][0]["source"] == "drive://playbook"
+
+        evaluation = client.post(
+            "/rag/eval",
+            json={
+                "questions": [
+                    {
+                        "question": "What should discovery calls confirm?",
+                        "expected_source": "drive://playbook",
+                        "required_terms": ["budget", "authority", "need", "timing"],
+                        "top_k": 10,
+                        "score_floor": 0.05,
+                    }
+                ]
+            },
+        )
+        assert evaluation.status_code == 200
+        evaluation_body = evaluation.json()
+        assert evaluation_body["ok"] is True
+        assert evaluation_body["passed"] == 1
+        assert evaluation_body["results"][0]["matched_source"] is True
+        assert evaluation_body["results"][0]["missing_terms"] == []
 
         approval = client.post(
             "/approvals",

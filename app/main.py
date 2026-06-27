@@ -12,7 +12,7 @@ from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.responses import HTMLResponse, PlainTextResponse
 
 from app.chunking import chunk_text
-from app.demo_payloads import DEMO_CALL_AUDIO, DEMO_SALES_PLAYBOOK
+from app.demo_payloads import DEMO_CALL_AUDIO, DEMO_RAG_EVAL_QUESTIONS, DEMO_SALES_PLAYBOOK
 from app.embeddings import HashEmbeddingProvider
 from app.integrations import (
     GOOGLE_DRIVE_ADAPTER_KEY,
@@ -24,6 +24,7 @@ from app.integrations import (
 from app.llm import LLMClient
 from app.observability import RuntimeStats, prometheus_metrics
 from app.privacy import redact_text, redact_transcription
+from app.rag_eval import evaluate_retrieval
 from app.sales_workflow import build_call_analysis
 from app.schemas import (
     ApprovalDecision,
@@ -47,6 +48,9 @@ from app.schemas import (
     OfferDemoRunOut,
     QueryIn,
     QueryOut,
+    RagEvalIn,
+    RagEvalQuestion,
+    RagEvaluationOut,
     TelegramWebhookIn,
     TelegramWebhookOut,
     TranscriptWebhookIn,
@@ -207,6 +211,9 @@ async def run_demo_workflow() -> OfferDemoRunOut:
             top_k=3,
         )
     )
+    rag_quality = evaluate_rag(
+        RagEvalIn(questions=default_rag_eval_questions()),
+    )
     audio = call_audio_webhook(CallAudioWebhookIn(**DEMO_CALL_AUDIO))
     analysis = audio.transcript_result
     telegram = dispatch_telegram_approval(
@@ -235,6 +242,7 @@ async def run_demo_workflow() -> OfferDemoRunOut:
             {"source": context.source, "score": context.score}
             for context in rag.contexts
         ],
+        rag_quality=rag_quality,
         privacy=analysis.privacy.model_dump(mode="json"),
         transcription={
             "provider": audio.transcription.provider,
@@ -356,6 +364,24 @@ async def query(payload: QueryIn) -> QueryOut:
     contexts = store.search(embedding, payload.top_k)
     answer = await llm.answer(payload.question, contexts)
     return QueryOut(answer=answer, contexts=contexts, top_k=payload.top_k)
+
+
+@app.post("/rag/eval", response_model=RagEvaluationOut)
+def evaluate_rag(payload: RagEvalIn | None = None) -> RagEvaluationOut:
+    runtime_stats.increment("rag_evaluations_total")
+    questions = payload.questions if payload and payload.questions else default_rag_eval_questions()
+    evaluation = evaluate_retrieval(
+        questions=questions,
+        embed=embedding_provider.embed,
+        search=store.search,
+    )
+    if not evaluation.ok:
+        runtime_stats.increment("rag_eval_failures_total")
+    return evaluation
+
+
+def default_rag_eval_questions() -> list[RagEvalQuestion]:
+    return [RagEvalQuestion(**question) for question in DEMO_RAG_EVAL_QUESTIONS]
 
 
 @app.post("/approvals", response_model=ApprovalOut)

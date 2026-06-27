@@ -30,11 +30,12 @@ prompt demo.
 | [Public proof status](docs/PUBLIC_PROOF_STATUS.md) | Current CI, local verification gate, committed evidence, runtime boundary, Pages route, and public boundary status. |
 | [CI workflow](.github/workflows/ci.yml) | Deterministic tests for workflow state, RAG boundaries, integration contracts, and public verification. |
 | [Privacy boundary](docs/PRIVACY_BOUNDARY.md) | Safe-logging proof: transcript PII is redacted before RAG ingestion, approval context, CRM handoff, demo JSON, and reviewer snapshots. |
+| RAG quality proof | `/rag/eval` and `/demo/run` return expected-source checks with citations, required terms, score floor, and pass/fail output. |
 | [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Role-level AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
 
 Best-fit evidence:
 
-- RAG/backend ownership: document and CRM intake contracts, connector/export adapters, chunking, retrieval, pgvector-ready storage, OpenAI/Claude/Gemini LLM boundary, and Whisper/Deepgram transcription boundary;
+- RAG/backend ownership: document and CRM intake contracts, connector/export adapters, chunking, retrieval, deterministic retrieval-quality eval, pgvector-ready storage, OpenAI/Claude/Gemini LLM boundary, and Whisper/Deepgram transcription boundary;
 - human-in-the-loop workflow ownership: approval queue, explicit state transitions, Telegram inline callback handling, and n8n integration shape;
 - business automation ownership: call-audio webhook, transcription normalization, transcript scoring, context capture, and review routing;
 - regulated-workflow ownership: safe logging and PII redaction before RAG, approval context, CRM handoff, and public evidence;
@@ -59,6 +60,7 @@ Fast evaluation path:
 | Offer demo | [Offer demo](docs/OFFER_DEMO.md) for document import -> RAG -> call-audio transcription boundary -> transcript scoring -> Telegram approval -> outbox drain -> dry-run Bitrix24 handoff. |
 | Reviewer gate | [Reviewer checklist](docs/REVIEWER_CHECKLIST.md), [CI workflow](.github/workflows/ci.yml), and deterministic tests in [tests/](tests/). |
 | Privacy boundary | [Privacy boundary](docs/PRIVACY_BOUNDARY.md) for transcript PII redaction before RAG, approval context, CRM handoff, demo JSON, and reviewer evidence. |
+| RAG quality eval | `/rag/eval`, `app/rag_eval.py`, and `/demo/run` prove expected-source retrieval with citations before an LLM answer is trusted. |
 | Runtime docs | [Live demo notes](docs/LIVE_DEMO.md), [Operations notes](docs/OPERATIONS.md), and runtime endpoints `/runtime`, `/llm/runtime`, `/transcription/runtime`, `/integrations/runtime`, `/metrics`. |
 | Architecture | [Architecture notes](docs/ARCHITECTURE.md), [Evidence map](docs/EVIDENCE_MAP.md), and [Integration skeleton](docs/INTEGRATION_SKELETON.md). |
 | n8n boundary | [n8n approval flow](docs/N8N_APPROVAL_FLOW.md) and importable workflows in [`infra/n8n/`](infra/n8n/). |
@@ -85,6 +87,7 @@ flowchart LR
 - Call-audio webhook and browser upload endpoint that convert audio through a transcription provider boundary into normalized transcript text.
 - Transcription runtime endpoint for OpenAI Whisper, Deepgram, and deterministic local fixture without exposing secrets.
 - RAG ingestion and retrieval with deterministic local embeddings for repeatable development.
+- RAG quality evaluation with expected source, required terms, score floor, citations, and pass/fail output.
 - pgvector-ready schema and Docker Compose runtime.
 - Transcript webhook that produces a structured analysis and a human approval item.
 - Safe-logging boundary that redacts transcript PII before RAG ingestion, approval context, CRM handoff, and public evidence.
@@ -206,6 +209,7 @@ curl -X POST http://127.0.0.1:8080/approvals \
 | `POST /documents` | Chunk and ingest text into the vector store. |
 | `POST /integrations/google-drive/import` | Import exported Google Drive document text into the RAG store with Drive metadata. |
 | `POST /query` | Retrieve context and produce an answer draft. |
+| `POST /rag/eval` | Run deterministic retrieval-quality checks against expected sources and required terms. |
 | `POST /approvals` | Create a human-in-the-loop approval item. |
 | `GET /approvals` | List approval items, optionally filtered by status. |
 | `GET /approvals/{id}` | Inspect one approval item. |

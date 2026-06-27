@@ -33,6 +33,14 @@ AI Ops Workflow Kit separates orchestration from durable application logic.
 4. The LLM adapter receives only the selected context and routes it through the selected provider boundary.
 5. The response includes the answer draft and source context for review.
 
+### RAG Quality Evaluation
+
+1. A reviewer or demo run sends expected-source questions to `POST /rag/eval`.
+2. The API retrieves context with deterministic embeddings and does not call an LLM.
+3. The evaluator checks expected source, required terms, score floor, citations, and pass/fail output.
+4. `/demo/run` includes the same `rag_quality` result so the end-to-end proof shows retrieval quality
+   before approval and CRM handoff.
+
 `GET /llm/runtime` exposes the requested provider, selected provider, configured provider names, and
 required environment variables without exposing secrets. This keeps provider wiring inspectable in
 public demos while API keys stay in deployment configuration.
@@ -95,7 +103,7 @@ inspectable without accidentally consuming synthetic events.
 ## Production Concerns
 
 - Keep prompts and provider payload contracts versioned and observable.
-- Maintain a small evaluation set for retrieval quality.
+- Maintain a small evaluation set for retrieval quality and keep `/rag/eval` in the public gate.
 - Track approval outcomes to improve scoring and prompt behavior.
 - Keep API contracts stable; change n8n workflows at the edge.
 - Prefer explicit state transitions over hidden node-level side effects.

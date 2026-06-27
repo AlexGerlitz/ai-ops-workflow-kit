@@ -11,6 +11,7 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 | Stable reviewer route | Start here, then run `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh`; this path does not depend on the external VPS edge being reachable |
 | Reviewer acceptance report | `python3 scripts/reviewer_acceptance_report.py` checks live API, live smoke, GitHub Actions state, Pages route, and public PDF when the live runtime is reachable |
 | Local public gate | `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `45 passed`, `public verification passed` |
+| RAG quality proof | `/demo/run` and `POST /rag/eval` return `rag_quality.ok=true`, `passed=2/2`, expected source matches, required terms, score floor, and citations |
 | Privacy boundary | `docs/PRIVACY_BOUNDARY.md`; public demo proves transcript email/phone redaction before RAG ingestion, approval context, CRM handoff, demo JSON, and reviewer snapshots |
 | Committed live-smoke evidence | `docs/evidence/reviewer-acceptance-report.txt` and `.sanitized.json` record the last captured `live demo smoke passed`, `score=100`, `transcription=local_stub:dry_run`, `telegram_callback=rejected`, and positive Bitrix24 drain counter |
 | Runtime smoke | `bash scripts/smoke_live_demo.sh https://saleops.duckdns.org` is the live VPS check; run it after confirming the edge is reachable |
@@ -40,8 +41,9 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 8. Read [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
 9. Inspect the latest live combined sandbox run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429
 10. Inspect `docs/evidence/live-telegram-approval.txt`, `docs/evidence/bitrix24-contract.txt`, and `docs/evidence/bitrix24-sandbox-preflight.txt`.
-11. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
-12. If the alias is needed, run `bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org`.
+11. Inspect `rag_quality` in `python3 scripts/run_offer_demo.py` output or call `POST /rag/eval` after importing the demo playbook.
+12. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
+13. If the alias is needed, run `bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org`.
 
 ## Public Boundary
 

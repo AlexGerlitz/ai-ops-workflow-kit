@@ -51,6 +51,7 @@ The token is used only to inspect webhook status and is not written to the artif
 - The transcription boundary exposes local fixture, OpenAI Whisper, and Deepgram provider slots
   without exposing secrets.
 - The demo imports Google Drive text into RAG and returns source context.
+- The demo checks RAG retrieval quality with expected-source questions, required terms, score floor, and citations.
 - The demo accepts call-audio metadata and returns normalized transcript segments before scoring.
 - Transcript analysis produces a lead score and approval item.
 - The synthetic demo exercises Telegram and Bitrix24 contracts in dry-run mode.

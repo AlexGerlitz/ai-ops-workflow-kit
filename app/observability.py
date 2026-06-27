@@ -11,6 +11,8 @@ class RuntimeStats:
             "documents_ingested_total": 0,
             "google_drive_imports_total": 0,
             "query_requests_total": 0,
+            "rag_evaluations_total": 0,
+            "rag_eval_failures_total": 0,
             "audio_webhooks_total": 0,
             "audio_transcriptions_total": 0,
             "transcript_webhooks_total": 0,

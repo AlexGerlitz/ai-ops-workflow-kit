@@ -12,6 +12,7 @@ def test_parse_key_value_lines_keeps_smoke_signals() -> None:
             "live demo smoke passed",
             "base_url=https://saleops.duckdns.org",
             "score=100",
+            "rag_eval=2/2",
             "telegram_callback=rejected",
             "bitrix24_drain=31",
         ]
@@ -20,6 +21,7 @@ def test_parse_key_value_lines_keeps_smoke_signals() -> None:
     parsed = parse_key_value_lines(text)
 
     assert parsed["score"] == "100"
+    assert parsed["rag_eval"] == "2/2"
     assert parsed["telegram_callback"] == "rejected"
     assert parsed["bitrix24_drain"] == "31"
 
@@ -78,6 +80,7 @@ def test_format_text_summarizes_acceptance_boundaries() -> None:
         "live_smoke": {
             "signals": {
                 "score": "100",
+                "rag_eval": "2/2",
                 "telegram_callback": "rejected",
                 "bitrix24_drain": "31",
             }
@@ -115,7 +118,7 @@ def test_format_text_summarizes_acceptance_boundaries() -> None:
     text = format_text(report)
 
     assert "reviewer acceptance report passed" in text
-    assert "live_smoke=passed score=100 telegram_callback=rejected bitrix24_drain=31" in text
+    assert "live_smoke=passed score=100 rag_eval=2/2 telegram_callback=rejected bitrix24_drain=31" in text
     assert "sandbox_run=success" in text
     assert "bitrix24_contract=passed method=crm.lead.update request_shape=True" in text
     assert "live_telegram_approval=passed telegram_live=True approval=approved" in text

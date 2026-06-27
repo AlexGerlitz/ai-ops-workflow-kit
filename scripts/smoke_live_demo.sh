@@ -105,6 +105,8 @@ assert payload["runtime"]["ok"] is True
 assert payload["runtime"]["llm"]["selected_provider"] == runtime_payload["llm"]["selected_provider"]
 assert payload["google_drive_import"]["adapter_key"] == "google_drive"
 assert payload["google_drive_import"]["source"].startswith("gdrive://")
+assert payload["rag_quality"]["ok"] is True
+assert payload["rag_quality"]["passed"] == payload["rag_quality"]["total"]
 assert payload["transcription"]["status"] == "dry_run"
 assert payload["transcription"]["segments"]
 assert payload["call_analysis"]["score"] >= 80
@@ -137,6 +139,7 @@ print(f"git_sha={runtime_payload['git_sha']}")
 print(f"llm={runtime_payload['llm']['selected_provider']}")
 print(f"score={payload['call_analysis']['score']}")
 print(f"google_drive={payload['google_drive_import']['source']}")
+print(f"rag_eval={payload['rag_quality']['passed']}/{payload['rag_quality']['total']}")
 print(f"transcription={payload['transcription']['provider']}:{payload['transcription']['status']}")
 print(f"approval={payload['approval']['status']}")
 print(f"telegram_callback={telegram_callback_response['approval_status']}")

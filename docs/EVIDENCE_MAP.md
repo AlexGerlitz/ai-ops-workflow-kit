@@ -13,7 +13,7 @@ For current CI, local gate, committed evidence, runtime reachability, and public
 | Document intake / Google Drive adapter | `POST /integrations/google-drive/import`, `GoogleDriveImportIn`, `docs/INTEGRATION_SKELETON.md` |
 | LLM API provider boundary | `app/llm.py`, `GET /llm/runtime`, OpenAI, Claude/Anthropic, Gemini payload tests |
 | Call-audio transcription boundary | `app/transcription.py`, `GET /transcription/runtime`, `POST /webhooks/n8n/call-audio`, `POST /demo/audio/upload`, `infra/n8n/call-audio-transcription-approval.json` |
-| RAG and embeddings | `app/chunking.py`, `app/embeddings.py`, `app/store.py`, `POST /documents`, `POST /query` |
+| RAG and embeddings | `app/chunking.py`, `app/embeddings.py`, `app/store.py`, `app/rag_eval.py`, `POST /documents`, `POST /query`, `POST /rag/eval` |
 | Privacy / safe logging boundary | `app/privacy.py`, `POST /webhooks/n8n/call-transcript`, `POST /webhooks/n8n/call-audio`, `docs/PRIVACY_BOUNDARY.md`, `scripts/verify_public.sh` |
 | pgvector-ready persistence | `app/store.py`, `docker-compose.yml`, `docs/ARCHITECTURE.md` |
 | Transcript analysis and scoring | `app/scoring.py`, `app/sales_workflow.py`, `demo/call-transcript.json` |
@@ -39,6 +39,7 @@ For current CI, local gate, committed evidence, runtime reachability, and public
 - The synthetic public demo keeps Telegram dry-run; owner-run evidence proves the real Telegram approval callback path.
 - Document intake through the Google Drive adapter is normalized before RAG storage, so connector code does not own retrieval logic.
 - Local embeddings and LLM fallback are deterministic, so tests and demo output are repeatable without API keys.
+- RAG quality is evaluated separately from generation through expected-source questions, required terms, score floor, and citations.
 - OpenAI, Claude/Anthropic, and Gemini provider wiring is contract-tested without committing secrets.
 - OpenAI Whisper and Deepgram transcription wiring is implemented behind a provider boundary; deterministic smoke uses a local fixture, and the browser upload endpoint can process a real temporary recording when a provider key is configured.
 - Transcript PII is redacted before RAG ingestion, approval context, CRM handoff payloads, demo JSON, and reviewer snapshots.
@@ -74,6 +75,7 @@ For current CI, local gate, committed evidence, runtime reachability, and public
 14. If runtime proof is needed, open `https://saleops.duckdns.org/llm/runtime`.
 15. If runtime proof is needed, open `https://saleops.duckdns.org/transcription/runtime`.
 16. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-17. Read `docs/PRIVACY_BOUNDARY.md`.
-18. Read `docs/ARCHITECTURE.md`.
-19. Read `docs/INTEGRATION_SKELETON.md`.
+17. Inspect `rag_quality` from `/demo/run` or call `POST /rag/eval` after importing the demo playbook.
+18. Read `docs/PRIVACY_BOUNDARY.md`.
+19. Read `docs/ARCHITECTURE.md`.
+20. Read `docs/INTEGRATION_SKELETON.md`.

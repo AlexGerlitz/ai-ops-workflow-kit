@@ -323,6 +323,9 @@ def build_report(
             "integrations": snapshot["integrations"],
             "workflow": {
                 "google_drive_source": snapshot["workflow"]["google_drive_source"],
+                "rag_quality_ok": snapshot["workflow"]["rag_quality_ok"],
+                "rag_quality_passed": snapshot["workflow"]["rag_quality_passed"],
+                "rag_quality_total": snapshot["workflow"]["rag_quality_total"],
                 "score": snapshot["workflow"]["score"],
                 "risk_level": snapshot["workflow"]["risk_level"],
                 "approval_status": snapshot["workflow"]["approval_status"],
@@ -365,6 +368,7 @@ def format_text(report: dict[str, Any]) -> str:
                 "live_smoke="
                 f"{report['checks']['live_smoke']} "
                 f"score={smoke_signals.get('score')} "
+                f"rag_eval={smoke_signals.get('rag_eval')} "
                 f"telegram_callback={smoke_signals.get('telegram_callback')} "
                 f"bitrix24_drain={smoke_signals.get('bitrix24_drain')}"
             ),

@@ -87,6 +87,8 @@ def assert_snapshot(snapshot: dict[str, Any]) -> None:
     assert demo["google_drive_import"]["source"].startswith("gdrive://")
     assert demo["google_drive_import"]["chunks"] >= 1
     assert demo["rag_context_sources"], "RAG returned no source context"
+    assert demo["rag_quality"]["ok"] is True
+    assert demo["rag_quality"]["passed"] == demo["rag_quality"]["total"]
     assert demo["privacy"]["redacted"] is True
     assert demo["privacy"]["raw_text_stored"] is False
     assert demo["privacy"]["safe_logging"] is True
@@ -179,6 +181,9 @@ def build_snapshot(base_url: str, timeout: float) -> dict[str, Any]:
         "workflow": {
             "google_drive_source": demo["google_drive_import"]["source"],
             "rag_context_sources": demo["rag_context_sources"],
+            "rag_quality_ok": demo["rag_quality"]["ok"],
+            "rag_quality_passed": demo["rag_quality"]["passed"],
+            "rag_quality_total": demo["rag_quality"]["total"],
             "transcription_provider": demo["transcription"]["provider"],
             "transcription_status": demo["transcription"]["status"],
             "transcription_segments": len(demo["transcription"]["segments"]),
@@ -203,6 +208,7 @@ def build_snapshot(base_url: str, timeout: float) -> dict[str, Any]:
             "deployed API responds with runtime identity",
             "LLM boundary exposes OpenAI, Claude, Gemini, and local fallback without secrets",
             "demo imports Google Drive text into RAG and returns source context",
+            "RAG retrieval quality is checked with deterministic expected-source questions",
             "demo accepts call audio metadata and converts it into a transcript boundary",
             "transcript PII is redacted before RAG, approval context, CRM handoff, and public logs",
             "transcript analysis produces a high lead score and approval item",
@@ -254,6 +260,7 @@ def format_text(snapshot: dict[str, Any]) -> str:
             (
                 "workflow="
                 f"source={workflow['google_drive_source']} "
+                f"rag_eval={workflow['rag_quality_passed']}/{workflow['rag_quality_total']} "
                 f"score={workflow['score']} "
                 f"risk={workflow['risk_level']} "
                 f"approval={workflow['approval_status']} "

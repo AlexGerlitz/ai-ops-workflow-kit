@@ -62,6 +62,7 @@ git_sha=<deployed-sha>
 llm=local
 score=100
 google_drive=gdrive://demo-sales-playbook
+rag_eval=2/2
 transcription=local_stub:dry_run
 approval=approved
 telegram_callback=rejected

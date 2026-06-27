@@ -43,6 +43,12 @@ assert payload["google_drive_import"]["adapter_key"] == "google_drive"
 assert payload["google_drive_import"]["source"].startswith("gdrive://")
 assert payload["google_drive_import"]["chunks"] == payload["ingestion"]["chunks"]
 assert payload["rag_context_sources"], "RAG retrieval returned no sources"
+assert payload["rag_quality"]["ok"] is True
+assert payload["rag_quality"]["total"] == 2
+assert payload["rag_quality"]["passed"] == 2
+assert payload["rag_quality"]["failed"] == 0
+assert all(result["passed"] for result in payload["rag_quality"]["results"])
+assert all(result["citations"] for result in payload["rag_quality"]["results"])
 assert payload["privacy"]["redacted"] is True
 assert payload["privacy"]["raw_text_stored"] is False
 assert payload["privacy"]["safe_logging"] is True
@@ -155,6 +161,25 @@ with TestClient(app) as client:
         context["source"] == "gdrive://verify-public-playbook"
         for context in drive_query.json()["contexts"]
     )
+    rag_eval = client.post(
+        "/rag/eval",
+        json={
+            "questions": [
+                {
+                    "question": "What should Google Drive imports feed?",
+                    "expected_source": "gdrive://verify-public-playbook",
+                    "required_terms": ["Google Drive imports", "RAG store"],
+                    "top_k": 10,
+                    "score_floor": 0.05,
+                }
+            ]
+        },
+    )
+    assert rag_eval.status_code == 200
+    rag_eval_body = rag_eval.json()
+    assert rag_eval_body["ok"] is True
+    assert rag_eval_body["passed"] == 1
+    assert rag_eval_body["results"][0]["missing_terms"] == []
     runtime = client.get("/runtime").json()
     llm_runtime_response = client.get("/llm/runtime")
     assert llm_runtime_response.status_code == 200
@@ -208,6 +233,8 @@ assert "DEEPGRAM_API_KEY" in {
     env for provider in transcription_runtime["providers"] for env in provider["required_env"]
 }
 assert runtime["counters"]["demo_runs_total"] >= 1
+assert runtime["counters"]["rag_evaluations_total"] >= 1
+assert runtime["counters"]["rag_eval_failures_total"] == 0
 assert runtime["counters"]["crm_handoffs_queued_total"] >= 1
 assert runtime["counters"]["telegram_callbacks_total"] >= 1
 assert runtime["counters"]["audio_transcriptions_total"] >= 1
@@ -224,6 +251,7 @@ assert runtime["workers"]["bitrix24_outbox"]["enabled"] is False
 assert runtime["workers"]["bitrix24_outbox"]["active"] is False
 assert "aiops_runtime_info" in metrics
 assert "aiops_demo_runs_total" in metrics
+assert "aiops_rag_evaluations_total" in metrics
 assert "aiops_audio_transcriptions_total" in metrics
 
 print("public verification passed")

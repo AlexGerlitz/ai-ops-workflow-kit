@@ -372,7 +372,7 @@ DEMO_PAGE_HTML = """
         setText("reviewer", data.approval.reviewer);
         setText("crm", data.crm_handoff.status);
         setText("crm-sub", `${data.bitrix24_dispatch.method} / ${data.bitrix24_dispatch.status}`);
-        setText("step1", `${data.google_drive_import.source}: ${data.ingestion.chunks} chunk(s), ${data.rag_context_sources.length} source(s) retrieved`);
+        setText("step1", `${data.google_drive_import.source}: ${data.ingestion.chunks} chunk(s), ${data.rag_context_sources.length} source(s), RAG eval ${data.rag_quality.passed}/${data.rag_quality.total}`);
         setText("step2", `${data.transcription.provider} ${data.transcription.status}: ${data.transcription.segments.length} segment(s)`);
         setText("step3", `${data.call_analysis.next_action}`);
         setText("step4", `${data.telegram_approval.adapter_key} ${data.telegram_approval.status}`);

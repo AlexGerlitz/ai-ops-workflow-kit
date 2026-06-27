@@ -6,15 +6,16 @@ The demo proves an end-to-end AI workflow automation scenario:
 
 1. import an exported Google Drive sales playbook into the RAG store;
 2. query the knowledge base with source context;
-3. expose the LLM provider boundary and local fallback state;
-4. accept call-audio metadata through the n8n-facing webhook;
-5. build a transcription provider contract and normalize the transcript;
-6. score the lead and build a structured call analysis;
-7. create a human approval item for the follow-up draft;
-8. build a dry-run Telegram approval payload;
-9. approve the item;
-10. queue a dry-run Bitrix24 CRM handoff event;
-11. build a dry-run Bitrix24 dispatch payload with idempotent outbox event state.
+3. run deterministic RAG quality checks against expected sources, required terms, score floor, and citations;
+4. expose the LLM provider boundary and local fallback state;
+5. accept call-audio metadata through the n8n-facing webhook;
+6. build a transcription provider contract and normalize the transcript;
+7. score the lead and build a structured call analysis;
+8. create a human approval item for the follow-up draft;
+9. build a dry-run Telegram approval payload;
+10. approve the item;
+11. queue a dry-run Bitrix24 CRM handoff event;
+12. build a dry-run Bitrix24 dispatch payload with idempotent outbox event state.
 
 The point is not to show a prompt wrapper. The point is to show the production
 boundary: n8n routes events, while the backend owns retrieval, scoring, state,
@@ -65,6 +66,7 @@ The output contains these sections:
 | `ingestion` | Sales playbook was chunked and stored. |
 | `google_drive_import` | Exported Google Drive document text was normalized and imported into the RAG store. |
 | `rag_context_sources` | Retrieval returned explicit source context. |
+| `rag_quality` | Retrieval quality was checked through expected-source questions, required terms, score floor, and citations before LLM generation is trusted. |
 | `transcription` | Call-audio metadata passed through the selected transcription boundary and returned normalized speaker segments. |
 | `call_analysis` | Transcript was scored and converted into structured business action. |
 | `approval` | Human-in-the-loop state transition happened before CRM handoff. |
@@ -87,6 +89,11 @@ Example high-level result:
     "adapter_key": "google_drive",
     "source": "gdrive://demo-sales-playbook",
     "chunks": 1
+  },
+  "rag_quality": {
+    "ok": true,
+    "passed": 2,
+    "total": 2
   },
   "transcription": {
     "provider": "local_stub",

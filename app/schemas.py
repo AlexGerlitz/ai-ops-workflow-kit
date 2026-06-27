@@ -68,6 +68,51 @@ class QueryOut(BaseModel):
     top_k: int
 
 
+class RagEvalQuestion(BaseModel):
+    question: str = Field(min_length=1)
+    expected_source: str = Field(min_length=1)
+    required_terms: list[str] = Field(default_factory=list)
+    top_k: int = Field(default=5, ge=1, le=20)
+    score_floor: float = Field(default=0.05, ge=-1.0, le=1.0)
+
+
+class RagEvalCitation(BaseModel):
+    source: str
+    score: float
+    excerpt: str
+    matched_expected_source: bool
+    matched_terms: list[str]
+
+
+class RagEvalResult(BaseModel):
+    question: str
+    expected_source: str
+    required_terms: list[str]
+    top_k: int
+    score_floor: float
+    top_source: str | None
+    top_score: float | None
+    matched_source: bool
+    matched_score: float | None
+    matched_terms: list[str]
+    missing_terms: list[str]
+    citations: list[RagEvalCitation]
+    passed: bool
+
+
+class RagEvaluationOut(BaseModel):
+    ok: bool
+    total: int
+    passed: int
+    failed: int
+    pass_rate: float
+    results: list[RagEvalResult]
+
+
+class RagEvalIn(BaseModel):
+    questions: list[RagEvalQuestion] = Field(default_factory=list)
+
+
 class ApprovalStatus(str, Enum):
     pending = "pending"
     approved = "approved"
@@ -325,6 +370,7 @@ class OfferDemoRunOut(BaseModel):
     ingestion: DocumentOut
     google_drive_import: GoogleDriveImportOut
     rag_context_sources: list[dict[str, Any]]
+    rag_quality: RagEvaluationOut
     privacy: dict[str, Any]
     transcription: dict[str, Any]
     call_analysis: dict[str, Any]
