@@ -1,7 +1,9 @@
 from scripts.reviewer_acceptance_report import (
     format_text,
+    latest_run_for_workflow,
     parse_key_value_lines,
     profile_page_check,
+    workflow_runs_url,
     workflow_status,
 )
 
@@ -44,6 +46,56 @@ def test_workflow_status_requires_active_workflow_path() -> None:
         == "passed"
     )
     assert workflow_status(workflows, ".github/workflows/missing.yml")["status"] == "failed"
+
+
+def test_workflow_runs_url_targets_specific_workflow() -> None:
+    url = workflow_runs_url(
+        "AlexGerlitz/ai-ops-workflow-kit",
+        {
+            "id": 12345,
+            "path": ".github/workflows/credentialed-sandbox-preflight.yml",
+        },
+        branch=None,
+    )
+
+    assert url == (
+        "https://api.github.com/repos/AlexGerlitz/ai-ops-workflow-kit/"
+        "actions/workflows/12345/runs?per_page=20"
+    )
+
+
+def test_latest_run_for_workflow_uses_workflow_run_endpoint(monkeypatch) -> None:
+    captured: dict[str, str] = {}
+
+    def fake_fetch_json_url(url: str, _timeout: float) -> dict:
+        captured["url"] = url
+        return {
+            "workflow_runs": [
+                {
+                    "name": "Credentialed Sandbox Preflight",
+                    "conclusion": "success",
+                    "head_sha": "abc123",
+                    "html_url": "https://github.com/example/runs/1",
+                    "created_at": "2026-06-27T00:00:00Z",
+                }
+            ]
+        }
+
+    monkeypatch.setattr(
+        "scripts.reviewer_acceptance_report.fetch_json_url",
+        fake_fetch_json_url,
+    )
+
+    result = latest_run_for_workflow(
+        "AlexGerlitz/ai-ops-workflow-kit",
+        {"status": "passed", "id": 12345, "name": "Credentialed Sandbox Preflight"},
+        branch=None,
+        timeout=1.0,
+    )
+
+    assert result["status"] == "passed"
+    assert result["conclusion"] == "success"
+    assert "actions/workflows/12345/runs?per_page=20" in captured["url"]
 
 
 def test_profile_page_check_reports_missing_markers(monkeypatch) -> None:

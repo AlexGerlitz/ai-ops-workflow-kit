@@ -47,6 +47,39 @@ def test_memory_store_retrieves_relevant_chunk() -> None:
     assert results[0].source == "sales"
 
 
+def test_memory_store_replaces_chunks_for_existing_source() -> None:
+    provider = HashEmbeddingProvider(dim=32)
+    store = InMemoryStore()
+    store.add_chunks(
+        [
+            ChunkRecord(
+                id=UUID("00000000-0000-0000-0000-000000000003"),
+                source="sales-playbook",
+                text="Obsolete guidance says to skip human approval.",
+                metadata={"version": "old"},
+                embedding=provider.embed("Obsolete guidance says to skip human approval."),
+            )
+        ]
+    )
+    store.add_chunks(
+        [
+            ChunkRecord(
+                id=UUID("00000000-0000-0000-0000-000000000004"),
+                source="sales-playbook",
+                text="Fresh guidance requires human approval before CRM updates.",
+                metadata={"version": "new"},
+                embedding=provider.embed("Fresh guidance requires human approval before CRM updates."),
+            )
+        ]
+    )
+
+    results = store.search(provider.embed("human approval CRM updates"), top_k=10)
+    source_results = [result for result in results if result.source == "sales-playbook"]
+    assert len(source_results) == 1
+    assert source_results[0].metadata["version"] == "new"
+    assert "Obsolete guidance" not in source_results[0].text
+
+
 def test_approval_transition_is_one_way() -> None:
     store = InMemoryStore()
     approval = store.create_approval(
@@ -68,4 +101,3 @@ def test_transcript_score_detects_sales_signals() -> None:
     assert score.score >= 80
     assert score.signals["budget"] is True
     assert score.signals["authority"] is True
-

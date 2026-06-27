@@ -14,7 +14,8 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 | RAG quality proof | `/demo/run` and `POST /rag/eval` return `rag_quality.ok=true`, `passed=2/2`, expected source matches, required terms, score floor, and citations |
 | Privacy boundary | `docs/PRIVACY_BOUNDARY.md`; public demo proves transcript email/phone redaction before RAG ingestion, approval context, CRM handoff, demo JSON, and reviewer snapshots |
 | Committed live-smoke evidence | `docs/evidence/reviewer-acceptance-report.txt` and `.sanitized.json` record the last captured `live demo smoke passed`, `score=100`, `transcription=local_stub:dry_run`, `telegram_callback=rejected`, and positive Bitrix24 drain counter |
-| Runtime smoke | `bash scripts/smoke_live_demo.sh https://saleops.duckdns.org` is the live VPS check; run it after confirming the edge is reachable |
+| Runtime smoke | `bash scripts/smoke_live_demo.sh https://saleops.duckdns.org` is the live VPS check; it requires `storage=postgres` on the public runtime |
+| Live Postgres persistence | `docs/evidence/live-postgres-persistence.txt` proves a RAG document remained retrievable after restarting the API container; Postgres stayed private to the Docker network |
 | Live audio upload | `POST /demo/audio/upload` from the browser demo accepts `.m4a/.mp3/.wav` uploads and runs live STT when `DEEPGRAM_API_KEY` is configured |
 | Live Telegram owner approval | `docs/evidence/live-telegram-approval.txt` -> real Telegram approval callback `approved`, CRM outbox event `queued`, Bitrix24 remains dry-run |
 | Runtime demo | https://saleops.duckdns.org/ |
@@ -42,13 +43,14 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 9. Inspect the latest live combined sandbox run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429
 10. Inspect `docs/evidence/live-telegram-approval.txt`, `docs/evidence/bitrix24-contract.txt`, and `docs/evidence/bitrix24-sandbox-preflight.txt`.
 11. Inspect `rag_quality` in `python3 scripts/run_offer_demo.py` output or call `POST /rag/eval` after importing the demo playbook.
-12. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
-13. If the alias is needed, run `bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org`.
+12. Inspect `docs/evidence/live-postgres-persistence.txt` for the API-restart persistence proof.
+13. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
+14. If the alias is needed, run `bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org`.
 
 ## Public Boundary
 
 - Public synthetic demo mode intentionally avoids customer data, real call recordings, real Telegram sends, real Bitrix24 writes, and committed secrets.
-- Live runtime may report an older deployed app Git SHA when the latest repository changes are docs, tests, or verification scripts only. CI and the local gate prove repository changes; runtime smoke proves the deployed workflow when the external VPS edge is reachable.
+- Live runtime may report an older deployed app Git SHA when the latest repository changes are docs, tests, or verification scripts only. CI and the local gate prove repository changes; runtime smoke proves the deployed workflow and PostgreSQL/pgvector storage mode when the external VPS edge is reachable.
 - Telegram sandbox credentials have been validated through the manual sandbox workflow; operator-triggered approval messages can be live while `/demo/run` remains dry-run.
 - Bitrix24 sandbox evidence validates the incoming webhook with read-only `profile` and CRM `crm.lead.fields`; public CRM writes remain dry-run and production-gated.
 - Synthetic smoke stays dry-run/public-safe through the local fixture; the browser upload flow can use live Deepgram for owner-provided recordings without committing secrets or permanent audio files.

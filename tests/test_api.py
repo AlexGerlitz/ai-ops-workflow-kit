@@ -399,6 +399,24 @@ def test_public_demo_run_proves_workflow_contract() -> None:
     assert runtime["counters"]["privacy_redactions_total"] >= 2
 
 
+def test_public_demo_run_replaces_synthetic_rag_sources() -> None:
+    with TestClient(app) as client:
+        first = client.post("/demo/run")
+        second = client.post("/demo/run")
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    chunks = getattr(store, "chunks", None)
+    assert chunks is not None
+    demo_sources = [
+        chunk.source
+        for chunk in chunks
+        if chunk.source in {"gdrive://demo-sales-playbook", "call://CALL-LIVE-DEMO-1"}
+    ]
+    assert demo_sources.count("gdrive://demo-sales-playbook") == 1
+    assert demo_sources.count("call://CALL-LIVE-DEMO-1") == 1
+
+
 def test_call_transcript_redacts_pii_before_rag_approval_and_crm() -> None:
     raw_email = "buyer.ops@example.com"
     raw_phone = "+41 79 555 10 20"

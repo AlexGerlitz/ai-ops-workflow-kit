@@ -66,6 +66,7 @@ https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429 or u
 | Provider contracts exist | Tests cover OpenAI, Claude/Anthropic, and Gemini payload builders and response parsers. |
 | RAG is not prompt-only | Demo imports Google Drive text, chunks it, retrieves source context, and returns `rag_context_sources`. |
 | RAG quality is testable | `/demo/run` returns `rag_quality` and `/rag/eval` checks expected source, required terms, score floor, and citations without needing an LLM call. |
+| RAG state is durable in live mode | The public runtime reports `storage=postgres`, and `docs/evidence/live-postgres-persistence.txt` shows a live RAG document stayed retrievable after the API container restarted. |
 | Call audio reaches the workflow | Demo accepts audio metadata, normalizes a transcript through the selected transcription boundary, and returns speaker segments before analysis. |
 | Privacy boundary is explicit | Demo transcript PII is redacted before RAG, approval context, CRM handoff, public JSON, and reviewer snapshots. |
 | Human approval is explicit | The workflow creates a pending approval, applies an approve/reject state transition, and only then queues CRM handoff. |
@@ -141,6 +142,7 @@ allows retry, dead-letter handling, and audit without changing the LLM/RAG contr
 | Audio transcription unavailable | `/webhooks/n8n/call-audio` fails before CRM mutation; downstream transcript analysis only runs after normalized transcript text exists. |
 | Provider response drift | Contract tests parse OpenAI Whisper verbose JSON and Deepgram diarized words without real network calls. |
 | Empty or weak retrieval | Query responses expose retrieved source context; `/rag/eval` checks expected-source matches, required terms, score floor, and citations. |
+| API process restart | Live Postgres persistence evidence shows retrieval before and after restarting the API container, with Postgres private to the Docker network. |
 | PII in transcripts | `app/privacy.py` redacts emails, phone-like values, payment-card-like values, and IBAN-like values before public workflow evidence. |
 | Duplicate approval handoff | CRM event gets deterministic idempotency key. |
 | Bitrix24 temporary failure | Dispatch records attempt count, `last_error`, `next_retry_at`, and can move to `dead_letter`. |
@@ -180,6 +182,7 @@ python3 scripts/credentialed_sandbox_preflight.py --require-target telegram
 python3 scripts/credentialed_sandbox_preflight.py --require-target bitrix24
 python3 scripts/bitrix24_contract_evidence.py
 python3 scripts/reviewer_snapshot.py https://leadscore.duckdns.org
+cat docs/evidence/live-postgres-persistence.txt
 bash scripts/smoke_live_demo.sh
 bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org
 bash scripts/verify_public.sh

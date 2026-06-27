@@ -17,6 +17,7 @@ that regenerates it.
 | [`docs/evidence/live-telegram-approval.sanitized.json`](./evidence/live-telegram-approval.sanitized.json) | Machine-readable owner-run proof that a real Telegram approval was approved and queued a CRM handoff. |
 | [`docs/evidence/bitrix24-contract.sanitized.json`](./evidence/bitrix24-contract.sanitized.json) | Machine-readable Bitrix24 REST contract proof for `crm.lead.update`, dry-run guard, idempotency, and token redaction. |
 | [`docs/evidence/bitrix24-sandbox-preflight.sanitized.json`](./evidence/bitrix24-sandbox-preflight.sanitized.json) | Sanitized live read-only Bitrix24 proof for `profile` and CRM `crm.lead.fields`. |
+| [`docs/evidence/live-postgres-persistence.txt`](./evidence/live-postgres-persistence.txt) | Sanitized proof that a RAG document ingested into the live API remains retrievable after restarting the API container, with Postgres private to the Docker network. |
 
 ## Regenerate
 
@@ -60,6 +61,7 @@ The token is used only to inspect webhook status and is not written to the artif
 - The Bitrix24 sandbox preflight proves the real incoming webhook can call read-only CRM metadata without writing CRM records.
 - The Bitrix24 contract artifact shows the exact `crm.lead.update` request shape used by the dispatch adapter.
 - CRM handoff is queued after approval and uses an idempotency key.
+- Live RAG state is backed by PostgreSQL/pgvector: the persistence evidence shows retrieval before and after an API restart.
 - Metrics expose runtime and demo counters.
 
 The deployed Git SHA in the evidence is the running application build. Documentation-only commits may

@@ -195,6 +195,12 @@ def integration_workers_runtime() -> dict[str, object]:
 @app.post("/demo/run", response_model=OfferDemoRunOut)
 async def run_demo_workflow() -> OfferDemoRunOut:
     runtime_stats.increment("demo_runs_total")
+    store.delete_sources(
+        [
+            "gdrive://demo-sales-playbook",
+            f"call://{DEMO_CALL_AUDIO['call_id']}",
+        ]
+    )
     drive_import = import_google_drive_document(
         GoogleDriveImportIn(
             file_id="demo-sales-playbook",

@@ -48,6 +48,25 @@ Expected response:
 If `DATABASE_URL` is unset, the API uses in-memory storage. That mode is useful for tests and contract
 development, not for production.
 
+## Live Persistence Boundary
+
+The public production route should report PostgreSQL-backed storage:
+
+```bash
+curl -fsS https://saleops.duckdns.org/runtime | python3 -m json.tool
+bash scripts/smoke_live_demo.sh https://saleops.duckdns.org
+```
+
+Expected smoke signal:
+
+```text
+storage=postgres
+```
+
+The VPS deployment keeps the API and PostgreSQL on a private Docker network, exposes only the API
+through the existing localhost edge route, and stores database data in a named Docker volume. Keep
+PostgreSQL off the public interface unless a separate, reviewed operations task requires it.
+
 ## Runtime Evidence
 
 `GET /runtime` reports:

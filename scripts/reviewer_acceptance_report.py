@@ -117,25 +117,65 @@ def latest_workflow_run(runs: list[dict[str, Any]], workflow_name: str) -> dict[
     return {"status": "failed", "name": workflow_name, "conclusion": "missing"}
 
 
+def workflow_runs_url(repo: str, workflow: dict[str, Any], *, branch: str | None = None) -> str:
+    workflow_id = workflow.get("id") or workflow.get("path")
+    encoded_repo = urllib.parse.quote(repo, safe="/")
+    encoded_workflow = urllib.parse.quote(str(workflow_id), safe="")
+    query = "per_page=20"
+    if branch:
+        query += f"&branch={urllib.parse.quote(branch, safe='')}"
+    return (
+        f"https://api.github.com/repos/{encoded_repo}/actions/workflows/"
+        f"{encoded_workflow}/runs?{query}"
+    )
+
+
+def latest_run_for_workflow(
+    repo: str,
+    workflow: dict[str, Any],
+    *,
+    branch: str | None,
+    timeout: float,
+) -> dict[str, Any]:
+    if workflow.get("status") != "passed":
+        return {
+            "status": "failed",
+            "name": workflow.get("name") or workflow.get("path"),
+            "conclusion": "workflow_missing",
+        }
+    payload = fetch_json_url(workflow_runs_url(repo, workflow, branch=branch), timeout)
+    runs = payload.get("workflow_runs", [])
+    if not runs:
+        return {
+            "status": "failed",
+            "name": workflow.get("name") or workflow.get("path"),
+            "conclusion": "missing",
+        }
+    run = runs[0]
+    return {
+        "status": "passed" if run.get("conclusion") == "success" else "failed",
+        "name": run.get("name"),
+        "conclusion": run.get("conclusion"),
+        "head_sha": run.get("head_sha"),
+        "html_url": run.get("html_url"),
+        "created_at": run.get("created_at"),
+    }
+
+
 def build_github_report(repo: str, timeout: float) -> dict[str, Any]:
     encoded_repo = urllib.parse.quote(repo, safe="/")
     workflows_payload = fetch_json_url(
         f"https://api.github.com/repos/{encoded_repo}/actions/workflows",
         timeout,
     )
-    runs_payload = fetch_json_url(
-        f"https://api.github.com/repos/{encoded_repo}/actions/runs?branch=main&per_page=20",
-        timeout,
-    )
     workflows = workflows_payload.get("workflows", [])
-    runs = runs_payload.get("workflow_runs", [])
     ci_workflow = workflow_status(workflows, ".github/workflows/ci.yml")
     sandbox_workflow = workflow_status(
         workflows,
         ".github/workflows/credentialed-sandbox-preflight.yml",
     )
-    latest_ci = latest_workflow_run(runs, "CI")
-    latest_sandbox = latest_workflow_run(runs, "Credentialed Sandbox Preflight")
+    latest_ci = latest_run_for_workflow(repo, ci_workflow, branch="main", timeout=timeout)
+    latest_sandbox = latest_run_for_workflow(repo, sandbox_workflow, branch=None, timeout=timeout)
     ok = (
         ci_workflow["status"] == "passed"
         and sandbox_workflow["status"] == "passed"

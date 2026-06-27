@@ -36,6 +36,8 @@ class Store(Protocol):
 
     def add_chunks(self, chunks: list[ChunkRecord]) -> None: ...
 
+    def delete_sources(self, sources: list[str]) -> None: ...
+
     def search(self, embedding: list[float], top_k: int) -> list[RetrievedContext]: ...
 
     def create_approval(self, item: ApprovalIn) -> ApprovalOut: ...
@@ -97,7 +99,14 @@ class InMemoryStore:
         return None
 
     def add_chunks(self, chunks: list[ChunkRecord]) -> None:
+        self.delete_sources([chunk.source for chunk in chunks])
         self.chunks.extend(chunks)
+
+    def delete_sources(self, sources: list[str]) -> None:
+        source_set = set(sources)
+        if not source_set:
+            return
+        self.chunks = [chunk for chunk in self.chunks if chunk.source not in source_set]
 
     def search(self, embedding: list[float], top_k: int) -> list[RetrievedContext]:
         scored = []
@@ -319,6 +328,7 @@ class PostgresVectorStore:
 
     def add_chunks(self, chunks: list[ChunkRecord]) -> None:
         with self._connect() as conn:
+            self._delete_sources(conn, [chunk.source for chunk in chunks])
             with conn.cursor() as cur:
                 for chunk in chunks:
                     cur.execute(
@@ -334,6 +344,14 @@ class PostgresVectorStore:
                             vector_literal(chunk.embedding),
                         ),
                     )
+
+    def delete_sources(self, sources: list[str]) -> None:
+        with self._connect() as conn:
+            self._delete_sources(conn, sources)
+
+    def _delete_sources(self, conn: psycopg.Connection[Any], sources: list[str]) -> None:
+        for source in set(sources):
+            conn.execute("DELETE FROM document_chunks WHERE source = %s", (source,))
 
     def search(self, embedding: list[float], top_k: int) -> list[RetrievedContext]:
         with self._connect() as conn:

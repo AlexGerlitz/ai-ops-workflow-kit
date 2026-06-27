@@ -69,6 +69,7 @@ telegram_callback_response = json.loads(os.environ["TELEGRAM_CALLBACK_RESPONSE"]
 drain_response = json.loads(os.environ["DRAIN_RESPONSE"])
 
 assert runtime_payload["ok"] is True
+assert runtime_payload["storage"] == "postgres"
 assert runtime_payload["public_base_url"] == expected_callback_base_url
 assert runtime_payload["llm"]["selected_provider"] in {"local", "openai", "claude", "gemini"}
 assert set(runtime_payload["llm"]["supported_providers"]) == {
@@ -136,6 +137,7 @@ print(f"base_url={expected_base_url}")
 print(f"callback_base_url={expected_callback_base_url}")
 print(f"version={runtime_payload['version']}")
 print(f"git_sha={runtime_payload['git_sha']}")
+print(f"storage={runtime_payload['storage']}")
 print(f"llm={runtime_payload['llm']['selected_provider']}")
 print(f"score={payload['call_analysis']['score']}")
 print(f"google_drive={payload['google_drive_import']['source']}")

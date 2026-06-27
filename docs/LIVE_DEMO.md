@@ -59,6 +59,7 @@ base_url=https://saleops.duckdns.org
 callback_base_url=https://saleops.duckdns.org
 version=0.2.0
 git_sha=<deployed-sha>
+storage=postgres
 llm=local
 score=100
 google_drive=gdrive://demo-sales-playbook
@@ -73,7 +74,7 @@ bitrix24_drain=<dry-run-count>
 worker_active=False
 ```
 
-The smoke check proves that the public edge route, FastAPI runtime, workflow endpoint,
+The smoke check proves that the public edge route, FastAPI runtime, PostgreSQL/pgvector storage mode, workflow endpoint,
 approval callback base URL, LLM provider runtime, transcription boundary, runtime evidence, metrics endpoint,
 and integration dry-run contracts are aligned. It also verifies that the browser UI exposes the current
 reviewer proof labels: Google Drive import, call audio transcription, OpenAI/Claude/Gemini provider boundary,
@@ -86,6 +87,7 @@ For committed live evidence, read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_P
 ## What Is Real
 
 - The API is a real deployed service, not a static mock.
+- The live production route uses PostgreSQL/pgvector storage; local tests can still use memory mode for deterministic review.
 - The workflow runs through the same `/demo/run` endpoint used by local tests.
 - The workflow imports exported Google Drive text into the same RAG store as direct document ingestion.
 - The workflow accepts call-audio metadata and returns normalized transcript segments before scoring.
@@ -106,6 +108,8 @@ For committed live evidence, read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_P
 - Bitrix24 dry-run leaves CRM events queued; production mode records idempotency, attempts, `next_retry_at`, `last_error`, and `dead_letter`.
 - The live smoke also calls `POST /integrations/bitrix24/drain` to prove the worker-style queue drain surface.
 - `GET /runtime` shows the Bitrix24 outbox worker is disabled in the public dry-run demo.
+- `docs/evidence/live-postgres-persistence.txt` records a live API restart check where a RAG document
+  remained retrievable from PostgreSQL/pgvector after the API container restarted.
 
 ## Local Fallback
 
