@@ -24,6 +24,11 @@ Profile / contact route: [DriveDesk AI Operator proof route](https://alexgerlitz
 This repository is public proof for AI workflow automation work where the output must be more than a
 prompt demo.
 
+Hiring relevance: I can turn an AI sales/support workflow into a backend-owned
+system where state, RAG quality, privacy redaction, approvals, retries, audit,
+idempotency, CRM contracts, n8n orchestration, Telegram approvals, Docker, CI,
+and reviewer evidence are all explicit instead of hidden inside no-code glue.
+
 | What to check | Why it matters |
 | --- | --- |
 | [Stable reviewer route](docs/PUBLIC_PROOF_STATUS.md) | Current proof status, CI, local gate, committed evidence, live-runtime boundary, and fallback review path in one page. |
