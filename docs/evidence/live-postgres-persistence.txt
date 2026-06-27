@@ -1,0 +1,16 @@
+live postgres persistence proof passed
+base_url=https://saleops.duckdns.org
+storage_before=postgres
+git_sha_before=1a83406e4d1cebb8d8bbd95c5d9e4d6435a71d98
+ingested_source=live-postgres-persistence://postgres-persistence-20260627140758
+ingested_chunks=1
+query_before_source_found=true
+api_restart=true
+storage_after=postgres
+git_sha_after=1a83406e4d1cebb8d8bbd95c5d9e4d6435a71d98
+query_after_restart_source_found=true
+answer_contains_marker=true
+postgres_running=true
+postgres_public_listener=false
+docker_network=aiops-live
+docker_volume=aiops_pgdata

@@ -1,9 +1,9 @@
 {
   "base_url": "https://saleops.duckdns.org",
   "ok": true,
-  "version": "0.2.0",
-  "git_sha": "67c3fbbafbd5a3c26a267d9735f1737382b9deb7",
-  "storage": "memory",
+  "version": "1a83406e4d1cebb8d8bbd95c5d9e4d6435a71d98",
+  "git_sha": "1a83406e4d1cebb8d8bbd95c5d9e4d6435a71d98",
+  "storage": "postgres",
   "public_base_url": "https://saleops.duckdns.org",
   "llm": {
     "requested_provider": "auto",
@@ -100,21 +100,24 @@
     "google_drive_source": "gdrive://demo-sales-playbook",
     "rag_context_sources": [
       {
-        "source": "call://CALL-LIVE-DEMO-1",
-        "score": 0.333105
+        "source": "gdrive://demo-sales-playbook",
+        "score": 0.318728
       },
       {
-        "source": "gdrive://demo-sales-playbook",
-        "score": 0.318727
+        "source": "live-postgres-persistence://postgres-persistence-20260627154949",
+        "score": 0.263752
       },
       {
-        "source": "gdrive://demo-sales-playbook",
-        "score": 0.318727
+        "source": "live-postgres-persistence://postgres-persistence-20260627140758",
+        "score": 0.0
       }
     ],
+    "rag_quality_ok": true,
+    "rag_quality_passed": 2,
+    "rag_quality_total": 2,
     "transcription_provider": "local_stub",
     "transcription_status": "dry_run",
-    "transcription_segments": 3,
+    "transcription_segments": 4,
     "score": 100,
     "risk_level": "medium",
     "approval_status": "approved",
@@ -122,7 +125,13 @@
     "crm_event_status": "queued",
     "crm_idempotency_key": "<generated-idempotency-key>",
     "bitrix24_status": "dry_run",
-    "bitrix24_event_status": "queued"
+    "bitrix24_event_status": "queued",
+    "privacy_redacted": true,
+    "privacy_categories": [
+      "email",
+      "phone"
+    ],
+    "raw_text_stored": false
   },
   "worker": {
     "enabled": false,
@@ -140,7 +149,9 @@
     "deployed API responds with runtime identity",
     "LLM boundary exposes OpenAI, Claude, Gemini, and local fallback without secrets",
     "demo imports Google Drive text into RAG and returns source context",
+    "RAG retrieval quality is checked with deterministic expected-source questions",
     "demo accepts call audio metadata and converts it into a transcript boundary",
+    "transcript PII is redacted before RAG, approval context, CRM handoff, and public logs",
     "transcript analysis produces a high lead score and approval item",
     "synthetic demo keeps Telegram and Bitrix24 dry-run for public safety",
     "owner-run Telegram approval can be enabled without changing the dry-run CRM boundary",

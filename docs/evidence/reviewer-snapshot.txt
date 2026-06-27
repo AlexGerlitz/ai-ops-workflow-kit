@@ -1,8 +1,8 @@
 technical reviewer snapshot passed
 base_url=https://saleops.duckdns.org
-version=0.2.0
-git_sha=67c3fbbafbd5a3c26a267d9735f1737382b9deb7
-storage=memory
+version=1a83406e4d1cebb8d8bbd95c5d9e4d6435a71d98
+git_sha=1a83406e4d1cebb8d8bbd95c5d9e4d6435a71d98
+storage=postgres
 public_base_url=https://saleops.duckdns.org
 llm=local requested=auto fallback=True
 providers:
@@ -18,8 +18,9 @@ integrations:
   - google_drive: configured=False dry_run=True
   - telegram: configured=True dry_run=False
   - bitrix24: configured=False dry_run=True
-workflow=source=gdrive://demo-sales-playbook score=100 risk=medium approval=approved transcription=dry_run telegram=dry_run bitrix24=dry_run crm=queued
-transcription=provider=local_stub segments=3
+workflow=source=gdrive://demo-sales-playbook rag_eval=2/2 score=100 risk=medium approval=approved transcription=dry_run telegram=dry_run bitrix24=dry_run crm=queued
+privacy=redacted=True categories=email,phone raw_text_stored=False
+transcription=provider=local_stub segments=4
 crm_idempotency_key=<generated-idempotency-key>
 worker=enabled=False active=False dry_run_blocked=True
 metrics=runtime_info=True demo_runs_total=True
@@ -27,7 +28,9 @@ reviewer_conclusion:
   - deployed API responds with runtime identity
   - LLM boundary exposes OpenAI, Claude, Gemini, and local fallback without secrets
   - demo imports Google Drive text into RAG and returns source context
+  - RAG retrieval quality is checked with deterministic expected-source questions
   - demo accepts call audio metadata and converts it into a transcript boundary
+  - transcript PII is redacted before RAG, approval context, CRM handoff, and public logs
   - transcript analysis produces a high lead score and approval item
   - synthetic demo keeps Telegram and Bitrix24 dry-run for public safety
   - owner-run Telegram approval can be enabled without changing the dry-run CRM boundary
