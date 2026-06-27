@@ -13,7 +13,8 @@ DEMO_TRANSCRIPT = {
     "transcript": (
         "The client said the price may be expensive, but the operations director approved the budget. "
         "They need the workflow this month because managers lose follow-up context after calls. "
-        "The next step is a short implementation call tomorrow with the decision maker."
+        "The next step is a short implementation call tomorrow with the decision maker. "
+        "Send the recap to maria.petrov@example.com and confirm by phone at +41 44 555 12 34."
     ),
     "metadata": {"source": "public-live-demo", "manager": "sales-demo"},
 }
@@ -31,7 +32,8 @@ DEMO_CALL_AUDIO = {
         "approved the budget.\n"
         "Client: We need the workflow this month because managers lose follow-up context "
         "after calls.\n"
-        "Manager: The next step is a short implementation call tomorrow with the decision maker."
+        "Manager: The next step is a short implementation call tomorrow with the decision maker.\n"
+        "Client: Send the recap to maria.petrov@example.com and confirm by phone at +41 44 555 12 34."
     ),
     "metadata": {
         "source": "public-live-demo",

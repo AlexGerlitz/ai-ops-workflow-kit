@@ -1,6 +1,6 @@
 # Public Proof Status
 
-Last checked: 2026-06-25
+Last checked: 2026-06-27
 
 This page is the shortest route to the current public evidence for AI Ops Workflow Kit.
 
@@ -10,7 +10,8 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 | CI workflow | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml |
 | Stable reviewer route | Start here, then run `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh`; this path does not depend on the external VPS edge being reachable |
 | Reviewer acceptance report | `python3 scripts/reviewer_acceptance_report.py` checks live API, live smoke, GitHub Actions state, Pages route, and public PDF when the live runtime is reachable |
-| Local public gate | `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `42 passed`, `public verification passed` |
+| Local public gate | `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `45 passed`, `public verification passed` |
+| Privacy boundary | `docs/PRIVACY_BOUNDARY.md`; public demo proves transcript email/phone redaction before RAG ingestion, approval context, CRM handoff, demo JSON, and reviewer snapshots |
 | Committed live-smoke evidence | `docs/evidence/reviewer-acceptance-report.txt` and `.sanitized.json` record the last captured `live demo smoke passed`, `score=100`, `transcription=local_stub:dry_run`, `telegram_callback=rejected`, and positive Bitrix24 drain counter |
 | Runtime smoke | `bash scripts/smoke_live_demo.sh https://saleops.duckdns.org` is the live VPS check; run it after confirming the edge is reachable |
 | Live audio upload | `POST /demo/audio/upload` from the browser demo accepts `.m4a/.mp3/.wav` uploads and runs live STT when `DEEPGRAM_API_KEY` is configured |

@@ -29,6 +29,7 @@ prompt demo.
 | [Reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md) | Live-runtime acceptance pass across API, smoke, GitHub Actions state, Pages route, and public PDF when the VPS edge is reachable. |
 | [Public proof status](docs/PUBLIC_PROOF_STATUS.md) | Current CI, local verification gate, committed evidence, runtime boundary, Pages route, and public boundary status. |
 | [CI workflow](.github/workflows/ci.yml) | Deterministic tests for workflow state, RAG boundaries, integration contracts, and public verification. |
+| [Privacy boundary](docs/PRIVACY_BOUNDARY.md) | Safe-logging proof: transcript PII is redacted before RAG ingestion, approval context, CRM handoff, demo JSON, and reviewer snapshots. |
 | [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Role-level AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
 
 Best-fit evidence:
@@ -36,6 +37,7 @@ Best-fit evidence:
 - RAG/backend ownership: document and CRM intake contracts, connector/export adapters, chunking, retrieval, pgvector-ready storage, OpenAI/Claude/Gemini LLM boundary, and Whisper/Deepgram transcription boundary;
 - human-in-the-loop workflow ownership: approval queue, explicit state transitions, Telegram inline callback handling, and n8n integration shape;
 - business automation ownership: call-audio webhook, transcription normalization, transcript scoring, context capture, and review routing;
+- regulated-workflow ownership: safe logging and PII redaction before RAG, approval context, CRM handoff, and public evidence;
 - engineering discipline: deterministic local embeddings, tests, Docker runtime, docs, and CI.
 
 Fast evaluation path:
@@ -56,6 +58,7 @@ Fast evaluation path:
 | Integration boundaries | [Public proof status](docs/PUBLIC_PROOF_STATUS.md), [reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md), and committed sanitized artifacts for Telegram and Bitrix24 boundary checks. |
 | Offer demo | [Offer demo](docs/OFFER_DEMO.md) for document import -> RAG -> call-audio transcription boundary -> transcript scoring -> Telegram approval -> outbox drain -> dry-run Bitrix24 handoff. |
 | Reviewer gate | [Reviewer checklist](docs/REVIEWER_CHECKLIST.md), [CI workflow](.github/workflows/ci.yml), and deterministic tests in [tests/](tests/). |
+| Privacy boundary | [Privacy boundary](docs/PRIVACY_BOUNDARY.md) for transcript PII redaction before RAG, approval context, CRM handoff, demo JSON, and reviewer evidence. |
 | Runtime docs | [Live demo notes](docs/LIVE_DEMO.md), [Operations notes](docs/OPERATIONS.md), and runtime endpoints `/runtime`, `/llm/runtime`, `/transcription/runtime`, `/integrations/runtime`, `/metrics`. |
 | Architecture | [Architecture notes](docs/ARCHITECTURE.md), [Evidence map](docs/EVIDENCE_MAP.md), and [Integration skeleton](docs/INTEGRATION_SKELETON.md). |
 | n8n boundary | [n8n approval flow](docs/N8N_APPROVAL_FLOW.md) and importable workflows in [`infra/n8n/`](infra/n8n/). |
@@ -84,6 +87,7 @@ flowchart LR
 - RAG ingestion and retrieval with deterministic local embeddings for repeatable development.
 - pgvector-ready schema and Docker Compose runtime.
 - Transcript webhook that produces a structured analysis and a human approval item.
+- Safe-logging boundary that redacts transcript PII before RAG ingestion, approval context, CRM handoff, and public evidence.
 - Dry-run Bitrix24 CRM handoff event queued only after human approval; the Bitrix adapter can be credentialed later without changing the approval/RAG flow.
 - CRM outbox state with idempotency keys, attempt counters, retry scheduling, last error, and dead-letter handling.
 - Optional background worker for Bitrix24 outbox drain, disabled in public dry-run mode.

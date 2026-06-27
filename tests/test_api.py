@@ -366,6 +366,15 @@ def test_public_demo_run_proves_workflow_contract() -> None:
     assert body["transcription"]["status"] == "dry_run"
     assert body["transcription"]["audio_uri"].startswith("gdrive://")
     assert body["transcription"]["segments"]
+    assert body["privacy"]["redacted"] is True
+    assert body["privacy"]["raw_text_stored"] is False
+    assert body["privacy"]["safe_logging"] is True
+    assert body["privacy"]["replacement_counts"] == {"email": 1, "phone": 1}
+    serialized = json.dumps(body)
+    assert "maria.petrov@example.com" not in serialized
+    assert "+41 44 555 12 34" not in serialized
+    assert "[redacted-email]" in serialized
+    assert "[redacted-phone]" in serialized
     assert body["transcription"]["request_contract"]["secret_fields"] == []
     assert body["call_analysis"]["score"] >= 80
     assert body["approval"]["status"] == "approved"
@@ -379,6 +388,57 @@ def test_public_demo_run_proves_workflow_contract() -> None:
     assert runtime["counters"]["demo_runs_total"] >= 1
     assert runtime["counters"]["audio_transcriptions_total"] >= 1
     assert runtime["counters"]["crm_handoffs_queued_total"] >= 1
+    assert runtime["counters"]["privacy_redacted_transcripts_total"] >= 1
+    assert runtime["counters"]["privacy_redactions_total"] >= 2
+
+
+def test_call_transcript_redacts_pii_before_rag_approval_and_crm() -> None:
+    raw_email = "buyer.ops@example.com"
+    raw_phone = "+41 79 555 10 20"
+    with TestClient(app) as client:
+        response = client.post(
+            "/webhooks/n8n/call-transcript",
+            json={
+                "call_id": "CALL-PRIVACY-1",
+                "customer_id": "LEAD-PRIVACY-1",
+                "transcript": (
+                    "The director approved the budget and needs delivery this month. "
+                    "The next step is a technical review tomorrow. "
+                    f"Send recap to {raw_email} and call {raw_phone}."
+                ),
+                "metadata": {"source": "privacy-test"},
+            },
+        )
+        assert response.status_code == 200
+        body = response.json()
+        approval = client.get(f"/approvals/{body['approval']['id']}").json()
+        query = client.post(
+            "/query",
+            json={"question": "Where should the recap be sent?", "top_k": 10},
+        )
+        approved = client.post(
+            f"/approvals/{body['approval']['id']}/approve",
+            json={"reviewer": "privacy-reviewer", "notes": "Safe to queue"},
+        )
+        assert approved.status_code == 200
+        events = client.get("/integration-events", params={"adapter_key": "bitrix24.mock"})
+
+    serialized = json.dumps(
+        {
+            "webhook": body,
+            "approval": approval,
+            "query": query.json(),
+            "events": events.json(),
+        },
+    )
+    assert body["privacy"]["redacted"] is True
+    assert body["privacy"]["replacement_counts"] == {"email": 1, "phone": 1}
+    assert raw_email not in serialized
+    assert raw_phone not in serialized
+    assert "[redacted-email]" in serialized
+    assert "[redacted-phone]" in serialized
+    assert approval["context"]["privacy"]["raw_text_stored"] is False
+    assert approval["context"]["crm_update"]["comment"].endswith("[redacted-phone].")
 
 
 def test_ingest_query_and_approval_flow() -> None:
@@ -798,7 +858,8 @@ def test_telegram_callback_repeated_click_answers_without_error(monkeypatch) -> 
     ]
 
 
-def test_offer_demo_call_transcript_queues_crm_handoff_after_approval() -> None:
+def test_offer_demo_call_transcript_queues_crm_handoff_after_approval(monkeypatch) -> None:
+    monkeypatch.setattr(settings, "top_k", 50)
     with TestClient(app) as client:
         playbook = client.post(
             "/documents",

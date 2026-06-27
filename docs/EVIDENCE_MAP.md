@@ -14,6 +14,7 @@ For current CI, local gate, committed evidence, runtime reachability, and public
 | LLM API provider boundary | `app/llm.py`, `GET /llm/runtime`, OpenAI, Claude/Anthropic, Gemini payload tests |
 | Call-audio transcription boundary | `app/transcription.py`, `GET /transcription/runtime`, `POST /webhooks/n8n/call-audio`, `POST /demo/audio/upload`, `infra/n8n/call-audio-transcription-approval.json` |
 | RAG and embeddings | `app/chunking.py`, `app/embeddings.py`, `app/store.py`, `POST /documents`, `POST /query` |
+| Privacy / safe logging boundary | `app/privacy.py`, `POST /webhooks/n8n/call-transcript`, `POST /webhooks/n8n/call-audio`, `docs/PRIVACY_BOUNDARY.md`, `scripts/verify_public.sh` |
 | pgvector-ready persistence | `app/store.py`, `docker-compose.yml`, `docs/ARCHITECTURE.md` |
 | Transcript analysis and scoring | `app/scoring.py`, `app/sales_workflow.py`, `demo/call-transcript.json` |
 | Human approval flow | `POST /approvals`, `POST /approvals/{id}/approve`, `tests/test_core.py` |
@@ -40,6 +41,7 @@ For current CI, local gate, committed evidence, runtime reachability, and public
 - Local embeddings and LLM fallback are deterministic, so tests and demo output are repeatable without API keys.
 - OpenAI, Claude/Anthropic, and Gemini provider wiring is contract-tested without committing secrets.
 - OpenAI Whisper and Deepgram transcription wiring is implemented behind a provider boundary; deterministic smoke uses a local fixture, and the browser upload endpoint can process a real temporary recording when a provider key is configured.
+- Transcript PII is redacted before RAG ingestion, approval context, CRM handoff payloads, demo JSON, and reviewer snapshots.
 - CRM handoff is queued only after an explicit approval transition.
 - Bitrix24 handoff is modeled as an outbox event with idempotency keys, attempt counters, `next_retry_at`, retry-safe drain, and `dead_letter` state.
 - Bitrix24 proof covers both the production request contract and a real read-only sandbox check for `profile` plus CRM `crm.lead.fields`.
@@ -72,5 +74,6 @@ For current CI, local gate, committed evidence, runtime reachability, and public
 14. If runtime proof is needed, open `https://saleops.duckdns.org/llm/runtime`.
 15. If runtime proof is needed, open `https://saleops.duckdns.org/transcription/runtime`.
 16. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-17. Read `docs/ARCHITECTURE.md`.
-18. Read `docs/INTEGRATION_SKELETON.md`.
+17. Read `docs/PRIVACY_BOUNDARY.md`.
+18. Read `docs/ARCHITECTURE.md`.
+19. Read `docs/INTEGRATION_SKELETON.md`.

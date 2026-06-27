@@ -43,6 +43,15 @@ assert payload["google_drive_import"]["adapter_key"] == "google_drive"
 assert payload["google_drive_import"]["source"].startswith("gdrive://")
 assert payload["google_drive_import"]["chunks"] == payload["ingestion"]["chunks"]
 assert payload["rag_context_sources"], "RAG retrieval returned no sources"
+assert payload["privacy"]["redacted"] is True
+assert payload["privacy"]["raw_text_stored"] is False
+assert payload["privacy"]["safe_logging"] is True
+assert payload["privacy"]["replacement_counts"] == {"email": 1, "phone": 1}
+serialized_payload = json.dumps(payload)
+assert "maria.petrov@example.com" not in serialized_payload
+assert "+41 44 555 12 34" not in serialized_payload
+assert "[redacted-email]" in serialized_payload
+assert "[redacted-phone]" in serialized_payload
 assert payload["transcription"]["provider"] in {"local_stub", "openai_whisper", "deepgram"}
 assert payload["transcription"]["status"] == "dry_run"
 assert payload["transcription"]["segments"], "Transcription returned no segments"
@@ -202,6 +211,8 @@ assert runtime["counters"]["demo_runs_total"] >= 1
 assert runtime["counters"]["crm_handoffs_queued_total"] >= 1
 assert runtime["counters"]["telegram_callbacks_total"] >= 1
 assert runtime["counters"]["audio_transcriptions_total"] >= 1
+assert runtime["counters"]["privacy_redacted_transcripts_total"] >= 1
+assert runtime["counters"]["privacy_redactions_total"] >= 2
 assert "bitrix24_dispatch_failures_total" in runtime["counters"]
 assert "integration_dead_letters_total" in runtime["counters"]
 assert "integration_events_drained_total" in runtime["counters"]

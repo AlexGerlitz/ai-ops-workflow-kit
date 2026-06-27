@@ -14,6 +14,8 @@ class RuntimeStats:
             "audio_webhooks_total": 0,
             "audio_transcriptions_total": 0,
             "transcript_webhooks_total": 0,
+            "privacy_redacted_transcripts_total": 0,
+            "privacy_redactions_total": 0,
             "approvals_created_total": 0,
             "approvals_approved_total": 0,
             "approvals_rejected_total": 0,

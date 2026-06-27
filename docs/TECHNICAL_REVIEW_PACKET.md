@@ -31,7 +31,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-36 passed
+45 passed
 public verification passed
 ```
 
@@ -66,6 +66,7 @@ https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429 or u
 | Provider contracts exist | Tests cover OpenAI, Claude/Anthropic, and Gemini payload builders and response parsers. |
 | RAG is not prompt-only | Demo imports Google Drive text, chunks it, retrieves source context, and returns `rag_context_sources`. |
 | Call audio reaches the workflow | Demo accepts audio metadata, normalizes a transcript through the selected transcription boundary, and returns speaker segments before analysis. |
+| Privacy boundary is explicit | Demo transcript PII is redacted before RAG, approval context, CRM handoff, public JSON, and reviewer snapshots. |
 | Human approval is explicit | The workflow creates a pending approval, applies an approve/reject state transition, and only then queues CRM handoff. |
 | Telegram is a real contract surface | Public smoke creates a synthetic approval and verifies Telegram callback handling through `POST /webhooks/telegram/approval`. |
 | Bitrix24 handoff is safe | CRM writes are modeled as idempotent outbox events with attempt counters, retry timing, and dead-letter state. |
@@ -108,6 +109,14 @@ RAG quality cannot be evaluated from a final answer alone. Query responses inclu
 sources so a reviewer can check whether the answer was grounded in the imported Google Drive or
 transcript content.
 
+### Why have a privacy boundary?
+
+Business transcripts often include emails, phone numbers, payment references, account identifiers, or
+other sensitive details. The backend now redacts common PII before RAG ingestion, approval context,
+CRM handoff payloads, public demo JSON, and reviewer snapshots. The demo fixture intentionally
+contains an email and a Swiss-style phone number so `scripts/verify_public.sh` can prove the raw
+values are not exposed.
+
 ### Why queue CRM handoff?
 
 External CRM writes should not happen inside an analysis prompt or hidden workflow node. The backend
@@ -124,6 +133,7 @@ allows retry, dead-letter handling, and audit without changing the LLM/RAG contr
 | Audio transcription unavailable | `/webhooks/n8n/call-audio` fails before CRM mutation; downstream transcript analysis only runs after normalized transcript text exists. |
 | Provider response drift | Contract tests parse OpenAI Whisper verbose JSON and Deepgram diarized words without real network calls. |
 | Empty or weak retrieval | Query responses expose retrieved source context; tests assert RAG sources are returned. |
+| PII in transcripts | `app/privacy.py` redacts emails, phone-like values, payment-card-like values, and IBAN-like values before public workflow evidence. |
 | Duplicate approval handoff | CRM event gets deterministic idempotency key. |
 | Bitrix24 temporary failure | Dispatch records attempt count, `last_error`, `next_retry_at`, and can move to `dead_letter`. |
 | Bitrix24 permission drift | Credentialed preflight checks both generic `profile` and CRM `crm.lead.fields`, so missing CRM scope is visible before enabling writes. |

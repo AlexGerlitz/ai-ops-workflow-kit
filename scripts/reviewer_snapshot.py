@@ -87,6 +87,10 @@ def assert_snapshot(snapshot: dict[str, Any]) -> None:
     assert demo["google_drive_import"]["source"].startswith("gdrive://")
     assert demo["google_drive_import"]["chunks"] >= 1
     assert demo["rag_context_sources"], "RAG returned no source context"
+    assert demo["privacy"]["redacted"] is True
+    assert demo["privacy"]["raw_text_stored"] is False
+    assert demo["privacy"]["safe_logging"] is True
+    assert "maria.petrov@example.com" not in json.dumps(demo)
     assert demo["transcription"]["status"] == "dry_run"
     assert demo["transcription"]["provider"] in {"local_stub", "openai_whisper", "deepgram"}
     assert demo["transcription"]["segments"], "Transcription returned no speaker segments"
@@ -186,6 +190,9 @@ def build_snapshot(base_url: str, timeout: float) -> dict[str, Any]:
             "crm_idempotency_key": demo["crm_handoff"]["idempotency_key"],
             "bitrix24_status": demo["bitrix24_dispatch"]["status"],
             "bitrix24_event_status": demo["bitrix24_dispatch"]["event_status"],
+            "privacy_redacted": demo["privacy"]["redacted"],
+            "privacy_categories": demo["privacy"]["categories"],
+            "raw_text_stored": demo["privacy"]["raw_text_stored"],
         },
         "worker": runtime["workers"]["bitrix24_outbox"],
         "metrics": {
@@ -197,6 +204,7 @@ def build_snapshot(base_url: str, timeout: float) -> dict[str, Any]:
             "LLM boundary exposes OpenAI, Claude, Gemini, and local fallback without secrets",
             "demo imports Google Drive text into RAG and returns source context",
             "demo accepts call audio metadata and converts it into a transcript boundary",
+            "transcript PII is redacted before RAG, approval context, CRM handoff, and public logs",
             "transcript analysis produces a high lead score and approval item",
             "synthetic demo keeps Telegram and Bitrix24 dry-run for public safety",
             "owner-run Telegram approval can be enabled without changing the dry-run CRM boundary",
@@ -253,6 +261,12 @@ def format_text(snapshot: dict[str, Any]) -> str:
                 f"telegram={workflow['telegram_status']} "
                 f"bitrix24={workflow['bitrix24_status']} "
                 f"crm={workflow['crm_event_status']}"
+            ),
+            (
+                "privacy="
+                f"redacted={workflow['privacy_redacted']} "
+                f"categories={','.join(workflow['privacy_categories']) or 'none'} "
+                f"raw_text_stored={workflow['raw_text_stored']}"
             ),
             (
                 "transcription="

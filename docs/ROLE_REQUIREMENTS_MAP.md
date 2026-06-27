@@ -11,6 +11,7 @@ generic AI claims.
 | AI workflow orchestration | `POST /webhooks/n8n/call-audio`, `POST /webhooks/n8n/call-transcript`, `infra/n8n/call-audio-transcription-approval.json`, `infra/n8n/call-transcript-approval.json`, `infra/n8n/google-drive-sales-ops-approval.json`, `docs/N8N_APPROVAL_FLOW.md` | Open the n8n workflow JSON files, then run `bash scripts/verify_public.sh`. | n8n owns routing, Drive export, and notifications; the backend owns transcription, state, scoring, retrieval, approvals, and integration contracts. |
 | LLM API integration boundary | `app/llm.py`, `GET /llm/runtime`, `tests/test_api.py`, `docs/OFFER_DEMO.md` | Run `bash scripts/verify_public.sh`, then inspect `/llm/runtime`. | The demo uses deterministic local behavior for public review; OpenAI, Claude/Anthropic, and Gemini payload contracts are isolated behind one provider boundary without moving workflow state into prompts. |
 | RAG and embeddings | `app/chunking.py`, `app/embeddings.py`, `app/store.py`, `POST /documents`, `POST /query` | Run `bash scripts/verify_public.sh` and inspect the demo output for `rag_context_sources`. | Deterministic local embeddings keep tests repeatable; PostgreSQL/pgvector is the durable runtime path. |
+| Privacy / safe logging boundary | `app/privacy.py`, `docs/PRIVACY_BOUNDARY.md`, `POST /webhooks/n8n/call-transcript`, `POST /webhooks/n8n/call-audio`, `scripts/verify_public.sh` | Run `bash scripts/verify_public.sh` and inspect `privacy.redacted`, replacement counts, and the absence of raw demo email/phone values. | Transcript PII is redacted before RAG ingestion, approval context, CRM handoff payloads, demo JSON, and reviewer snapshots. |
 | Document intake / Google Drive API adapter | `POST /integrations/google-drive/import`, `GoogleDriveImportIn`, `infra/n8n/google-drive-sales-ops-approval.json`, `app/integrations.py`, `docs/INTEGRATION_SKELETON.md` | Run `bash scripts/verify_public.sh` and inspect `google_drive_import` in the offer demo output. | Public mode accepts exported Drive document text without credentials; production mode connects OAuth/service-account export in n8n or a connector and sends normalized text to the backend. |
 | PostgreSQL, Supabase, pgvector readiness | `docker-compose.yml`, `app/store.py`, `docs/ARCHITECTURE.md`, `docs/OPERATIONS.md` | Run `docker compose up --build`, then open `/runtime`, `/documents`, and `/query`. | The public demo can run in memory for inspectability; the storage boundary is designed around PostgreSQL with pgvector. |
 | Whisper / Deepgram / diarization boundary | `app/transcription.py`, `GET /transcription/runtime`, `POST /webhooks/n8n/call-audio`, `infra/n8n/call-audio-transcription-approval.json`, `tests/test_api.py` | Run `bash scripts/verify_public.sh`, inspect `/transcription/runtime`, and send a payload with `audio_uri` plus `transcript_hint` to `/webhooks/n8n/call-audio`. | Public mode uses a deterministic local fixture without secrets; live mode calls OpenAI Whisper or Deepgram, parses text/speaker segments, and keeps downstream transcript analysis unchanged. |
@@ -45,7 +46,7 @@ curl -fsS https://saleops.duckdns.org/transcription/runtime
 Expected local gate result:
 
 ```text
-36 passed
+45 passed
 public verification passed
 ```
 
@@ -57,6 +58,7 @@ llm=local
 score=100
 google_drive=gdrive://demo-sales-playbook
 transcription=local_stub:dry_run
+privacy=redacted=True categories=email,phone raw_text_stored=False
 approval=approved
 telegram_callback=rejected
 bitrix24_drain=<positive dry-run drain count>

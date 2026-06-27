@@ -121,6 +121,16 @@ class TranscriptWebhookIn(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class PrivacyRedactionOut(BaseModel):
+    enabled: bool
+    redacted: bool
+    categories: list[str]
+    replacement_counts: dict[str, int]
+    raw_text_stored: bool
+    safe_logging: bool
+    notes: str
+
+
 class TranscriptWebhookOut(BaseModel):
     call_id: str
     customer_id: str
@@ -128,6 +138,7 @@ class TranscriptWebhookOut(BaseModel):
     signals: dict[str, bool]
     analysis: CallAnalysisOut
     approval: ApprovalOut
+    privacy: PrivacyRedactionOut
 
 
 class TranscriptionStatus(str, Enum):
@@ -314,6 +325,7 @@ class OfferDemoRunOut(BaseModel):
     ingestion: DocumentOut
     google_drive_import: GoogleDriveImportOut
     rag_context_sources: list[dict[str, Any]]
+    privacy: dict[str, Any]
     transcription: dict[str, Any]
     call_analysis: dict[str, Any]
     approval: dict[str, Any]

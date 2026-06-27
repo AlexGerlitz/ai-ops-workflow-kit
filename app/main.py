@@ -23,6 +23,7 @@ from app.integrations import (
 )
 from app.llm import LLMClient
 from app.observability import RuntimeStats, prometheus_metrics
+from app.privacy import redact_text, redact_transcription
 from app.sales_workflow import build_call_analysis
 from app.schemas import (
     ApprovalDecision,
@@ -234,6 +235,7 @@ async def run_demo_workflow() -> OfferDemoRunOut:
             {"source": context.source, "score": context.score}
             for context in rag.contexts
         ],
+        privacy=analysis.privacy.model_dump(mode="json"),
         transcription={
             "provider": audio.transcription.provider,
             "status": audio.transcription.status.value,
@@ -564,26 +566,35 @@ def dispatch_event_to_bitrix24(event_id: UUID) -> IntegrationDispatchOut:
 @app.post("/webhooks/n8n/call-transcript", response_model=TranscriptWebhookOut)
 def call_transcript_webhook(payload: TranscriptWebhookIn) -> TranscriptWebhookOut:
     runtime_stats.increment("transcript_webhooks_total")
+    redacted = redact_text(payload.transcript)
+    privacy = redacted.evidence()
+    if privacy.redacted:
+        runtime_stats.increment("privacy_redacted_transcripts_total")
+        runtime_stats.increment_by(
+            "privacy_redactions_total",
+            sum(privacy.replacement_counts.values()),
+        )
     knowledge_context = store.search(
-        embedding_provider.embed(payload.transcript),
+        embedding_provider.embed(redacted.text),
         settings.top_k,
     )
     ingest_document(
         DocumentIn(
             source=f"call://{payload.call_id}",
-            text=payload.transcript,
+            text=redacted.text,
             metadata={
                 "customer_id": payload.customer_id,
                 "call_id": payload.call_id,
+                "privacy": privacy.model_dump(mode="json"),
                 **payload.metadata,
             },
         )
     )
-    transcript_score = score_transcript(payload.transcript)
+    transcript_score = score_transcript(redacted.text)
     analysis = build_call_analysis(
         call_id=payload.call_id,
         customer_id=payload.customer_id,
-        transcript=payload.transcript,
+        transcript=redacted.text,
         transcript_score=transcript_score,
         knowledge_context=knowledge_context,
     )
@@ -602,6 +613,7 @@ def call_transcript_webhook(payload: TranscriptWebhookIn) -> TranscriptWebhookOu
                 "objections": analysis.objections,
                 "next_action": analysis.next_action,
                 "crm_update": analysis.crm_update,
+                "privacy": privacy.model_dump(mode="json"),
                 "knowledge_context_sources": [
                     {
                         "source": context.source,
@@ -620,6 +632,7 @@ def call_transcript_webhook(payload: TranscriptWebhookIn) -> TranscriptWebhookOu
         signals=transcript_score.signals,
         analysis=analysis,
         approval=approval,
+        privacy=privacy,
     )
 
 
@@ -732,6 +745,7 @@ def process_call_audio(
             detail=f"transcription unavailable: {transcription.detail}",
         )
     runtime_stats.increment("audio_transcriptions_total")
+    public_transcription = redact_transcription(transcription)
     transcript_result = call_transcript_webhook(
         TranscriptWebhookIn(
             call_id=payload.call_id,
@@ -750,7 +764,7 @@ def process_call_audio(
     return CallAudioWebhookOut(
         call_id=payload.call_id,
         customer_id=payload.customer_id,
-        transcription=transcription,
+        transcription=public_transcription,
         transcript_result=transcript_result,
     )
 
