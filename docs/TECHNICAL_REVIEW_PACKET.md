@@ -31,7 +31,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-45 passed
+49 passed
 public verification passed
 ```
 
@@ -48,6 +48,8 @@ For the acceptance report route, read
 [Reviewer Acceptance Report](./REVIEWER_ACCEPTANCE_REPORT.md).
 For current CI, live smoke, local gate, Pages route, and public boundary status, read
 [Public Proof Status](./PUBLIC_PROOF_STATUS.md).
+For employer trigger mapping, read
+[Employer Trigger Proof](./EMPLOYER_TRIGGER_PROOF.md).
 For deterministic failure-mode evidence, read
 [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
 For the real-credential boundary, read

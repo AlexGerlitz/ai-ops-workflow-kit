@@ -21,6 +21,18 @@ grep -q "mode=skipped_no_credentials" /tmp/aiops-credentialed-sandbox-preflight.
 grep -q "secrets_printed=False" /tmp/aiops-credentialed-sandbox-preflight.txt
 grep -q "bitrix24 contract evidence passed" /tmp/aiops-bitrix24-contract.txt
 grep -q "secret_token_leaked=False" /tmp/aiops-bitrix24-contract.txt
+grep -q "Employer Trigger Proof" README.md
+grep -q "Employer Trigger Proof" docs/PUBLIC_PROOF_STATUS.md
+grep -q "Employer Trigger Proof" docs/ROLE_REQUIREMENTS_MAP.md
+grep -q "Employer Trigger Proof" docs/TECHNICAL_REVIEW_PACKET.md
+grep -q "AI workflow / RAG" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "CRM/ERP/API integration" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "Backend/platform ownership" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "DevOps / reliability" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "One backend-owned workflow slice" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "Adapter contract, idempotent CRM handoff" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "49 passed" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "public verification passed" docs/EMPLOYER_TRIGGER_PROOF.md
 
 "$PYTHON_BIN" - "$DEMO_OUTPUT" <<'PY'
 import json

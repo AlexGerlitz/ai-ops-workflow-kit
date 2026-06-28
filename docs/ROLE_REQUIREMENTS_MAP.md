@@ -4,6 +4,8 @@ This map connects common AI automation role requirements to concrete proof in th
 It is written for technical reviewers who want to verify implementation depth instead of reading
 generic AI claims.
 
+For a hiring-manager view of the same evidence, start with [Employer Trigger Proof](./EMPLOYER_TRIGGER_PROOF.md).
+
 ## Requirement To Evidence
 
 | Role requirement | Evidence in this repo | How to verify | Production boundary |
@@ -46,7 +48,7 @@ curl -fsS https://saleops.duckdns.org/transcription/runtime
 Expected local gate result:
 
 ```text
-45 passed
+49 passed
 public verification passed
 ```
 

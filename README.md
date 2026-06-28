@@ -40,6 +40,7 @@ and reviewer evidence are all explicit instead of hidden inside no-code glue.
 | [Privacy boundary](docs/PRIVACY_BOUNDARY.md) | Safe-logging proof: transcript PII is redacted before RAG ingestion, approval context, CRM handoff, demo JSON, and reviewer snapshots. |
 | RAG quality proof | `/rag/eval` and `/demo/run` return expected-source checks with citations, required terms, score floor, and pass/fail output. |
 | [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Role-level AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
+| [Employer Trigger Proof](docs/EMPLOYER_TRIGGER_PROOF.md) | Hiring/project triggers mapped to concrete repo evidence, proof commands, and the first result this system demonstrates. |
 
 Best-fit evidence:
 
@@ -63,6 +64,7 @@ Fast evaluation path:
 | Surface | Proof |
 | --- | --- |
 | Public status | [Public proof status](docs/PUBLIC_PROOF_STATUS.md) with current CI, local gate, committed evidence, runtime reachability boundary, Pages route, and public boundary. |
+| Employer trigger proof | [Employer Trigger Proof](docs/EMPLOYER_TRIGGER_PROOF.md) maps AI workflow/RAG, CRM/API integration, backend/platform ownership, and DevOps reliability triggers to inspectable code, docs, and commands. |
 | Live approval proof | [Live approval proof](docs/LIVE_OWNER_PROOF.md) for Telegram callback approval and CRM-safe outbox handoff. |
 | Integration boundaries | [Public proof status](docs/PUBLIC_PROOF_STATUS.md), [reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md), and committed sanitized artifacts for Telegram and Bitrix24 boundary checks. |
 | Offer demo | [Offer demo](docs/OFFER_DEMO.md) for document import -> RAG -> call-audio transcription boundary -> transcript scoring -> Telegram approval -> outbox drain -> dry-run Bitrix24 handoff. |
