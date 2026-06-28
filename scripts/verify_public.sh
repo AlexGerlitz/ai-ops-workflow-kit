@@ -25,10 +25,17 @@ grep -q "Employer Trigger Proof" README.md
 grep -q "Employer Trigger Proof" docs/PUBLIC_PROOF_STATUS.md
 grep -q "Employer Trigger Proof" docs/ROLE_REQUIREMENTS_MAP.md
 grep -q "Employer Trigger Proof" docs/TECHNICAL_REVIEW_PACKET.md
+grep -q "Last checked: 2026-06-28" docs/PUBLIC_PROOF_STATUS.md
+grep -q "Latest checked commit | \`61ad9f9\`" docs/PUBLIC_PROOF_STATUS.md
+grep -q "actions/runs/28307835531" docs/PUBLIC_PROOF_STATUS.md
+grep -q "Checked on 2026-06-28" docs/PUBLIC_PROOF_STATUS.md
 grep -q "AI workflow / RAG" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "CRM/ERP/API integration" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Backend/platform ownership" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "DevOps / reliability" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "Current Freshness" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "Latest checked commit: \`61ad9f9\`" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "actions/runs/28307835531" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "One backend-owned workflow slice" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Adapter contract, idempotent CRM handoff" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "49 passed" docs/EMPLOYER_TRIGGER_PROOF.md

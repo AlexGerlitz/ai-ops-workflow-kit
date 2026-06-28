@@ -1,17 +1,19 @@
 # Public Proof Status
 
-Last checked: 2026-06-27
+Last checked: 2026-06-28
 
 This page is the shortest route to the current public evidence for AI Ops Workflow Kit.
 
 | Surface | Current proof |
 | --- | --- |
 | Repository state | Current public `main` branch; this file is part of the reviewed tree |
+| Latest checked commit | `61ad9f9` (`Clarify employer contact trigger`) |
+| Latest checked CI run | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/28307835531 -> success on `61ad9f9` |
 | CI workflow | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml |
 | Stable reviewer route | Start here, then run `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh`; this path does not depend on the external VPS edge being reachable |
 | Employer trigger proof | `docs/EMPLOYER_TRIGGER_PROOF.md` maps AI workflow/RAG, CRM/API integration, backend/platform ownership, and DevOps reliability triggers to concrete repo evidence and first-result proof |
 | Reviewer acceptance report | `python3 scripts/reviewer_acceptance_report.py` checks live API, live smoke, GitHub Actions state, Pages route, and public PDF when the live runtime is reachable |
-| Local public gate | `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `49 passed`, `public verification passed` |
+| Local public gate | Checked on 2026-06-28 with `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `49 passed`, `public verification passed` |
 | RAG quality proof | `/demo/run` and `POST /rag/eval` return `rag_quality.ok=true`, `passed=2/2`, expected source matches, required terms, score floor, and citations |
 | Privacy boundary | `docs/PRIVACY_BOUNDARY.md`; public demo proves transcript email/phone redaction before RAG ingestion, approval context, CRM handoff, demo JSON, and reviewer snapshots |
 | Committed live-smoke evidence | `docs/evidence/reviewer-acceptance-report.txt` and `.sanitized.json` record the last captured `live demo smoke passed`, `score=100`, `transcription=local_stub:dry_run`, `telegram_callback=rejected`, and positive Bitrix24 drain counter |

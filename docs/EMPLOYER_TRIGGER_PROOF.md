@@ -4,6 +4,13 @@ This page maps the hiring and project triggers from the public profile route to 
 
 Use it when the first question is not "what does the demo do?" but "what employer problem can this prove quickly?"
 
+## Current Freshness
+
+- Last checked: 2026-06-28.
+- Latest checked commit: `61ad9f9` (`Clarify employer contact trigger`).
+- Latest checked CI run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/28307835531 -> success on `61ad9f9`.
+- Local public gate: `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `49 passed`, `public verification passed`.
+
 ## Trigger To Proof
 
 | Employer trigger | Employer pain | Proof in this repo | First result this repo demonstrates |
