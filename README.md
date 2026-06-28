@@ -17,6 +17,18 @@ Profile / contact route: [DriveDesk AI Operator proof route](https://alexgerlitz
 [enterprise readiness](https://alexgerlitz.github.io/AlexGerlitz/enterprise-readiness.html), and
 [inbound brief](https://alexgerlitz.github.io/AlexGerlitz/intake-brief.html).
 
+Message me first when there is one messy sales/support workflow, one risky CRM or approval
+handoff, or one backend-owned AI workflow slice that should become testable, logged,
+documented, and handed off.
+
+Shortest proof path: [LinkedIn Recruiter Packet](https://alexgerlitz.github.io/AlexGerlitz/linkedin-recruiter-packet.html) ->
+[Hiring Decision](https://alexgerlitz.github.io/AlexGerlitz/hiring-decision.html) ->
+[DriveDesk Proof Route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html) ->
+[PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-remote-ai-automation-resume.pdf).
+
+First useful result: a verified RAG/transcript/approval/CRM slice with backend-owned
+state, tests, logs, docs, and a handoff route.
+
 ![AI Sales Ops Control Tower](docs/assets/live-demo-control-tower.png)
 
 ## 60-Second Reviewer Snapshot
