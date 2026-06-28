@@ -12,7 +12,7 @@ The public demo and transcript webhook redact these categories:
 - payment-card-like values;
 - IBAN-like values.
 
-The demo fixture intentionally includes an email and a Swiss-style phone number so reviewers can
+The demo fixture intentionally includes an email and an international-format phone number so reviewers can
 verify that the raw values do not appear in public output.
 
 ## Where Redaction Happens

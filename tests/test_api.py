@@ -54,6 +54,30 @@ def test_runtime_and_metrics_endpoints_expose_operational_evidence() -> None:
     assert "aiops_demo_runs_total" in metrics.text
 
 
+def test_reviewer_observability_endpoint_is_read_only_evidence() -> None:
+    with TestClient(app) as client:
+        response = client.get("/reviewer/observability")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["ok"] is True
+    assert body["schema"] == "reviewer_observability_v1"
+    assert body["read_only"] is True
+    assert body["runtime"]["storage"] in {"memory", "postgres"}
+    assert body["quality_gates"]["runtime"]["endpoint"] == "/runtime"
+    assert body["quality_gates"]["metrics"]["endpoint"] == "/metrics"
+    assert "demo_runs_total" in body["quality_gates"]["metrics"]["tracked_counters"]
+    assert body["quality_gates"]["rag_quality"]["endpoint"] == "/rag/eval"
+    assert body["quality_gates"]["rag_quality"]["expected_source_eval"] is True
+    assert body["quality_gates"]["privacy"]["raw_text_stored"] is False
+    assert body["quality_gates"]["privacy"]["safe_logging"] is True
+    assert body["quality_gates"]["outbox"]["event_status_counts"]["queued"] >= 0
+    assert body["integration_boundaries"]["telegram.approval"]["dry_run"] is True
+    assert body["integration_boundaries"]["bitrix24"]["dry_run"] is True
+    assert body["worker_boundary"]["active"] is False
+    assert "GET /reviewer/observability" in body["reviewer_actions"]
+    assert any("Backend owns runtime identity" in item for item in body["enterprise_signal"])
+
+
 def test_llm_runtime_endpoint_exposes_provider_boundary_without_secrets() -> None:
     with TestClient(app) as client:
         response = client.get("/llm/runtime")

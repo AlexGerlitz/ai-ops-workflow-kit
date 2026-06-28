@@ -161,6 +161,94 @@ def metrics() -> PlainTextResponse:
     )
 
 
+@app.get("/reviewer/observability")
+def reviewer_observability() -> dict[str, object]:
+    counters = runtime_stats.snapshot()
+    approvals = {status.value: len(store.list_approvals(status)) for status in ApprovalStatus}
+    integration_statuses = {
+        status.value: len(store.list_integration_events(status=status))
+        for status in IntegrationEventStatus
+    }
+    adapter_events: dict[str, int] = {}
+    for event in store.list_integration_events():
+        adapter_events[event.adapter_key] = adapter_events.get(event.adapter_key, 0) + 1
+
+    integrations = get_integration_runtime()
+    integration_boundaries = {
+        capability.adapter_key: {
+            "configured": capability.configured,
+            "dry_run": capability.dry_run,
+            "webhook_secret_configured": capability.webhook_secret_configured,
+            "required_env": capability.required_env,
+        }
+        for capability in integrations.capabilities
+    }
+
+    return {
+        "ok": True,
+        "schema": "reviewer_observability_v1",
+        "read_only": True,
+        "generated_at": datetime.now(UTC).isoformat(),
+        "runtime": {
+            "version": settings.app_version,
+            "git_sha": settings.git_sha,
+            "environment": settings.deploy_environment,
+            "storage": store.name,
+            "uptime_seconds": runtime_stats.uptime_seconds(),
+            "public_base_url": settings.public_base_url,
+        },
+        "quality_gates": {
+            "runtime": {
+                "endpoint": "/runtime",
+                "git_sha_present": bool(settings.git_sha),
+                "storage": store.name,
+            },
+            "metrics": {
+                "endpoint": "/metrics",
+                "prometheus_text": True,
+                "tracked_counters": sorted(counters),
+            },
+            "rag_quality": {
+                "endpoint": "/rag/eval",
+                "evaluations_total": counters.get("rag_evaluations_total", 0),
+                "failures_total": counters.get("rag_eval_failures_total", 0),
+                "expected_source_eval": True,
+            },
+            "privacy": {
+                "raw_text_stored": False,
+                "safe_logging": True,
+                "redacted_transcripts_total": counters.get(
+                    "privacy_redacted_transcripts_total",
+                    0,
+                ),
+                "redactions_total": counters.get("privacy_redactions_total", 0),
+            },
+            "approvals": approvals,
+            "outbox": {
+                "event_status_counts": integration_statuses,
+                "adapter_event_counts": adapter_events,
+                "dead_letters_total": counters.get("integration_dead_letters_total", 0),
+                "retries_scheduled_total": counters.get("integration_retries_scheduled_total", 0),
+            },
+        },
+        "integration_boundaries": integration_boundaries,
+        "worker_boundary": integration_workers_runtime()["bitrix24_outbox"],
+        "reviewer_actions": [
+            "GET /runtime",
+            "GET /metrics",
+            "GET /reviewer/observability",
+            "POST /demo/run",
+            "POST /rag/eval",
+            "POST /integrations/bitrix24/drain",
+        ],
+        "enterprise_signal": [
+            "Backend owns runtime identity, counters, approvals, outbox state, and adapter boundaries.",
+            "RAG quality, privacy redaction, human approval, and CRM handoff are inspectable without secrets.",
+            "Public demo can stay dry-run while reviewer evidence still proves contracts, metrics, and handoff state.",
+        ],
+    }
+
+
 @app.get("/integrations/runtime", response_model=IntegrationRuntimeOut)
 def get_integration_runtime() -> IntegrationRuntimeOut:
     return integration_runtime(settings)

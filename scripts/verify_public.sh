@@ -45,8 +45,12 @@ grep -q "Current CI route" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Visual proof route" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "One backend-owned workflow slice" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Adapter contract, idempotent CRM handoff" docs/EMPLOYER_TRIGGER_PROOF.md
-grep -q "49 passed" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "50 passed" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "public verification passed" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "reviewer observability snapshot" README.md
+grep -q "GET /reviewer/observability" README.md
+grep -q "reviewer_observability_v1" docs/TECHNICAL_REVIEW_PACKET.md
+grep -q "GET /reviewer/observability" docs/PUBLIC_PROOF_STATUS.md
 
 "$PYTHON_BIN" - "$DEMO_OUTPUT" <<'PY'
 import json
@@ -211,6 +215,14 @@ with TestClient(app) as client:
     assert rag_eval_body["passed"] == 1
     assert rag_eval_body["results"][0]["missing_terms"] == []
     runtime = client.get("/runtime").json()
+    reviewer_observability_response = client.get("/reviewer/observability")
+    assert reviewer_observability_response.status_code == 200
+    reviewer_observability = reviewer_observability_response.json()
+    assert reviewer_observability["schema"] == "reviewer_observability_v1"
+    assert reviewer_observability["read_only"] is True
+    assert reviewer_observability["quality_gates"]["privacy"]["raw_text_stored"] is False
+    assert reviewer_observability["quality_gates"]["rag_quality"]["expected_source_eval"] is True
+    assert "GET /reviewer/observability" in reviewer_observability["reviewer_actions"]
     llm_runtime_response = client.get("/llm/runtime")
     assert llm_runtime_response.status_code == 200
     llm_runtime = llm_runtime_response.json()

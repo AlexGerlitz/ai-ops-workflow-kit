@@ -8,7 +8,7 @@ Use it when the first question is not "what does the demo do?" but "what employe
 
 - Last checked: 2026-06-28.
 - Current CI route: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml.
-- Local public gate: `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `49 passed`, `public verification passed`.
+- Local public gate: `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `50 passed`, `public verification passed`.
 - Visual proof route: `docs/DEMO_WALKTHROUGH.md` with `docs/assets/drive-operator-demo.gif`.
 
 ## Trigger To Proof
@@ -32,7 +32,7 @@ python3 scripts/production_readiness_drill.py
 Expected local gate:
 
 ```text
-49 passed
+50 passed
 public verification passed
 ```
 

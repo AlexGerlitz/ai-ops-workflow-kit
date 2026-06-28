@@ -13,8 +13,9 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 | Demo walkthrough | `docs/DEMO_WALKTHROUGH.md` and `docs/assets/drive-operator-demo.gif` show the transcript -> RAG -> approval -> CRM-safe handoff route generated from the public-safe offer demo |
 | Employer trigger proof | `docs/EMPLOYER_TRIGGER_PROOF.md` maps AI workflow/RAG, CRM/API integration, backend/platform ownership, and DevOps reliability triggers to concrete repo evidence and first-result proof |
 | Reviewer acceptance report | `python3 scripts/reviewer_acceptance_report.py` checks live API, live smoke, GitHub Actions state, Pages route, and public PDF when the live runtime is reachable |
-| Local public gate | Checked on 2026-06-28 with `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `49 passed`, `public verification passed` |
+| Local public gate | Checked on 2026-06-28 with `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `50 passed`, `public verification passed` |
 | RAG quality proof | `/demo/run` and `POST /rag/eval` return `rag_quality.ok=true`, `passed=2/2`, expected source matches, required terms, score floor, and citations |
+| Reviewer observability snapshot | `GET /reviewer/observability` returns `schema=reviewer_observability_v1`, read-only runtime identity, counters, RAG quality gate, privacy boundary, approval counts, outbox state, adapter dry-run status, and worker boundary |
 | Privacy boundary | `docs/PRIVACY_BOUNDARY.md`; public demo proves transcript email/phone redaction before RAG ingestion, approval context, CRM handoff, demo JSON, and reviewer snapshots |
 | Committed live-smoke evidence | `docs/evidence/reviewer-acceptance-report.txt` and `.sanitized.json` record the last captured `live demo smoke passed`, `score=100`, `transcription=local_stub:dry_run`, `telegram_callback=rejected`, and positive Bitrix24 drain counter |
 | Runtime smoke | `bash scripts/smoke_live_demo.sh https://saleops.duckdns.org` is the live VPS check; it requires `storage=postgres` on the public runtime |
@@ -48,9 +49,10 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 11. Inspect the latest live combined sandbox run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429
 12. Inspect `docs/evidence/live-telegram-approval.txt`, `docs/evidence/bitrix24-contract.txt`, and `docs/evidence/bitrix24-sandbox-preflight.txt`.
 13. Inspect `rag_quality` in `python3 scripts/run_offer_demo.py` output or call `POST /rag/eval` after importing the demo playbook.
-14. Inspect `docs/evidence/live-postgres-persistence.txt` for the API-restart persistence proof.
-15. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
-16. If the alias is needed, run `bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org`.
+14. Inspect `GET /reviewer/observability` for the read-only runtime/counter/RAG/privacy/outbox snapshot.
+15. Inspect `docs/evidence/live-postgres-persistence.txt` for the API-restart persistence proof.
+16. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
+17. If the alias is needed, run `bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org`.
 
 ## Public Boundary
 

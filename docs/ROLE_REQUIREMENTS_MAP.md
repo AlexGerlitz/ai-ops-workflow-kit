@@ -48,7 +48,7 @@ curl -fsS https://saleops.duckdns.org/transcription/runtime
 Expected local gate result:
 
 ```text
-49 passed
+50 passed
 public verification passed
 ```
 

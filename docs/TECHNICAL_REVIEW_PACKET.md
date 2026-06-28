@@ -31,7 +31,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-49 passed
+50 passed
 public verification passed
 ```
 
@@ -63,6 +63,7 @@ https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429 or u
 | Signal | Evidence |
 | --- | --- |
 | Deployed service is real | `GET /runtime` returns version, Git SHA, storage mode, callback base URL, counters, and worker state. |
+| Reviewer observability is consolidated | `GET /reviewer/observability` returns `schema=reviewer_observability_v1`, read-only runtime identity, counters, RAG quality gate, privacy boundary, approval counts, outbox state, adapter dry-run status, and worker boundary. |
 | LLM boundary is inspectable | `GET /llm/runtime` returns requested provider, selected provider, supported providers, required env vars, and local fallback without secrets. |
 | Transcription boundary is inspectable | `GET /transcription/runtime` returns local fixture, OpenAI Whisper, and Deepgram provider state without secrets. |
 | Provider contracts exist | Tests cover OpenAI, Claude/Anthropic, and Gemini payload builders and response parsers. |
@@ -125,7 +126,7 @@ keys.
 Business transcripts often include emails, phone numbers, payment references, account identifiers, or
 other sensitive details. The backend now redacts common PII before RAG ingestion, approval context,
 CRM handoff payloads, public demo JSON, and reviewer snapshots. The demo fixture intentionally
-contains an email and a Swiss-style phone number so `scripts/verify_public.sh` can prove the raw
+contains an email and an international-format phone number so `scripts/verify_public.sh` can prove the raw
 values are not exposed.
 
 ### Why queue CRM handoff?
