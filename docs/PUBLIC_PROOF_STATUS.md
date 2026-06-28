@@ -12,6 +12,7 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 | Stable reviewer route | Start here, then run `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh`; this path does not depend on the external VPS edge being reachable |
 | Demo walkthrough | `docs/DEMO_WALKTHROUGH.md` and `docs/assets/drive-operator-demo.gif` show the transcript -> RAG -> approval -> CRM-safe handoff route generated from the public-safe offer demo |
 | Employer trigger proof | `docs/EMPLOYER_TRIGGER_PROOF.md` maps AI workflow/RAG, CRM/API integration, backend/platform ownership, and DevOps reliability triggers to concrete repo evidence and first-result proof |
+| First slice playbook | `docs/FIRST_SLICE_PLAYBOOK.md` maps role/project context to RAG/transcript, CRM handoff, human approval, and reliability slices with done criteria and proof commands |
 | Reviewer acceptance report | `python3 scripts/reviewer_acceptance_report.py` checks live API, live smoke, GitHub Actions state, Pages route, and public PDF when the live runtime is reachable |
 | Local public gate | Checked on 2026-06-28 with `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `50 passed`, `public verification passed` |
 | RAG quality proof | `/demo/run` and `POST /rag/eval` return `rag_quality.ok=true`, `passed=2/2`, expected source matches, required terms, score floor, and citations |
@@ -43,16 +44,17 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 5. Read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 6. Read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
 7. Read [Employer Trigger Proof](./EMPLOYER_TRIGGER_PROOF.md).
-8. Read [Live Owner Proof](./LIVE_OWNER_PROOF.md).
-9. Read [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
-10. Read [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
-11. Inspect the latest live combined sandbox run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429
-12. Inspect `docs/evidence/live-telegram-approval.txt`, `docs/evidence/bitrix24-contract.txt`, and `docs/evidence/bitrix24-sandbox-preflight.txt`.
-13. Inspect `rag_quality` in `python3 scripts/run_offer_demo.py` output or call `POST /rag/eval` after importing the demo playbook.
-14. Inspect `GET /reviewer/observability` for the read-only runtime/counter/RAG/privacy/outbox snapshot.
-15. Inspect `docs/evidence/live-postgres-persistence.txt` for the API-restart persistence proof.
-16. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
-17. If the alias is needed, run `bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org`.
+8. Read [First Slice Playbook](./FIRST_SLICE_PLAYBOOK.md).
+9. Read [Live Owner Proof](./LIVE_OWNER_PROOF.md).
+10. Read [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
+11. Read [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
+12. Inspect the latest live combined sandbox run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429
+13. Inspect `docs/evidence/live-telegram-approval.txt`, `docs/evidence/bitrix24-contract.txt`, and `docs/evidence/bitrix24-sandbox-preflight.txt`.
+14. Inspect `rag_quality` in `python3 scripts/run_offer_demo.py` output or call `POST /rag/eval` after importing the demo playbook.
+15. Inspect `GET /reviewer/observability` for the read-only runtime/counter/RAG/privacy/outbox snapshot.
+16. Inspect `docs/evidence/live-postgres-persistence.txt` for the API-restart persistence proof.
+17. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
+18. If the alias is needed, run `bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org`.
 
 ## Public Boundary
 

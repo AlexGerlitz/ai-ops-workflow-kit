@@ -23,9 +23,11 @@ grep -q "secrets_printed=False" /tmp/aiops-credentialed-sandbox-preflight.txt
 grep -q "bitrix24 contract evidence passed" /tmp/aiops-bitrix24-contract.txt
 grep -q "secret_token_leaked=False" /tmp/aiops-bitrix24-contract.txt
 grep -q "Employer Trigger Proof" README.md
+grep -q "First Slice Playbook" README.md
 grep -q "Demo walkthrough" README.md
 grep -q "docs/assets/drive-operator-demo.gif" README.md
 grep -q "Employer Trigger Proof" docs/PUBLIC_PROOF_STATUS.md
+grep -q "First slice playbook" docs/PUBLIC_PROOF_STATUS.md
 grep -q "Demo Walkthrough" docs/PUBLIC_PROOF_STATUS.md
 grep -q "docs/assets/drive-operator-demo.gif" docs/PUBLIC_PROOF_STATUS.md
 grep -q "Employer Trigger Proof" docs/ROLE_REQUIREMENTS_MAP.md
@@ -45,6 +47,13 @@ grep -q "Current CI route" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Visual proof route" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "One backend-owned workflow slice" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Adapter contract, idempotent CRM handoff" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "First Slice Playbook" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "RAG / transcript workflow slice" docs/FIRST_SLICE_PLAYBOOK.md
+grep -q "CRM handoff slice" docs/FIRST_SLICE_PLAYBOOK.md
+grep -q "Human approval slice" docs/FIRST_SLICE_PLAYBOOK.md
+grep -q "Reliability slice" docs/FIRST_SLICE_PLAYBOOK.md
+grep -q "one runnable command or live route" docs/FIRST_SLICE_PLAYBOOK.md
+grep -q "Best First Message" docs/FIRST_SLICE_PLAYBOOK.md
 grep -q "50 passed" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "public verification passed" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "reviewer observability snapshot" README.md

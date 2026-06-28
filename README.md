@@ -59,6 +59,7 @@ and reviewer evidence are all explicit instead of hidden inside no-code glue.
 | RAG quality proof | `/rag/eval` and `/demo/run` return expected-source checks with citations, required terms, score floor, and pass/fail output. |
 | [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Role-level AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
 | [Employer Trigger Proof](docs/EMPLOYER_TRIGGER_PROOF.md) | Hiring/project triggers mapped to concrete repo evidence, proof commands, and the first result this system demonstrates. |
+| [First Slice Playbook](docs/FIRST_SLICE_PLAYBOOK.md) | Short route from inbound role/project context to the first shippable slice, done criteria, proof command, and handoff artifact. |
 
 Best-fit evidence:
 
@@ -84,6 +85,7 @@ Fast evaluation path:
 | Public status | [Public proof status](docs/PUBLIC_PROOF_STATUS.md) with current CI, local gate, committed evidence, runtime reachability boundary, Pages route, and public boundary. |
 | Demo walkthrough | [Demo walkthrough](docs/DEMO_WALKTHROUGH.md) with a short GIF generated from the public-safe offer demo. |
 | Employer trigger proof | [Employer Trigger Proof](docs/EMPLOYER_TRIGGER_PROOF.md) maps AI workflow/RAG, CRM/API integration, backend/platform ownership, and DevOps reliability triggers to inspectable code, docs, and commands. |
+| First slice playbook | [First Slice Playbook](docs/FIRST_SLICE_PLAYBOOK.md) maps inbound role/project context to RAG/transcript, CRM handoff, human approval, and reliability slices with done criteria. |
 | Live approval proof | [Live approval proof](docs/LIVE_OWNER_PROOF.md) for Telegram callback approval and CRM-safe outbox handoff. |
 | Integration boundaries | [Public proof status](docs/PUBLIC_PROOF_STATUS.md), [reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md), and committed sanitized artifacts for Telegram and Bitrix24 boundary checks. |
 | Offer demo | [Offer demo](docs/OFFER_DEMO.md) for document import -> RAG -> call-audio transcription boundary -> transcript scoring -> Telegram approval -> outbox drain -> dry-run Bitrix24 handoff. |

@@ -47,6 +47,21 @@ crm_handoff.status=queued
 bitrix24_dispatch.status=dry_run
 ```
 
+## First Slice Route
+
+Read [First Slice Playbook](./FIRST_SLICE_PLAYBOOK.md) when the useful question is:
+what can be shipped first, what risk does it reduce, and what evidence proves it?
+
+The first slice options are:
+
+- RAG / transcript workflow slice;
+- CRM handoff slice;
+- human approval slice;
+- reliability slice.
+
+Each slice maps to proof commands, done criteria, and a handoff artifact so the first conversation
+can move from vague interest to a reviewable delivery path.
+
 ## Review Boundary
 
 - The public demo proves contracts, state, RAG quality, approval flow, outbox handoff, privacy redaction, and failure behavior without real customer data.

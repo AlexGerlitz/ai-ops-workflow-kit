@@ -199,6 +199,7 @@ Then open:
 | [Owner-run Sandbox Workflow](../.github/workflows/credentialed-sandbox-preflight.yml) | Manual GitHub Actions path for sanitized Telegram/Bitrix24 sandbox evidence from repository secrets. |
 | [Evidence Map](./EVIDENCE_MAP.md) | Requirement-by-requirement proof map for AI automation roles. |
 | [Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md) | Role-level AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
+| [First Slice Playbook](./FIRST_SLICE_PLAYBOOK.md) | How a role/project request becomes the first shippable RAG/transcript, CRM handoff, approval, or reliability slice. |
 | [Live Demo](./LIVE_DEMO.md) | Public deployment URL and public smoke checks. |
 | [Architecture](./ARCHITECTURE.md) | FastAPI/n8n/PostgreSQL/LLM boundaries and state ownership. |
 | [Operations](./OPERATIONS.md) | Local runtime, health checks, smoke test, logs, and handoff. |
