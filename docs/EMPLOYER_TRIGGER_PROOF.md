@@ -7,9 +7,9 @@ Use it when the first question is not "what does the demo do?" but "what employe
 ## Current Freshness
 
 - Last checked: 2026-06-28.
-- Latest checked commit: `61ad9f9` (`Clarify employer contact trigger`).
-- Latest checked CI run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/28307835531 -> success on `61ad9f9`.
+- Current CI route: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml.
 - Local public gate: `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `49 passed`, `public verification passed`.
+- Visual proof route: `docs/DEMO_WALKTHROUGH.md` with `docs/assets/drive-operator-demo.gif`.
 
 ## Trigger To Proof
 

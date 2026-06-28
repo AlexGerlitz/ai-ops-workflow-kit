@@ -29,6 +29,10 @@ Shortest proof path: [LinkedIn Recruiter Packet](https://alexgerlitz.github.io/A
 First useful result: a verified RAG/transcript/approval/CRM slice with backend-owned
 state, tests, logs, docs, and a handoff route.
 
+![DriveDesk AI Operator demo GIF](docs/assets/drive-operator-demo.gif)
+
+Short visual route: [Demo walkthrough](docs/DEMO_WALKTHROUGH.md).
+
 ![AI Sales Ops Control Tower](docs/assets/live-demo-control-tower.png)
 
 ## 60-Second Reviewer Snapshot
@@ -44,6 +48,7 @@ and reviewer evidence are all explicit instead of hidden inside no-code glue.
 | What to check | Why it matters |
 | --- | --- |
 | [Stable reviewer route](docs/PUBLIC_PROOF_STATUS.md) | Current proof status, CI, local gate, committed evidence, live-runtime boundary, and fallback review path in one page. |
+| [Demo walkthrough](docs/DEMO_WALKTHROUGH.md) | Short GIF route for transcript -> RAG -> approval -> CRM-safe handoff, generated from the public-safe offer demo. |
 | [Runtime demo notes](docs/LIVE_DEMO.md) | Availability-dependent VPS demo notes for the browser-visible Sales Ops workflow; use them after the public proof status page confirms the edge is reachable. |
 | [Live approval proof](docs/LIVE_OWNER_PROOF.md) | Real Telegram approval callback proof: approved item -> queued CRM handoff, while Bitrix24 stays dry-run. |
 | [Reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md) | Live-runtime acceptance pass across API, smoke, GitHub Actions state, Pages route, and public PDF when the VPS edge is reachable. |
@@ -76,6 +81,7 @@ Fast evaluation path:
 | Surface | Proof |
 | --- | --- |
 | Public status | [Public proof status](docs/PUBLIC_PROOF_STATUS.md) with current CI, local gate, committed evidence, runtime reachability boundary, Pages route, and public boundary. |
+| Demo walkthrough | [Demo walkthrough](docs/DEMO_WALKTHROUGH.md) with a short GIF generated from the public-safe offer demo. |
 | Employer trigger proof | [Employer Trigger Proof](docs/EMPLOYER_TRIGGER_PROOF.md) maps AI workflow/RAG, CRM/API integration, backend/platform ownership, and DevOps reliability triggers to inspectable code, docs, and commands. |
 | Live approval proof | [Live approval proof](docs/LIVE_OWNER_PROOF.md) for Telegram callback approval and CRM-safe outbox handoff. |
 | Integration boundaries | [Public proof status](docs/PUBLIC_PROOF_STATUS.md), [reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md), and committed sanitized artifacts for Telegram and Bitrix24 boundary checks. |

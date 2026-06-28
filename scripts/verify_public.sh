@@ -12,6 +12,7 @@ DEMO_OUTPUT="${DEMO_OUTPUT:-/tmp/aiops-offer-demo.json}"
 "$PYTHON_BIN" -m py_compile scripts/bitrix24_contract_evidence.py
 "$PYTHON_BIN" -m py_compile scripts/reviewer_acceptance_report.py
 "$PYTHON_BIN" -m py_compile scripts/live_telegram_approval_evidence.py
+"$PYTHON_BIN" -m py_compile scripts/build_demo_gif.py
 "$PYTHON_BIN" scripts/run_offer_demo.py > "$DEMO_OUTPUT"
 "$PYTHON_BIN" scripts/production_readiness_drill.py --output-dir /tmp/aiops-production-readiness-drill > /tmp/aiops-production-readiness-drill.txt
 "$PYTHON_BIN" scripts/credentialed_sandbox_preflight.py --output-dir /tmp/aiops-credentialed-sandbox-preflight > /tmp/aiops-credentialed-sandbox-preflight.txt
@@ -22,20 +23,26 @@ grep -q "secrets_printed=False" /tmp/aiops-credentialed-sandbox-preflight.txt
 grep -q "bitrix24 contract evidence passed" /tmp/aiops-bitrix24-contract.txt
 grep -q "secret_token_leaked=False" /tmp/aiops-bitrix24-contract.txt
 grep -q "Employer Trigger Proof" README.md
+grep -q "Demo walkthrough" README.md
+grep -q "docs/assets/drive-operator-demo.gif" README.md
 grep -q "Employer Trigger Proof" docs/PUBLIC_PROOF_STATUS.md
+grep -q "Demo Walkthrough" docs/PUBLIC_PROOF_STATUS.md
+grep -q "docs/assets/drive-operator-demo.gif" docs/PUBLIC_PROOF_STATUS.md
 grep -q "Employer Trigger Proof" docs/ROLE_REQUIREMENTS_MAP.md
 grep -q "Employer Trigger Proof" docs/TECHNICAL_REVIEW_PACKET.md
+grep -q "DriveDesk AI Operator demo GIF" docs/DEMO_WALKTHROUGH.md
+grep -q "Transcript -> RAG -> approval -> CRM-safe handoff" docs/DEMO_WALKTHROUGH.md
+grep -q "python3 scripts/build_demo_gif.py" docs/DEMO_WALKTHROUGH.md
 grep -q "Last checked: 2026-06-28" docs/PUBLIC_PROOF_STATUS.md
-grep -q "Latest checked commit | \`61ad9f9\`" docs/PUBLIC_PROOF_STATUS.md
-grep -q "actions/runs/28307835531" docs/PUBLIC_PROOF_STATUS.md
+grep -q "CI status route" docs/PUBLIC_PROOF_STATUS.md
 grep -q "Checked on 2026-06-28" docs/PUBLIC_PROOF_STATUS.md
 grep -q "AI workflow / RAG" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "CRM/ERP/API integration" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Backend/platform ownership" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "DevOps / reliability" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Current Freshness" docs/EMPLOYER_TRIGGER_PROOF.md
-grep -q "Latest checked commit: \`61ad9f9\`" docs/EMPLOYER_TRIGGER_PROOF.md
-grep -q "actions/runs/28307835531" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "Current CI route" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "Visual proof route" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "One backend-owned workflow slice" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Adapter contract, idempotent CRM handoff" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "49 passed" docs/EMPLOYER_TRIGGER_PROOF.md
@@ -47,6 +54,10 @@ import sys
 from pathlib import Path
 
 payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+gif = Path("docs/assets/drive-operator-demo.gif")
+gif_data = gif.read_bytes()
+assert gif_data.startswith((b"GIF87a", b"GIF89a"))
+assert len(gif_data) > 80_000
 
 assert payload["runtime"]["ok"] is True
 assert payload["runtime"]["storage"] == "memory"

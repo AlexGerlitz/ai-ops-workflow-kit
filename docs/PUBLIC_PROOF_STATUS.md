@@ -7,10 +7,10 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 | Surface | Current proof |
 | --- | --- |
 | Repository state | Current public `main` branch; this file is part of the reviewed tree |
-| Latest checked commit | `61ad9f9` (`Clarify employer contact trigger`) |
-| Latest checked CI run | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/28307835531 -> success on `61ad9f9` |
+| CI status route | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml |
 | CI workflow | https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml |
 | Stable reviewer route | Start here, then run `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh`; this path does not depend on the external VPS edge being reachable |
+| Demo walkthrough | `docs/DEMO_WALKTHROUGH.md` and `docs/assets/drive-operator-demo.gif` show the transcript -> RAG -> approval -> CRM-safe handoff route generated from the public-safe offer demo |
 | Employer trigger proof | `docs/EMPLOYER_TRIGGER_PROOF.md` maps AI workflow/RAG, CRM/API integration, backend/platform ownership, and DevOps reliability triggers to concrete repo evidence and first-result proof |
 | Reviewer acceptance report | `python3 scripts/reviewer_acceptance_report.py` checks live API, live smoke, GitHub Actions state, Pages route, and public PDF when the live runtime is reachable |
 | Local public gate | Checked on 2026-06-28 with `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `49 passed`, `public verification passed` |
@@ -38,18 +38,19 @@ This page is the shortest route to the current public evidence for AI Ops Workfl
 1. Run `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh`.
 2. Open the CI workflow: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml
 3. Read the committed reviewer acceptance evidence in `docs/evidence/reviewer-acceptance-report.txt`.
-4. Read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
-5. Read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
-6. Read [Employer Trigger Proof](./EMPLOYER_TRIGGER_PROOF.md).
-7. Read [Live Owner Proof](./LIVE_OWNER_PROOF.md).
-8. Read [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
-9. Read [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
-10. Inspect the latest live combined sandbox run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429
-11. Inspect `docs/evidence/live-telegram-approval.txt`, `docs/evidence/bitrix24-contract.txt`, and `docs/evidence/bitrix24-sandbox-preflight.txt`.
-12. Inspect `rag_quality` in `python3 scripts/run_offer_demo.py` output or call `POST /rag/eval` after importing the demo playbook.
-13. Inspect `docs/evidence/live-postgres-persistence.txt` for the API-restart persistence proof.
-14. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
-15. If the alias is needed, run `bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org`.
+4. Read [Demo Walkthrough](./DEMO_WALKTHROUGH.md).
+5. Read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
+6. Read [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md).
+7. Read [Employer Trigger Proof](./EMPLOYER_TRIGGER_PROOF.md).
+8. Read [Live Owner Proof](./LIVE_OWNER_PROOF.md).
+9. Read [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
+10. Read [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md).
+11. Inspect the latest live combined sandbox run: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429
+12. Inspect `docs/evidence/live-telegram-approval.txt`, `docs/evidence/bitrix24-contract.txt`, and `docs/evidence/bitrix24-sandbox-preflight.txt`.
+13. Inspect `rag_quality` in `python3 scripts/run_offer_demo.py` output or call `POST /rag/eval` after importing the demo playbook.
+14. Inspect `docs/evidence/live-postgres-persistence.txt` for the API-restart persistence proof.
+15. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
+16. If the alias is needed, run `bash scripts/smoke_live_demo.sh https://leadscore.duckdns.org`.
 
 ## Public Boundary
 
