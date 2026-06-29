@@ -1,0 +1,23 @@
+hiring signal brief passed
+schema=hiring_signal_brief_v1
+shortlist_signal=backend/platform owner for AI workflow systems where business context, RAG quality, approval state, CRM/ERP/API handoff, retries, audit, and operator handoff must be reviewable.
+business_route=knowledge ingestion -> retrieval quality gate -> call analysis -> human approval -> CRM-safe handoff -> Bitrix24 adapter boundary
+quality_gate=rag_ok=True passed=2/2 citations_present=True
+privacy=redacted=True raw_text_stored=False safe_logging=True
+handoff=approval=approved crm=queued idempotency_key_present=True bitrix24=dry_run
+production_readiness=telegram_secret_signed=200 retry_dead_letter=dead_letter retry_schedule_skips_until_due=True idempotent_events=1 worker_active=False
+high_bar_checks:
+  - business_workflow_to_backend_state=True
+  - rag_quality_reviewable=True
+  - privacy_boundary_owned=True
+  - approval_to_crm_handoff_controlled=True
+  - external_writes_gated=True
+  - failure_modes_tested=True
+  - worker_guarded_in_dry_run=True
+risk_reduction:
+  - hidden automation state becomes backend-owned records, approval state, outbox events, and audit-friendly evidence
+  - untrusted AI output gets RAG expected-source checks, citations, structured analysis, and human approval
+  - brittle CRM handoff gets adapter contracts, idempotency, retry scheduling, and dead-letter behavior
+  - unsafe external writes stay dry-run or approval-gated until credentialed sandbox proof is reviewed
+  - remote review ambiguity is reduced through commands, tests, docs, runbooks, metrics, and sanitized evidence
+first_assignment=Turn one risky document/transcript/lead workflow into a verified slice with backend-owned state, RAG quality checks, approval, CRM-safe handoff, metrics, tests, docs, and operator handoff notes.

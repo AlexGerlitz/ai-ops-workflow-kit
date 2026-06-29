@@ -48,6 +48,7 @@ and reviewer evidence are all explicit instead of hidden inside no-code glue.
 | What to check | Why it matters |
 | --- | --- |
 | [Stable reviewer route](docs/PUBLIC_PROOF_STATUS.md) | Current proof status, CI, local gate, committed evidence, live-runtime boundary, and fallback review path in one page. |
+| [Hiring signal brief](docs/evidence/hiring-signal-brief.txt) | Shortlist-focused proof that combines business replay and production-readiness drill signals into one high-bar backend/platform screen. |
 | [Business scenario replay](docs/evidence/business-scenario-replay.txt) | Short business-input -> backend-route -> RAG/approval/CRM result for a reviewer who wants the outcome before reading code. |
 | [Demo walkthrough](docs/DEMO_WALKTHROUGH.md) | Short GIF route for transcript -> RAG -> approval -> CRM-safe handoff, generated from the public-safe offer demo. |
 | [Runtime demo notes](docs/LIVE_DEMO.md) | Availability-dependent VPS demo notes for the browser-visible Sales Ops workflow; use them after the public proof status page confirms the edge is reachable. |
@@ -74,11 +75,12 @@ Fast evaluation path:
 
 1. Open `docs/PUBLIC_PROOF_STATUS.md`.
 2. Run `bash scripts/verify_public.sh`.
-3. Read `docs/evidence/business-scenario-replay.txt`.
-4. Open `docs/LIVE_OWNER_PROOF.md`.
-5. Run `python3 scripts/reviewer_acceptance_report.py` when `https://saleops.duckdns.org/` is reachable.
-6. Open `docs/ROLE_REQUIREMENTS_MAP.md`.
-7. Review `infra/n8n/` to see the orchestration boundary.
+3. Read `docs/evidence/hiring-signal-brief.txt`.
+4. Read `docs/evidence/business-scenario-replay.txt`.
+5. Open `docs/LIVE_OWNER_PROOF.md`.
+6. Run `python3 scripts/reviewer_acceptance_report.py` when `https://saleops.duckdns.org/` is reachable.
+7. Open `docs/ROLE_REQUIREMENTS_MAP.md`.
+8. Review `infra/n8n/` to see the orchestration boundary.
 
 ## Drill-Down Index
 
@@ -86,6 +88,7 @@ Fast evaluation path:
 | --- | --- |
 | Public status | [Public proof status](docs/PUBLIC_PROOF_STATUS.md) with current CI, local gate, committed evidence, runtime reachability boundary, Pages route, and public boundary. |
 | Demo walkthrough | [Demo walkthrough](docs/DEMO_WALKTHROUGH.md) with a short GIF generated from the public-safe offer demo. |
+| Hiring signal brief | [Hiring signal brief](docs/evidence/hiring-signal-brief.txt) and [sanitized JSON](docs/evidence/hiring-signal-brief.sanitized.json) combine replay and readiness drill evidence into a shortlist-focused screen. |
 | Business scenario replay | [Business scenario replay](docs/evidence/business-scenario-replay.txt) and [sanitized JSON](docs/evidence/business-scenario-replay.sanitized.json) compress the offer demo into business input, backend route, proof signals, and handoff artifacts. |
 | Employer trigger proof | [Employer Trigger Proof](docs/EMPLOYER_TRIGGER_PROOF.md) maps AI workflow/RAG, CRM/API integration, backend/platform ownership, and DevOps reliability triggers to inspectable code, docs, and commands. |
 | First slice playbook | [First Slice Playbook](docs/FIRST_SLICE_PLAYBOOK.md) maps inbound role/project context to RAG/transcript, CRM handoff, human approval, and reliability slices with done criteria. |

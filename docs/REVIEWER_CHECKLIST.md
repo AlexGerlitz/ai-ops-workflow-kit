@@ -58,7 +58,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-52 passed
+54 passed
 public verification passed
 ```
 

@@ -1,0 +1,151 @@
+{
+  "best_fit_roles": [
+    "AI Automation Engineer",
+    "Backend / Platform Engineer",
+    "LLM Workflow / RAG Engineer",
+    "CRM / ERP / API Integration Engineer",
+    "Internal Tools / Operations Platform Engineer",
+    "DevOps / Reliability Engineer for workflow systems"
+  ],
+  "first_assignment": "Turn one risky document/transcript/lead workflow into a verified slice with backend-owned state, RAG quality checks, approval, CRM-safe handoff, metrics, tests, docs, and operator handoff notes.",
+  "high_bar_checks": {
+    "approval_to_crm_handoff_controlled": true,
+    "business_workflow_to_backend_state": true,
+    "external_writes_gated": true,
+    "failure_modes_tested": true,
+    "privacy_boundary_owned": true,
+    "rag_quality_reviewable": true,
+    "worker_guarded_in_dry_run": true
+  },
+  "ok": true,
+  "proof_summary": {
+    "approval": {
+      "status": "approved",
+      "telegram_callback_contract": [
+        "approve",
+        "reject",
+        "telegram_webhook"
+      ],
+      "telegram_status": "dry_run"
+    },
+    "bitrix24_dispatch": {
+      "adapter_key": "bitrix24",
+      "attempt_count": 0,
+      "event_status": "queued",
+      "max_attempts": 3,
+      "method": "crm.lead.update",
+      "request_fields": [
+        "COMMENTS"
+      ],
+      "status": "dry_run"
+    },
+    "business_route": "knowledge ingestion -> retrieval quality gate -> call analysis -> human approval -> CRM-safe handoff -> Bitrix24 adapter boundary",
+    "crm_handoff": {
+      "adapter_key": "bitrix24.mock",
+      "attempt_count": 0,
+      "idempotency_key_present": true,
+      "last_error": null,
+      "operation": "upsert_lead_follow_up",
+      "status": "queued",
+      "target_stage": "qualified"
+    },
+    "privacy": {
+      "raw_text_stored": false,
+      "redacted": true,
+      "replacement_counts": {
+        "email": 1,
+        "phone": 1
+      },
+      "safe_logging": true
+    },
+    "production_readiness": {
+      "bitrix_retry_dead_letter": {
+        "first_dispatch": {
+          "attempt_count": 1,
+          "event_status": "retry",
+          "status": "not_configured"
+        },
+        "second_dispatch": {
+          "attempt_count": 2,
+          "event_status": "dead_letter",
+          "status": "not_configured"
+        },
+        "stored_event": {
+          "attempt_count": 2,
+          "last_error_contains": "Bitrix24 webhook URL is not configured",
+          "status": "dead_letter"
+        }
+      },
+      "crm_handoff_idempotency": {
+        "idempotency_key": "<generated-idempotency-key>",
+        "matching_event_count": 1,
+        "source_approval_id": "<approval-id>",
+        "status": "queued"
+      },
+      "drain_retry_schedule": {
+        "first_drain": {
+          "event_was_selected": true,
+          "retry": 2,
+          "selected": 2
+        },
+        "retry_event": {
+          "attempt_count": 1,
+          "next_retry_at": "<scheduled-retry-timestamp>",
+          "status": "retry"
+        },
+        "second_drain": {
+          "event_was_skipped_until_retry_time": true,
+          "selected": 0
+        }
+      },
+      "runtime_counters": {
+        "bitrix24_dispatch_failures_total": 4,
+        "crm_handoffs_queued_total": 6,
+        "integration_dead_letters_total": 1,
+        "integration_retries_scheduled_total": 3,
+        "telegram_callback_auth_failures_total": 1
+      },
+      "telegram_secret": {
+        "approval_status": "rejected",
+        "auth_failure_counter_present": true,
+        "signed_callback_status_code": 200,
+        "unsigned_callback_status_code": 403
+      },
+      "worker_guard": {
+        "active": false,
+        "dry_run": true,
+        "enabled": true,
+        "guard": "worker remains inactive while Bitrix24 dry-run is enabled"
+      }
+    },
+    "rag_quality": {
+      "citations_present": true,
+      "ok": true,
+      "passed": 2,
+      "total": 2
+    }
+  },
+  "reviewer_commands": [
+    "python3 scripts/hiring_signal_brief.py",
+    "python3 scripts/business_scenario_replay.py",
+    "python3 scripts/production_readiness_drill.py",
+    "bash scripts/verify_public.sh"
+  ],
+  "risk_reduction": [
+    "hidden automation state becomes backend-owned records, approval state, outbox events, and audit-friendly evidence",
+    "untrusted AI output gets RAG expected-source checks, citations, structured analysis, and human approval",
+    "brittle CRM handoff gets adapter contracts, idempotency, retry scheduling, and dead-letter behavior",
+    "unsafe external writes stay dry-run or approval-gated until credentialed sandbox proof is reviewed",
+    "remote review ambiguity is reduced through commands, tests, docs, runbooks, metrics, and sanitized evidence"
+  ],
+  "schema": "hiring_signal_brief_v1",
+  "shortlist_signal": "backend/platform owner for AI workflow systems where business context, RAG quality, approval state, CRM/ERP/API handoff, retries, audit, and operator handoff must be reviewable.",
+  "source_artifacts": [
+    "docs/evidence/hiring-signal-brief.txt",
+    "docs/evidence/hiring-signal-brief.sanitized.json",
+    "docs/evidence/business-scenario-replay.txt",
+    "docs/evidence/production-readiness-drill.txt",
+    "docs/TECHNICAL_REVIEW_PACKET.md",
+    "docs/EMPLOYER_TRIGGER_PROOF.md"
+  ]
+}

@@ -14,8 +14,10 @@ DEMO_OUTPUT="${DEMO_OUTPUT:-/tmp/aiops-offer-demo.json}"
 "$PYTHON_BIN" -m py_compile scripts/live_telegram_approval_evidence.py
 "$PYTHON_BIN" -m py_compile scripts/build_demo_gif.py
 "$PYTHON_BIN" -m py_compile scripts/business_scenario_replay.py
+"$PYTHON_BIN" -m py_compile scripts/hiring_signal_brief.py
 "$PYTHON_BIN" scripts/run_offer_demo.py > "$DEMO_OUTPUT"
 "$PYTHON_BIN" scripts/business_scenario_replay.py --output-dir /tmp/aiops-business-scenario-replay > /tmp/aiops-business-scenario-replay.txt
+"$PYTHON_BIN" scripts/hiring_signal_brief.py --output-dir /tmp/aiops-hiring-signal-brief > /tmp/aiops-hiring-signal-brief.txt
 "$PYTHON_BIN" scripts/production_readiness_drill.py --output-dir /tmp/aiops-production-readiness-drill > /tmp/aiops-production-readiness-drill.txt
 "$PYTHON_BIN" scripts/credentialed_sandbox_preflight.py --output-dir /tmp/aiops-credentialed-sandbox-preflight > /tmp/aiops-credentialed-sandbox-preflight.txt
 "$PYTHON_BIN" scripts/bitrix24_contract_evidence.py --output-dir /tmp/aiops-bitrix24-contract > /tmp/aiops-bitrix24-contract.txt
@@ -23,6 +25,10 @@ grep -q "business scenario replay passed" /tmp/aiops-business-scenario-replay.tx
 grep -q "rag_quality=ok=True passed=2/2 citations_present=True" /tmp/aiops-business-scenario-replay.txt
 grep -q "crm_handoff=adapter=bitrix24.mock status=queued" /tmp/aiops-business-scenario-replay.txt
 grep -q "bitrix24_dispatch=adapter=bitrix24 status=dry_run" /tmp/aiops-business-scenario-replay.txt
+grep -q "hiring signal brief passed" /tmp/aiops-hiring-signal-brief.txt
+grep -q "quality_gate=rag_ok=True passed=2/2 citations_present=True" /tmp/aiops-hiring-signal-brief.txt
+grep -q "retry_dead_letter=dead_letter" /tmp/aiops-hiring-signal-brief.txt
+grep -q "worker_active=False" /tmp/aiops-hiring-signal-brief.txt
 grep -q "credentialed sandbox preflight passed" /tmp/aiops-credentialed-sandbox-preflight.txt
 grep -q "mode=skipped_no_credentials" /tmp/aiops-credentialed-sandbox-preflight.txt
 grep -q "secrets_printed=False" /tmp/aiops-credentialed-sandbox-preflight.txt
@@ -30,15 +36,19 @@ grep -q "bitrix24 contract evidence passed" /tmp/aiops-bitrix24-contract.txt
 grep -q "secret_token_leaked=False" /tmp/aiops-bitrix24-contract.txt
 grep -q "Employer Trigger Proof" README.md
 grep -q "First Slice Playbook" README.md
+grep -q "Hiring signal brief" README.md
 grep -q "Demo walkthrough" README.md
 grep -q "docs/assets/drive-operator-demo.gif" README.md
 grep -q "Employer Trigger Proof" docs/PUBLIC_PROOF_STATUS.md
 grep -q "First slice playbook" docs/PUBLIC_PROOF_STATUS.md
 grep -q "Business scenario replay" docs/PUBLIC_PROOF_STATUS.md
+grep -q "Hiring signal brief" docs/PUBLIC_PROOF_STATUS.md
 grep -q "Demo Walkthrough" docs/PUBLIC_PROOF_STATUS.md
 grep -q "docs/assets/drive-operator-demo.gif" docs/PUBLIC_PROOF_STATUS.md
 grep -q "Employer Trigger Proof" docs/ROLE_REQUIREMENTS_MAP.md
 grep -q "Employer Trigger Proof" docs/TECHNICAL_REVIEW_PACKET.md
+grep -q "Hiring signal is compressed" docs/TECHNICAL_REVIEW_PACKET.md
+grep -q "python3 scripts/hiring_signal_brief.py" docs/TECHNICAL_REVIEW_PACKET.md
 grep -q "DriveDesk AI Operator demo GIF" docs/DEMO_WALKTHROUGH.md
 grep -q "Transcript -> RAG -> approval -> CRM-safe handoff" docs/DEMO_WALKTHROUGH.md
 grep -q "python3 scripts/build_demo_gif.py" docs/DEMO_WALKTHROUGH.md
@@ -52,6 +62,7 @@ grep -q "DevOps / reliability" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Current Freshness" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Current CI route" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Visual proof route" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "Hiring signal brief" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "One backend-owned workflow slice" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Adapter contract, idempotent CRM handoff" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "First Slice Playbook" docs/EMPLOYER_TRIGGER_PROOF.md
@@ -62,7 +73,7 @@ grep -q "Reliability slice" docs/FIRST_SLICE_PLAYBOOK.md
 grep -q "one runnable command or live route" docs/FIRST_SLICE_PLAYBOOK.md
 grep -q "Best First Message" docs/FIRST_SLICE_PLAYBOOK.md
 grep -q "business scenario replay" docs/FIRST_SLICE_PLAYBOOK.md
-grep -q "52 passed" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "54 passed" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "public verification passed" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "reviewer observability snapshot" README.md
 grep -q "GET /reviewer/observability" README.md

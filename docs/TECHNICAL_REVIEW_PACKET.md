@@ -31,8 +31,22 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-52 passed
+54 passed
 public verification passed
+```
+
+For a shortlist-focused screen that combines business outcome and failure-mode evidence, run:
+
+```bash
+python3 scripts/hiring_signal_brief.py
+```
+
+Expected signal:
+
+```text
+hiring signal brief passed
+quality_gate=rag_ok=True passed=2/2 citations_present=True
+production_readiness=telegram_secret_signed=200 retry_dead_letter=dead_letter
 ```
 
 For a shorter business-level replay of the same route, run:
@@ -77,6 +91,7 @@ https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429 or u
 
 | Signal | Evidence |
 | --- | --- |
+| Hiring signal is compressed | `scripts/hiring_signal_brief.py` and `docs/evidence/hiring-signal-brief.txt` combine business replay and readiness drill evidence into one high-bar backend/platform screen. |
 | Business result is inspectable | `scripts/business_scenario_replay.py` and `docs/evidence/business-scenario-replay.txt` summarize business input, backend route, RAG quality, approval, queued CRM handoff, and Bitrix24 dry-run status. |
 | Deployed service is real | `GET /runtime` returns version, Git SHA, storage mode, callback base URL, counters, and worker state. |
 | Reviewer observability is consolidated | `GET /reviewer/observability` returns `schema=reviewer_observability_v1`, read-only runtime identity, counters, RAG quality gate, privacy boundary, approval counts, outbox state, adapter dry-run status, and worker boundary. |

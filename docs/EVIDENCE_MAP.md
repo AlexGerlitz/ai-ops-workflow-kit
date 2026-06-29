@@ -9,6 +9,7 @@ For current CI, local gate, committed evidence, runtime reachability, and public
 
 | Requirement | Evidence |
 | --- | --- |
+| Hiring signal brief | `scripts/hiring_signal_brief.py`, `docs/evidence/hiring-signal-brief.txt`, `docs/evidence/hiring-signal-brief.sanitized.json` |
 | Business scenario replay | `scripts/business_scenario_replay.py`, `docs/evidence/business-scenario-replay.txt`, `docs/evidence/business-scenario-replay.sanitized.json` |
 | AI workflow orchestration | `app/main.py`, `infra/n8n/call-audio-transcription-approval.json`, `infra/n8n/call-transcript-approval.json`, `infra/n8n/google-drive-sales-ops-approval.json`, `docs/N8N_APPROVAL_FLOW.md` |
 | Document intake / Google Drive adapter | `POST /integrations/google-drive/import`, `GoogleDriveImportIn`, `docs/INTEGRATION_SKELETON.md` |
@@ -35,6 +36,7 @@ For current CI, local gate, committed evidence, runtime reachability, and public
 ## Design Signals
 
 - n8n is treated as workflow orchestration, not as the place where core state lives.
+- The hiring signal brief combines buyer-facing replay and failure-mode proof into one shortlist-focused review artifact.
 - The business scenario replay shows the buyer-facing result first, then links back to code, tests, and evidence.
 - The backend owns retrieval, scoring, approvals, and integration contracts.
 - External write integrations are dry-run by default, so a public reviewer can inspect payloads without secrets.
@@ -63,22 +65,23 @@ For current CI, local gate, committed evidence, runtime reachability, and public
 
 1. Open `docs/PUBLIC_PROOF_STATUS.md`.
 2. Run `bash scripts/verify_public.sh`.
-3. Read `docs/evidence/business-scenario-replay.txt`.
-4. Read `docs/evidence/reviewer-acceptance-report.txt`.
-5. Open `docs/REVIEWER_EVIDENCE_PACK.md`.
-6. Run `python3 scripts/capture_reviewer_evidence.py`.
-7. Run `python3 scripts/reviewer_snapshot.py`.
-8. Run `python3 scripts/production_readiness_drill.py`.
-9. Run `python3 scripts/credentialed_sandbox_preflight.py`.
-10. Open `docs/LIVE_OWNER_PROOF.md`.
-11. Run `python3 scripts/bitrix24_contract_evidence.py`.
-12. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
-13. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
-14. If runtime proof is needed, run `bash scripts/smoke_live_demo.sh`.
-15. If runtime proof is needed, open `https://saleops.duckdns.org/llm/runtime`.
-16. If runtime proof is needed, open `https://saleops.duckdns.org/transcription/runtime`.
-17. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
-18. Inspect `rag_quality` from `/demo/run` or call `POST /rag/eval` after importing the demo playbook.
-19. Read `docs/PRIVACY_BOUNDARY.md`.
-20. Read `docs/ARCHITECTURE.md`.
-21. Read `docs/INTEGRATION_SKELETON.md`.
+3. Read `docs/evidence/hiring-signal-brief.txt`.
+4. Read `docs/evidence/business-scenario-replay.txt`.
+5. Read `docs/evidence/reviewer-acceptance-report.txt`.
+6. Open `docs/REVIEWER_EVIDENCE_PACK.md`.
+7. Run `python3 scripts/capture_reviewer_evidence.py`.
+8. Run `python3 scripts/reviewer_snapshot.py`.
+9. Run `python3 scripts/production_readiness_drill.py`.
+10. Run `python3 scripts/credentialed_sandbox_preflight.py`.
+11. Open `docs/LIVE_OWNER_PROOF.md`.
+12. Run `python3 scripts/bitrix24_contract_evidence.py`.
+13. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
+14. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
+15. If runtime proof is needed, run `bash scripts/smoke_live_demo.sh`.
+16. If runtime proof is needed, open `https://saleops.duckdns.org/llm/runtime`.
+17. If runtime proof is needed, open `https://saleops.duckdns.org/transcription/runtime`.
+18. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
+19. Inspect `rag_quality` from `/demo/run` or call `POST /rag/eval` after importing the demo playbook.
+20. Read `docs/PRIVACY_BOUNDARY.md`.
+21. Read `docs/ARCHITECTURE.md`.
+22. Read `docs/INTEGRATION_SKELETON.md`.

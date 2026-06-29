@@ -8,7 +8,8 @@ Use it when the first question is not "what does the demo do?" but "what employe
 
 - Last checked: 2026-06-29.
 - Current CI route: https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/workflows/ci.yml.
-- Local public gate: `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `52 passed`, `public verification passed`.
+- Local public gate: `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `54 passed`, `public verification passed`.
+- Hiring signal brief: `docs/evidence/hiring-signal-brief.txt` combines replay and production-readiness drill signals into one shortlist screen.
 - Business scenario replay: `docs/evidence/business-scenario-replay.txt` shows business input -> backend route -> RAG/approval/CRM result.
 - Visual proof route: `docs/DEMO_WALKTHROUGH.md` with `docs/assets/drive-operator-demo.gif`.
 
@@ -26,6 +27,7 @@ Use it when the first question is not "what does the demo do?" but "what employe
 ```bash
 python3 -m pip install -r requirements.txt
 bash scripts/verify_public.sh
+python3 scripts/hiring_signal_brief.py
 python3 scripts/business_scenario_replay.py
 python3 scripts/run_offer_demo.py
 python3 scripts/production_readiness_drill.py
@@ -34,7 +36,7 @@ python3 scripts/production_readiness_drill.py
 Expected local gate:
 
 ```text
-52 passed
+54 passed
 public verification passed
 ```
 
@@ -48,6 +50,7 @@ approval.status=approved
 crm_handoff.status=queued
 bitrix24_dispatch.status=dry_run
 business scenario replay passed
+hiring signal brief passed
 ```
 
 ## First Slice Route
