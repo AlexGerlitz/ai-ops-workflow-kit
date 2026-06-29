@@ -10,6 +10,7 @@ For a hiring-manager view of the same evidence, start with [Employer Trigger Pro
 
 | Role requirement | Evidence in this repo | How to verify | Production boundary |
 | --- | --- | --- | --- |
+| Business scenario replay | `scripts/business_scenario_replay.py`, `docs/evidence/business-scenario-replay.txt`, `docs/evidence/business-scenario-replay.sanitized.json` | Run `python3 scripts/business_scenario_replay.py` and inspect the business input, backend route, RAG quality, approval, CRM handoff, and Bitrix24 dry-run signals. | Public-safe replay summarizes the route without raw personal data or external writes; deeper API evidence remains in `/demo/run` and the public gate. |
 | AI workflow orchestration | `POST /webhooks/n8n/call-audio`, `POST /webhooks/n8n/call-transcript`, `infra/n8n/call-audio-transcription-approval.json`, `infra/n8n/call-transcript-approval.json`, `infra/n8n/google-drive-sales-ops-approval.json`, `docs/N8N_APPROVAL_FLOW.md` | Open the n8n workflow JSON files, then run `bash scripts/verify_public.sh`. | n8n owns routing, Drive export, and notifications; the backend owns transcription, state, scoring, retrieval, approvals, and integration contracts. |
 | LLM API integration boundary | `app/llm.py`, `GET /llm/runtime`, `tests/test_api.py`, `docs/OFFER_DEMO.md` | Run `bash scripts/verify_public.sh`, then inspect `/llm/runtime`. | The demo uses deterministic local behavior for public review; OpenAI, Claude/Anthropic, and Gemini payload contracts are isolated behind one provider boundary without moving workflow state into prompts. |
 | RAG and embeddings | `app/chunking.py`, `app/embeddings.py`, `app/store.py`, `app/rag_eval.py`, `POST /documents`, `POST /query`, `POST /rag/eval` | Run `bash scripts/verify_public.sh` and inspect the demo output for `rag_context_sources` and `rag_quality.ok=true`. | Deterministic local embeddings keep tests repeatable; PostgreSQL/pgvector is the durable runtime path; retrieval quality is checked before trusting generated answers. |
@@ -31,6 +32,7 @@ For a hiring-manager view of the same evidence, start with [Employer Trigger Pro
 ```bash
 python3 -m pip install -r requirements.txt
 bash scripts/verify_public.sh
+python3 scripts/business_scenario_replay.py
 python3 scripts/reviewer_acceptance_report.py
 python3 scripts/capture_reviewer_evidence.py
 python3 scripts/production_readiness_drill.py
@@ -48,8 +50,17 @@ curl -fsS https://saleops.duckdns.org/transcription/runtime
 Expected local gate result:
 
 ```text
-50 passed
+52 passed
 public verification passed
+```
+
+Expected business scenario replay signal:
+
+```text
+business scenario replay passed
+rag_quality=ok=True passed=2/2 citations_present=True
+crm_handoff=adapter=bitrix24.mock status=queued
+bitrix24_dispatch=adapter=bitrix24 status=dry_run
 ```
 
 Expected live smoke signals:

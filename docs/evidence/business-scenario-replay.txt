@@ -1,0 +1,11 @@
+business scenario replay passed
+schema=business_scenario_replay_v1
+scenario=sales_support_call_to_reviewed_crm_handoff
+backend_route=knowledge ingestion -> retrieval quality gate -> call analysis -> human approval -> CRM-safe handoff -> Bitrix24 adapter boundary
+rag_quality=ok=True passed=2/2 citations_present=True
+call_analysis=score=100 risk=medium objections=price sensitivity missing_signals=none
+privacy=redacted=True raw_text_stored=False safe_logging=True replacements={'email': 1, 'phone': 1}
+approval=status=approved telegram_status=dry_run callbacks=approve,reject,telegram_webhook
+crm_handoff=adapter=bitrix24.mock status=queued idempotency_key_present=True attempt_count=0 target_stage=qualified
+bitrix24_dispatch=adapter=bitrix24 status=dry_run event_status=queued method=crm.lead.update attempt_count=0 max_attempts=3
+first_slice_result=A sales/support transcript becomes a cited RAG answer, structured lead analysis, approved follow-up, queued CRM handoff, and dry-run Bitrix24 request without storing raw personal data in public evidence.

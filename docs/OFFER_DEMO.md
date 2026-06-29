@@ -31,6 +31,15 @@ python3 scripts/run_offer_demo.py
 The script uses in-memory storage so a reviewer can run it without Docker or API keys.
 Docker/PostgreSQL mode is still available through `docker compose up --build`.
 
+For a shorter business-facing replay of the same route, run:
+
+```bash
+python3 scripts/business_scenario_replay.py
+```
+
+This writes `docs/evidence/business-scenario-replay.txt` and
+`docs/evidence/business-scenario-replay.sanitized.json`.
+
 The same workflow is available through the browser demo:
 
 ```text
@@ -73,6 +82,10 @@ The output contains these sections:
 | `telegram_approval` | Telegram approval payload and approve/reject callback contract were built in dry-run mode. |
 | `crm_handoff` | A dry-run Bitrix24 adapter event was queued after approval, with idempotency key, attempt count, retry timing, and last error state. |
 | `bitrix24_dispatch` | Bitrix24 dispatch payload was built in dry-run mode for the queued event and reports event state. |
+
+The business scenario replay compresses these sections into the route a buyer or hiring reviewer
+usually cares about first: business input, backend route, RAG quality, approval status, queued CRM
+handoff, and dry-run Bitrix24 request shape.
 
 Example high-level result:
 

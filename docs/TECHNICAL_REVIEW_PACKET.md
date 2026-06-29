@@ -31,8 +31,23 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-50 passed
+52 passed
 public verification passed
+```
+
+For a shorter business-level replay of the same route, run:
+
+```bash
+python3 scripts/business_scenario_replay.py
+```
+
+Expected signal:
+
+```text
+business scenario replay passed
+rag_quality=ok=True passed=2/2 citations_present=True
+crm_handoff=adapter=bitrix24.mock status=queued
+bitrix24_dispatch=adapter=bitrix24 status=dry_run
 ```
 
 For a single acceptance pass across the live API, live smoke, GitHub Actions, Pages, and public PDF,
@@ -62,6 +77,7 @@ https://github.com/AlexGerlitz/ai-ops-workflow-kit/actions/runs/27799329429 or u
 
 | Signal | Evidence |
 | --- | --- |
+| Business result is inspectable | `scripts/business_scenario_replay.py` and `docs/evidence/business-scenario-replay.txt` summarize business input, backend route, RAG quality, approval, queued CRM handoff, and Bitrix24 dry-run status. |
 | Deployed service is real | `GET /runtime` returns version, Git SHA, storage mode, callback base URL, counters, and worker state. |
 | Reviewer observability is consolidated | `GET /reviewer/observability` returns `schema=reviewer_observability_v1`, read-only runtime identity, counters, RAG quality gate, privacy boundary, approval counts, outbox state, adapter dry-run status, and worker boundary. |
 | LLM boundary is inspectable | `GET /llm/runtime` returns requested provider, selected provider, supported providers, required env vars, and local fallback without secrets. |

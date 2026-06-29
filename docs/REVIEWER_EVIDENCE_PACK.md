@@ -9,6 +9,9 @@ that regenerates it.
 | --- | --- |
 | [`docs/evidence/reviewer-snapshot.sanitized.json`](./evidence/reviewer-snapshot.sanitized.json) | Machine-readable live snapshot with dynamic CRM idempotency key redacted. |
 | [`docs/evidence/reviewer-snapshot.txt`](./evidence/reviewer-snapshot.txt) | Human-readable summary of the same live snapshot. |
+| [`docs/evidence/business-scenario-replay.sanitized.json`](./evidence/business-scenario-replay.sanitized.json) | Machine-readable public-safe replay of business input, backend route, RAG quality, approval state, CRM handoff, and Bitrix24 dry-run proof. |
+| [`docs/evidence/business-scenario-replay.txt`](./evidence/business-scenario-replay.txt) | Human-readable replay for a fast business-level review before opening the full demo JSON. |
+| [`scripts/business_scenario_replay.py`](../scripts/business_scenario_replay.py) | Rebuilds the public-safe replay from `/demo/run`. |
 | [`scripts/capture_reviewer_evidence.py`](../scripts/capture_reviewer_evidence.py) | Rebuilds the evidence from `/runtime`, `/llm/runtime`, `/transcription/runtime`, `/integrations/runtime`, `/metrics`, and `/demo/run`. |
 | [`scripts/reviewer_snapshot.py`](../scripts/reviewer_snapshot.py) | Fails fast if the public workflow, RAG context, approval state, dry-run integrations, worker state, or metrics are inconsistent. |
 | [`docs/PRODUCTION_READINESS_DRILL.md`](./PRODUCTION_READINESS_DRILL.md) | Complements the live snapshot with deterministic failure-mode evidence. |
@@ -22,6 +25,7 @@ that regenerates it.
 ## Regenerate
 
 ```bash
+python3 scripts/business_scenario_replay.py
 python3 scripts/capture_reviewer_evidence.py
 ```
 
@@ -47,6 +51,7 @@ The token is used only to inspect webhook status and is not written to the artif
 ## What A Reviewer Should See
 
 - The public API returns runtime identity and worker state.
+- The business scenario replay shows the same workflow as business input, backend route, RAG/approval/CRM proof signals, and handoff artifacts.
 - The LLM boundary exposes local fallback plus OpenAI, Claude/Anthropic, and Gemini provider slots
   without exposing secrets.
 - The transcription boundary exposes local fixture, OpenAI Whisper, and Deepgram provider slots

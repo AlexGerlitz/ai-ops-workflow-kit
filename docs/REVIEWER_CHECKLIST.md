@@ -8,6 +8,7 @@ Start with the local public gate and committed evidence:
 
 ```bash
 bash scripts/verify_public.sh
+python3 scripts/business_scenario_replay.py
 ```
 
 For a live-runtime acceptance pass across API, smoke, GitHub Actions, Pages, and public PDF
@@ -57,7 +58,7 @@ bash scripts/verify_public.sh
 Expected result:
 
 ```text
-36 passed
+52 passed
 public verification passed
 ```
 
@@ -80,6 +81,7 @@ workflow produced:
 - exact Bitrix24 `crm.lead.update` request body for the dispatch adapter.
 - Bitrix24 idempotency, retry scheduling, drain, opt-in worker, and dead-letter state for failed production dispatches.
 - runtime identity and metrics surface.
+- public-safe business scenario replay evidence.
 
 ## 4. Run The Production Readiness Drill
 
@@ -130,6 +132,7 @@ Current live Bitrix24 read-only evidence is available in
 
 ```bash
 python3 scripts/run_offer_demo.py
+python3 scripts/business_scenario_replay.py
 ```
 
 The demo does not require Docker or external API keys. It uses deterministic local embeddings and
@@ -190,6 +193,7 @@ Then open:
 | --- | --- |
 | [README](../README.md) | Reviewer snapshot, API surface, repository layout, and checks. |
 | [Public Proof Status](./PUBLIC_PROOF_STATUS.md) | Current CI, local public gate, committed evidence, runtime reachability boundary, Pages route, and public demo boundary. |
+| [Business Scenario Replay](./evidence/business-scenario-replay.txt) | Business input, backend route, RAG quality, approval status, CRM handoff, and dry-run Bitrix24 request proof. |
 | [Reviewer Acceptance Report](./REVIEWER_ACCEPTANCE_REPORT.md) | Live-runtime acceptance check across API, smoke, GitHub Actions, Pages, and PDF when the external edge is reachable. |
 | [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md) | Live snapshot, architecture decisions, failure modes, production rollout checklist, and public demo boundary. |
 | [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live evidence and regeneration command. |

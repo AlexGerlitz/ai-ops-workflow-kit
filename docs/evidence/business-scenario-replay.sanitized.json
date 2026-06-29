@@ -1,0 +1,120 @@
+{
+  "backend_route": [
+    {
+      "status": "passed",
+      "step": "knowledge ingestion",
+      "surface": "Google Drive import and document chunks"
+    },
+    {
+      "status": "passed",
+      "step": "retrieval quality gate",
+      "surface": "RAG expected-source eval with citations"
+    },
+    {
+      "status": "passed",
+      "step": "call analysis",
+      "surface": "structured score, objections, risk, next action"
+    },
+    {
+      "status": "approved",
+      "step": "human approval",
+      "surface": "approval state and Telegram callback contract"
+    },
+    {
+      "status": "queued",
+      "step": "CRM-safe handoff",
+      "surface": "queued outbox event with idempotency and retry contract"
+    },
+    {
+      "status": "dry_run",
+      "step": "Bitrix24 adapter boundary",
+      "surface": "dry-run crm.lead.update request shape"
+    }
+  ],
+  "business_input": {
+    "call_source": "gdrive://demo-call-audio.mp3",
+    "knowledge_source": "gdrive://demo-sales-playbook",
+    "lead_context": [
+      "pricing concern",
+      "approved budget",
+      "workflow needed this month",
+      "implementation call as the next step"
+    ],
+    "raw_personal_data_stored": false
+  },
+  "first_slice_result": "A sales/support transcript becomes a cited RAG answer, structured lead analysis, approved follow-up, queued CRM handoff, and dry-run Bitrix24 request without storing raw personal data in public evidence.",
+  "handoff_artifacts": [
+    "docs/OFFER_DEMO.md",
+    "docs/FIRST_SLICE_PLAYBOOK.md",
+    "docs/PRIVACY_BOUNDARY.md",
+    "docs/evidence/business-scenario-replay.txt",
+    "docs/evidence/business-scenario-replay.sanitized.json"
+  ],
+  "ok": true,
+  "proof_signals": {
+    "approval": {
+      "status": "approved",
+      "telegram_callback_contract": [
+        "approve",
+        "reject",
+        "telegram_webhook"
+      ],
+      "telegram_status": "dry_run"
+    },
+    "bitrix24_dispatch": {
+      "adapter_key": "bitrix24",
+      "attempt_count": 0,
+      "event_status": "queued",
+      "max_attempts": 3,
+      "method": "crm.lead.update",
+      "request_fields": [
+        "COMMENTS"
+      ],
+      "status": "dry_run"
+    },
+    "call_analysis": {
+      "missing_signals": [],
+      "objections": [
+        "price sensitivity"
+      ],
+      "risk_level": "medium",
+      "score": 100
+    },
+    "crm_handoff": {
+      "adapter_key": "bitrix24.mock",
+      "attempt_count": 0,
+      "idempotency_key_present": true,
+      "last_error": null,
+      "operation": "upsert_lead_follow_up",
+      "status": "queued",
+      "target_stage": "qualified"
+    },
+    "privacy": {
+      "raw_text_stored": false,
+      "redacted": true,
+      "replacement_counts": {
+        "email": 1,
+        "phone": 1
+      },
+      "safe_logging": true
+    },
+    "rag_quality": {
+      "citations_present": true,
+      "ok": true,
+      "passed": 2,
+      "total": 2
+    },
+    "transcription": {
+      "provider": "local_stub",
+      "segments": 4,
+      "status": "dry_run"
+    }
+  },
+  "reviewer_commands": [
+    "python3 scripts/business_scenario_replay.py",
+    "python3 scripts/run_offer_demo.py",
+    "bash scripts/verify_public.sh"
+  ],
+  "scenario": "sales_support_call_to_reviewed_crm_handoff",
+  "schema": "business_scenario_replay_v1"
+}

@@ -37,11 +37,31 @@ A first slice is done when it has:
 - dry-run or sandbox boundary before external writes;
 - docs/runbook/handoff notes that explain how to operate the slice after the demo.
 
+## Business Scenario Replay
+
+For a fast review, start with the business scenario replay before reading the full demo JSON:
+
+```bash
+python3 scripts/business_scenario_replay.py
+```
+
+It summarizes the same offer-demo route as business input, backend route, proof signals, and handoff
+artifacts:
+
+```text
+business scenario replay passed
+rag_quality=ok=True passed=2/2 citations_present=True
+approval=status=approved
+crm_handoff=adapter=bitrix24.mock status=queued
+bitrix24_dispatch=adapter=bitrix24 status=dry_run
+```
+
 ## Fast Verification
 
 ```bash
 python3 -m pip install -r requirements.txt
 bash scripts/verify_public.sh
+python3 scripts/business_scenario_replay.py
 python3 scripts/run_offer_demo.py
 python3 scripts/production_readiness_drill.py
 ```
@@ -53,6 +73,7 @@ rag_quality.ok=true
 approval.status=approved
 crm_handoff.status=queued
 bitrix24_dispatch.status=dry_run
+business scenario replay passed
 public verification passed
 ```
 
