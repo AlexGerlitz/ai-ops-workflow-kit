@@ -1,10 +1,10 @@
 # AI Automation Role Requirements Map
 
-This map connects common AI automation role requirements to concrete proof in this repository.
+This map connects common AI automation role requirements to concrete evidence in this repository.
 It is written for technical reviewers who want to verify implementation depth instead of reading
 generic AI claims.
 
-For a hiring-manager view of the same evidence, start with [Employer Trigger Proof](./EMPLOYER_TRIGGER_PROOF.md).
+For a hiring-manager view of the same evidence, start with [Employer Trigger Evidence](./EMPLOYER_TRIGGER_PROOF.md).
 
 ## Requirement To Evidence
 
@@ -106,7 +106,7 @@ secret_boundaries=secrets_printed=False mutating_external_calls=False
 Expected Bitrix24 sandbox and contract signals:
 
 ```text
-bitrix24=configured=True profile=passed crm_lead_fields=passed origin=https://b24-jgkzt9.bitrix24.ru
+bitrix24=configured=True profile=passed crm_lead_fields=passed origin=<redacted-bitrix24-origin>
 bitrix24 contract evidence passed
 method=crm.lead.update
 request_shape=True

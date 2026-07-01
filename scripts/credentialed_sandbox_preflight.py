@@ -30,7 +30,7 @@ def redacted_url_origin(url: str | None) -> str | None:
     parsed = urlparse(url)
     if not parsed.scheme or not parsed.hostname:
         return "<invalid-url>"
-    return f"{parsed.scheme}://{parsed.hostname}"
+    return "<redacted-bitrix24-origin>"
 
 
 def status_is_failure(check: dict[str, Any]) -> bool:

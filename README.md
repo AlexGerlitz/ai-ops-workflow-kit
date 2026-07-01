@@ -10,7 +10,7 @@ The project keeps the workflow engine thin and moves stateful logic into a backe
 webhooks, retries, notifications, and human-in-the-loop routing while the API owns RAG, scoring, audit-friendly
 state transitions, and integration contracts.
 
-Profile / contact route: [DriveDesk AI Operator proof route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html),
+Profile / contact route: [DriveDesk AI Operator route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html),
 [Decision-Ready Contact](https://alexgerlitz.github.io/AlexGerlitz/decision-ready-contact.html),
 [LinkedIn message route](https://www.linkedin.com/in/alex-gerlitz-a659ab3bb/),
 [PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-python-backend-automation-resume.pdf),
@@ -22,9 +22,9 @@ Message me first when there is one messy sales/support workflow, one risky CRM o
 handoff, or one backend-owned AI workflow slice that should become testable, logged,
 documented, and handed off.
 
-Shortest proof path: [LinkedIn Recruiter Packet](https://alexgerlitz.github.io/AlexGerlitz/linkedin-recruiter-packet.html) ->
+Shortest review path: [LinkedIn Recruiter Packet](https://alexgerlitz.github.io/AlexGerlitz/linkedin-recruiter-packet.html) ->
 [Hiring Decision](https://alexgerlitz.github.io/AlexGerlitz/hiring-decision.html) ->
-[DriveDesk Proof Route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html) ->
+[DriveDesk AI Operator route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html) ->
 [Decision-Ready Contact](https://alexgerlitz.github.io/AlexGerlitz/decision-ready-contact.html) ->
 [PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-python-backend-automation-resume.pdf).
 
@@ -39,7 +39,7 @@ Short visual route: [Demo walkthrough](docs/DEMO_WALKTHROUGH.md).
 
 ## 60-Second Reviewer Snapshot
 
-This repository is public proof for AI workflow automation work where the output must be more than a
+This repository is public evidence for AI workflow automation work where the output must be more than a
 prompt demo.
 
 Hiring relevance: I can turn an AI sales/support workflow into a backend-owned
@@ -49,21 +49,21 @@ and reviewer evidence are all explicit instead of hidden inside no-code glue.
 
 | What to check | Why it matters |
 | --- | --- |
-| [Stable reviewer route](docs/PUBLIC_PROOF_STATUS.md) | Current proof status, CI, local gate, committed evidence, live-runtime boundary, and fallback review path in one page. |
-| [Hiring signal brief](docs/evidence/hiring-signal-brief.txt) | Shortlist-focused proof that combines business replay and production-readiness drill signals into one high-bar backend/platform screen. |
+| [Stable reviewer route](docs/PUBLIC_PROOF_STATUS.md) | Current evidence status, CI, local gate, committed evidence, live-runtime boundary, and fallback review path in one page. |
+| [Hiring signal brief](docs/evidence/hiring-signal-brief.txt) | Shortlist-focused evidence that combines business replay and production-readiness drill signals into one high-bar backend/platform screen. |
 | [Business scenario replay](docs/evidence/business-scenario-replay.txt) | Short business-input -> backend-route -> RAG/approval/CRM result for a reviewer who wants the outcome before reading code. |
 | [Demo walkthrough](docs/DEMO_WALKTHROUGH.md) | Short GIF route for transcript -> RAG -> approval -> CRM-safe handoff, generated from the public-safe offer demo. |
-| [Runtime demo notes](docs/LIVE_DEMO.md) | Availability-dependent VPS demo notes for the browser-visible Sales Ops workflow; use them after the public proof status page confirms the edge is reachable. |
-| [Live approval proof](docs/LIVE_OWNER_PROOF.md) | Real Telegram approval callback proof: approved item -> queued CRM handoff, while Bitrix24 stays dry-run. |
+| [Runtime demo notes](docs/LIVE_DEMO.md) | Availability-dependent VPS demo notes for the browser-visible Sales Ops workflow; use them after the public evidence status page confirms the edge is reachable. |
+| [Live approval evidence](docs/LIVE_OWNER_PROOF.md) | Real Telegram approval callback evidence: approved item -> queued CRM handoff, while Bitrix24 stays dry-run. |
 | [Reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md) | Live-runtime acceptance pass across API, smoke, GitHub Actions state, Pages route, and public PDF when the VPS edge is reachable. |
-| [Public proof status](docs/PUBLIC_PROOF_STATUS.md) | Current CI, local verification gate, committed evidence, runtime boundary, Pages route, and public boundary status. |
+| [Public evidence status](docs/PUBLIC_PROOF_STATUS.md) | Current CI, local verification gate, committed evidence, runtime boundary, Pages route, and public boundary status. |
 | [CI workflow](.github/workflows/ci.yml) | Deterministic tests for workflow state, RAG boundaries, integration contracts, and public verification. |
 | Reviewer observability snapshot | `GET /reviewer/observability` returns a read-only reviewer observability snapshot for runtime identity, counters, RAG quality gate, privacy boundary, approval counts, outbox state, adapter dry-run status, and worker boundary. |
-| [Privacy boundary](docs/PRIVACY_BOUNDARY.md) | Safe-logging proof: transcript PII is redacted before RAG ingestion, approval context, CRM handoff, demo JSON, and reviewer snapshots. |
-| RAG quality proof | `/rag/eval` and `/demo/run` return expected-source checks with citations, required terms, score floor, and pass/fail output. |
+| [Privacy boundary](docs/PRIVACY_BOUNDARY.md) | Safe-logging evidence: transcript PII is redacted before RAG ingestion, approval context, CRM handoff, demo JSON, and reviewer snapshots. |
+| RAG quality evidence | `/rag/eval` and `/demo/run` return expected-source checks with citations, required terms, score floor, and pass/fail output. |
 | [Role requirements map](docs/ROLE_REQUIREMENTS_MAP.md) | Role-level AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
-| [Employer Trigger Proof](docs/EMPLOYER_TRIGGER_PROOF.md) | Hiring/project triggers mapped to concrete repo evidence, proof commands, and the first result this system demonstrates. |
-| [First Slice Playbook](docs/FIRST_SLICE_PLAYBOOK.md) | Short route from inbound role/project context to the first shippable slice, done criteria, proof command, and handoff artifact. |
+| [Employer Trigger Evidence](docs/EMPLOYER_TRIGGER_PROOF.md) | Hiring/project triggers mapped to concrete repo evidence, verification commands, and the first result this system demonstrates. |
+| [First Slice Playbook](docs/FIRST_SLICE_PLAYBOOK.md) | Short route from inbound role/project context to the first shippable slice, done criteria, verification command, and handoff artifact. |
 
 Best-fit evidence:
 
@@ -86,16 +86,16 @@ Fast evaluation path:
 
 ## Drill-Down Index
 
-| Surface | Proof |
+| Surface | Evidence |
 | --- | --- |
-| Public status | [Public proof status](docs/PUBLIC_PROOF_STATUS.md) with current CI, local gate, committed evidence, runtime reachability boundary, Pages route, and public boundary. |
+| Public status | [Public evidence status](docs/PUBLIC_PROOF_STATUS.md) with current CI, local gate, committed evidence, runtime reachability boundary, Pages route, and public boundary. |
 | Demo walkthrough | [Demo walkthrough](docs/DEMO_WALKTHROUGH.md) with a short GIF generated from the public-safe offer demo. |
 | Hiring signal brief | [Hiring signal brief](docs/evidence/hiring-signal-brief.txt) and [sanitized JSON](docs/evidence/hiring-signal-brief.sanitized.json) combine replay and readiness drill evidence into a shortlist-focused screen. |
-| Business scenario replay | [Business scenario replay](docs/evidence/business-scenario-replay.txt) and [sanitized JSON](docs/evidence/business-scenario-replay.sanitized.json) compress the offer demo into business input, backend route, proof signals, and handoff artifacts. |
-| Employer trigger proof | [Employer Trigger Proof](docs/EMPLOYER_TRIGGER_PROOF.md) maps AI workflow/RAG, CRM/API integration, backend/platform ownership, and DevOps reliability triggers to inspectable code, docs, and commands. |
+| Business scenario replay | [Business scenario replay](docs/evidence/business-scenario-replay.txt) and [sanitized JSON](docs/evidence/business-scenario-replay.sanitized.json) compress the offer demo into business input, backend route, evidence signals, and handoff artifacts. |
+| Employer trigger evidence | [Employer Trigger Evidence](docs/EMPLOYER_TRIGGER_PROOF.md) maps AI workflow/RAG, CRM/API integration, backend/platform ownership, and DevOps reliability triggers to inspectable code, docs, and commands. |
 | First slice playbook | [First Slice Playbook](docs/FIRST_SLICE_PLAYBOOK.md) maps inbound role/project context to RAG/transcript, CRM handoff, human approval, and reliability slices with done criteria. |
-| Live approval proof | [Live approval proof](docs/LIVE_OWNER_PROOF.md) for Telegram callback approval and CRM-safe outbox handoff. |
-| Integration boundaries | [Public proof status](docs/PUBLIC_PROOF_STATUS.md), [reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md), and committed sanitized artifacts for Telegram and Bitrix24 boundary checks. |
+| Live approval evidence | [Live approval evidence](docs/LIVE_OWNER_PROOF.md) for Telegram callback approval and CRM-safe outbox handoff. |
+| Integration boundaries | [Public evidence status](docs/PUBLIC_PROOF_STATUS.md), [reviewer acceptance report](docs/REVIEWER_ACCEPTANCE_REPORT.md), and committed sanitized artifacts for Telegram and Bitrix24 boundary checks. |
 | Offer demo | [Offer demo](docs/OFFER_DEMO.md) for document import -> RAG -> call-audio transcription boundary -> transcript scoring -> Telegram approval -> outbox drain -> dry-run Bitrix24 handoff. |
 | Reviewer gate | [Reviewer checklist](docs/REVIEWER_CHECKLIST.md), [CI workflow](.github/workflows/ci.yml), and deterministic tests in [tests/](tests/). |
 | Privacy boundary | [Privacy boundary](docs/PRIVACY_BOUNDARY.md) for transcript PII redaction before RAG, approval context, CRM handoff, demo JSON, and reviewer evidence. |

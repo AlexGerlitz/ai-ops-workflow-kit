@@ -1,6 +1,6 @@
-# Employer Trigger Proof
+# Employer Trigger Evidence
 
-This page maps the hiring and project triggers from the public profile route to concrete, inspectable proof in this repository.
+This page maps the hiring and project triggers from the public profile route to concrete, inspectable evidence in this repository.
 
 Use it when the first question is not "what does the demo do?" but "what employer problem can this prove quickly?"
 
@@ -11,11 +11,11 @@ Use it when the first question is not "what does the demo do?" but "what employe
 - Local public gate: `PYTHON_BIN=.venv/bin/python bash scripts/verify_public.sh` -> `54 passed`, `public verification passed`.
 - Hiring signal brief: `docs/evidence/hiring-signal-brief.txt` combines replay and production-readiness drill signals into one shortlist screen.
 - Business scenario replay: `docs/evidence/business-scenario-replay.txt` shows business input -> backend route -> RAG/approval/CRM result.
-- Visual proof route: `docs/DEMO_WALKTHROUGH.md` with `docs/assets/drive-operator-demo.gif`.
+- Visual evidence route: `docs/DEMO_WALKTHROUGH.md` with `docs/assets/drive-operator-demo.gif`.
 
-## Trigger To Proof
+## Trigger To Evidence
 
-| Employer trigger | Employer pain | Proof in this repo | First result this repo demonstrates |
+| Employer trigger | Employer pain | Evidence in this repo | First result this repo demonstrates |
 | --- | --- | --- | --- |
 | AI workflow / RAG | Documents, transcripts, calls, or leads need retrieval, structured analysis, scoring, and human approval. | `POST /demo/run`, `POST /rag/eval`, `scripts/business_scenario_replay.py`, `docs/evidence/business-scenario-replay.txt`, `app/rag_eval.py`, `app/sales_workflow.py`, `docs/OFFER_DEMO.md`, and `infra/n8n/call-audio-transcription-approval.json`. | One backend-owned workflow slice with document intake, RAG citations, transcript analysis, score/risk/next action, approval state, tests, logs, and operator handoff. |
 | CRM/ERP/API integration | Business systems are connected through brittle manual steps, hidden automation state, or unclear ownership. | `app/integrations.py`, `app/store.py`, `POST /integration-events/{id}/dispatch/bitrix24`, `POST /integrations/bitrix24/drain`, `docs/LIVE_OWNER_PROOF.md`, and `docs/evidence/bitrix24-contract.txt`. | Adapter contract, idempotent CRM handoff, queued outbox state, retries/dead-letter behavior, audit trail, and rollback notes before enabling real writes. |
@@ -65,7 +65,7 @@ The first slice options are:
 - human approval slice;
 - reliability slice.
 
-Each slice maps to proof commands, done criteria, and a handoff artifact so the first conversation
+Each slice maps to verification commands, done criteria, and a handoff artifact so the first conversation
 can move from vague interest to a reviewable delivery path.
 
 ## Review Boundary

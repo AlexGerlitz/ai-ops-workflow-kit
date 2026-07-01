@@ -128,7 +128,7 @@ def build_report(
         },
         "telegram_webhook": webhook,
         "approval": {
-            "id": approval.get("id"),
+            "id": "<redacted-approval-id>",
             "title": approval.get("title"),
             "kind": approval.get("kind"),
             "status": approval.get("status"),
@@ -137,19 +137,19 @@ def build_report(
         },
         "crm_event": (
             {
-                "id": crm_event.get("id"),
+                "id": "<redacted-crm-event-id>",
                 "adapter_key": crm_event.get("adapter_key"),
                 "operation": crm_event.get("operation"),
                 "status": crm_event.get("status"),
                 "attempt_count": crm_event.get("attempt_count"),
-                "source_approval_id": crm_event.get("source_approval_id"),
+                "source_approval_id": "<redacted-approval-id>",
             }
             if crm_event
             else None
         ),
         "public_boundary": {
             "synthetic_demo_telegram_remains_dry_run": True,
-            "bitrix24_trial_is_not_required_for_public_proof": True,
+            "bitrix24_trial_is_not_required_for_public_evidence": True,
             "real_bitrix24_writes_remain_production_gated": True,
         },
     }
@@ -206,7 +206,7 @@ def format_text(report: dict[str, Any]) -> str:
             (
                 "public_boundary="
                 "synthetic_demo_telegram_remains_dry_run=True "
-                "bitrix24_trial_is_not_required_for_public_proof=True"
+                "bitrix24_trial_is_not_required_for_public_evidence=True"
             ),
         ]
     )

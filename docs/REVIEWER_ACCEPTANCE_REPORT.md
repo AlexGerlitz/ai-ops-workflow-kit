@@ -1,6 +1,6 @@
 # Reviewer Acceptance Report
 
-This report is the fastest live-runtime acceptance pass for the public AI Ops proof surface. It checks
+This report is the fastest live-runtime acceptance pass for the public AI Ops evidence surface. It checks
 the live deployment, GitHub Actions state, profile Pages route, public resume PDF availability, and
 the owner-run sandbox workflow link in one command when the VPS edge is reachable.
 
@@ -17,8 +17,8 @@ Generated evidence:
 
 | Artifact | Purpose |
 | --- | --- |
-| `docs/evidence/reviewer-acceptance-report.sanitized.json` | Machine-readable acceptance result from the last captured live proof surface. |
-| `docs/evidence/reviewer-acceptance-report.txt` | Human-readable acceptance summary from the last captured live proof surface. |
+| `docs/evidence/reviewer-acceptance-report.sanitized.json` | Machine-readable acceptance result from the last captured live evidence surface. |
+| `docs/evidence/reviewer-acceptance-report.txt` | Human-readable acceptance summary from the last captured live evidence surface. |
 | `scripts/reviewer_acceptance_report.py` | Recreates the report. |
 
 ## What It Checks
@@ -27,11 +27,11 @@ Generated evidence:
 | --- | --- |
 | Live API snapshot | `/runtime`, `/llm/runtime`, `/transcription/runtime`, `/integrations/runtime`, `/metrics`, and `/demo/run` through `scripts/reviewer_snapshot.py` when the live runtime is reachable. |
 | Live browser/workflow smoke | `scripts/smoke_live_demo.sh https://saleops.duckdns.org`, including Telegram callback rejection and Bitrix24 dry-run drain, when the live runtime is reachable. |
-| GitHub proof state | Public CI workflow, latest checked CI run, owner-run `Credentialed Sandbox Preflight` workflow, and latest checked sandbox run are successful. |
-| Profile proof route | GitHub Pages surfaces link to AI Ops public proof status and owner-run sandbox workflow. |
+| GitHub evidence state | Public CI workflow, latest checked CI run, owner-run `Credentialed Sandbox Preflight` workflow, and latest checked sandbox run are successful. |
+| Profile review route | GitHub Pages surfaces link to AI Ops public evidence status and owner-run sandbox workflow. |
 | Resume artifact | Public PDF resume is present and downloadable. |
-| Bitrix24 contract artifact | Committed sanitized proof for `crm.lead.update` request shape, dry-run guard, and token redaction. |
-| Live Telegram approval artifact | Committed sanitized proof for a real Telegram approval callback that queued a CRM handoff while Bitrix24 stayed dry-run. |
+| Bitrix24 contract artifact | Committed sanitized evidence for `crm.lead.update` request shape, dry-run guard, and token redaction. |
+| Live Telegram approval artifact | Committed sanitized evidence for a real Telegram approval callback that queued a CRM handoff while Bitrix24 stayed dry-run. |
 
 ## Expected Summary
 
@@ -52,7 +52,7 @@ secret_boundaries=secrets_printed=False mutating_external_calls=False
 
 - The report does not use or print private API keys.
 - The synthetic public workflow stays dry-run for Telegram and Bitrix24 external actions.
-- The live-runtime command is intentionally allowed to fail when the external VPS edge is unavailable; use the local public gate and committed sanitized evidence as the stable proof route.
+- The live-runtime command is intentionally allowed to fail when the external VPS edge is unavailable; use the local public gate and committed sanitized evidence as the stable evidence route.
 - Telegram owner-run sandbox evidence and live approval evidence are present as sanitized artifacts.
 - Bitrix24 has sanitized read-only sandbox evidence for `profile` and `crm.lead.fields`, plus a
   committed contract artifact for the production dispatch request shape.

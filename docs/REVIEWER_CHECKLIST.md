@@ -37,7 +37,7 @@ state, Bitrix24 dry-run state, CRM idempotency key, worker state, and metrics av
 
 Read: [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 For the current CI/live-smoke/local-gate status, read
-[Public Proof Status](./PUBLIC_PROOF_STATUS.md).
+[Public Evidence Status](./PUBLIC_PROOF_STATUS.md).
 
 ## 2. Regenerate The Evidence Pack
 
@@ -192,8 +192,8 @@ Then open:
 | File | What to check |
 | --- | --- |
 | [README](../README.md) | Reviewer snapshot, API surface, repository layout, and checks. |
-| [Public Proof Status](./PUBLIC_PROOF_STATUS.md) | Current CI, local public gate, committed evidence, runtime reachability boundary, Pages route, and public demo boundary. |
-| [Business Scenario Replay](./evidence/business-scenario-replay.txt) | Business input, backend route, RAG quality, approval status, CRM handoff, and dry-run Bitrix24 request proof. |
+| [Public Evidence Status](./PUBLIC_PROOF_STATUS.md) | Current CI, local public gate, committed evidence, runtime reachability boundary, Pages route, and public demo boundary. |
+| [Business Scenario Replay](./evidence/business-scenario-replay.txt) | Business input, backend route, RAG quality, approval status, CRM handoff, and dry-run Bitrix24 request evidence. |
 | [Reviewer Acceptance Report](./REVIEWER_ACCEPTANCE_REPORT.md) | Live-runtime acceptance check across API, smoke, GitHub Actions, Pages, and PDF when the external edge is reachable. |
 | [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md) | Live snapshot, architecture decisions, failure modes, production rollout checklist, and public demo boundary. |
 | [Reviewer Evidence Pack](./REVIEWER_EVIDENCE_PACK.md) | Committed sanitized live evidence and regeneration command. |
@@ -201,7 +201,7 @@ Then open:
 | [Credentialed Sandbox Preflight](./CREDENTIALED_SANDBOX_PREFLIGHT.md) | Read-only real-credential boundary for Telegram and Bitrix24 sandbox checks. |
 | [Bitrix24 Contract Evidence](./evidence/bitrix24-contract.txt) | Sanitized REST request contract for the Bitrix24 CRM dispatch adapter. |
 | [Owner-run Sandbox Workflow](../.github/workflows/credentialed-sandbox-preflight.yml) | Manual GitHub Actions path for sanitized Telegram/Bitrix24 sandbox evidence from repository secrets. |
-| [Evidence Map](./EVIDENCE_MAP.md) | Requirement-by-requirement proof map for AI automation roles. |
+| [Evidence Map](./EVIDENCE_MAP.md) | Requirement-by-requirement evidence map for AI automation roles. |
 | [Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md) | Role-level AI automation requirements mapped to files, endpoints, commands, and production boundaries. |
 | [First Slice Playbook](./FIRST_SLICE_PLAYBOOK.md) | How a role/project request becomes the first shippable RAG/transcript, CRM handoff, approval, or reliability slice. |
 | [Live Demo](./LIVE_DEMO.md) | Public deployment URL and public smoke checks. |
@@ -209,7 +209,7 @@ Then open:
 | [Operations](./OPERATIONS.md) | Local runtime, health checks, smoke test, logs, and handoff. |
 | [n8n Approval Flow](./N8N_APPROVAL_FLOW.md) | How importable call-audio, transcript, and Google Drive workflow routing, Telegram payloads, and approval callbacks connect. |
 | [Integration Skeleton](./INTEGRATION_SKELETON.md) | How Google Drive, Telegram, and Bitrix24 contracts become real credentials later. |
-| [Live Owner Proof](./LIVE_OWNER_PROOF.md) | Owner-run live Telegram approval proof while Bitrix24 remains dry-run. |
+| [Live Owner Evidence](./LIVE_OWNER_PROOF.md) | Owner-run live Telegram approval evidence while Bitrix24 remains dry-run. |
 | [Tests](../tests/) | Deterministic coverage for retrieval, scoring, approval, CRM handoff, idempotency, drain, background worker, and integration retry/dead-letter behavior. |
 
 ## 11. What This Proves

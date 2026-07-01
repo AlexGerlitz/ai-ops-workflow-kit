@@ -34,19 +34,19 @@ grep -q "mode=skipped_no_credentials" /tmp/aiops-credentialed-sandbox-preflight.
 grep -q "secrets_printed=False" /tmp/aiops-credentialed-sandbox-preflight.txt
 grep -q "bitrix24 contract evidence passed" /tmp/aiops-bitrix24-contract.txt
 grep -q "secret_token_leaked=False" /tmp/aiops-bitrix24-contract.txt
-grep -q "Employer Trigger Proof" README.md
+grep -q "Employer Trigger Evidence" README.md
 grep -q "First Slice Playbook" README.md
 grep -q "Hiring signal brief" README.md
 grep -q "Demo walkthrough" README.md
 grep -q "docs/assets/drive-operator-demo.gif" README.md
-grep -q "Employer Trigger Proof" docs/PUBLIC_PROOF_STATUS.md
+grep -q "Employer Trigger Evidence" docs/PUBLIC_PROOF_STATUS.md
 grep -q "First slice playbook" docs/PUBLIC_PROOF_STATUS.md
 grep -q "Business scenario replay" docs/PUBLIC_PROOF_STATUS.md
 grep -q "Hiring signal brief" docs/PUBLIC_PROOF_STATUS.md
 grep -q "Demo Walkthrough" docs/PUBLIC_PROOF_STATUS.md
 grep -q "docs/assets/drive-operator-demo.gif" docs/PUBLIC_PROOF_STATUS.md
-grep -q "Employer Trigger Proof" docs/ROLE_REQUIREMENTS_MAP.md
-grep -q "Employer Trigger Proof" docs/TECHNICAL_REVIEW_PACKET.md
+grep -q "Employer Trigger Evidence" docs/ROLE_REQUIREMENTS_MAP.md
+grep -q "Employer Trigger Evidence" docs/TECHNICAL_REVIEW_PACKET.md
 grep -q "Hiring signal is compressed" docs/TECHNICAL_REVIEW_PACKET.md
 grep -q "python3 scripts/hiring_signal_brief.py" docs/TECHNICAL_REVIEW_PACKET.md
 grep -q "DriveDesk AI Operator demo GIF" docs/DEMO_WALKTHROUGH.md
@@ -61,7 +61,7 @@ grep -q "Backend/platform ownership" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "DevOps / reliability" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Current Freshness" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Current CI route" docs/EMPLOYER_TRIGGER_PROOF.md
-grep -q "Visual proof route" docs/EMPLOYER_TRIGGER_PROOF.md
+grep -q "Visual evidence route" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Hiring signal brief" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "One backend-owned workflow slice" docs/EMPLOYER_TRIGGER_PROOF.md
 grep -q "Adapter contract, idempotent CRM handoff" docs/EMPLOYER_TRIGGER_PROOF.md

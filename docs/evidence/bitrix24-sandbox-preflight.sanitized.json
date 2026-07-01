@@ -17,7 +17,7 @@
     "telegram_webhook_secret_configured": false,
     "telegram_dry_run": true,
     "bitrix24_webhook_url_configured": true,
-    "bitrix24_webhook_origin": "https://b24-jgkzt9.bitrix24.ru",
+    "bitrix24_webhook_origin": "<redacted-bitrix24-origin>",
     "bitrix24_dry_run": true,
     "integration_worker_enabled": false
   },
@@ -34,14 +34,14 @@
     "bitrix24_profile": {
       "status": "passed",
       "http_status": 200,
-      "webhook_origin": "https://b24-jgkzt9.bitrix24.ru",
+      "webhook_origin": "<redacted-bitrix24-origin>",
       "profile_id_present": true,
       "profile_name_present": false
     },
     "bitrix24_crm_lead_fields": {
       "status": "passed",
       "http_status": 200,
-      "webhook_origin": "https://b24-jgkzt9.bitrix24.ru",
+      "webhook_origin": "<redacted-bitrix24-origin>",
       "lead_fields_present": true,
       "core_fields_present": true
     }

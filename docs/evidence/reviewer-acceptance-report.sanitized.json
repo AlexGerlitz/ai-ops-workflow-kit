@@ -217,5 +217,5 @@
     "crm_event_status": "queued",
     "bitrix24_dry_run": true
   },
-  "private_sandbox_next_step": "Combined Telegram and Bitrix24 owner-run sandbox evidence is present; rerun Credentialed Sandbox Preflight when rotating either secret, and regenerate Live Owner Proof when validating a new Telegram approval."
+  "private_sandbox_next_step": "Combined Telegram and Bitrix24 owner-run sandbox evidence is present; rerun Credentialed Sandbox Preflight when rotating either secret, and regenerate Live Owner Evidence when validating a new Telegram approval."
 }

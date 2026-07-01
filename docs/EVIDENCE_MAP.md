@@ -5,7 +5,7 @@ For a role-level checklist with verification commands and production boundaries,
 [AI Automation Role Requirements Map](./ROLE_REQUIREMENTS_MAP.md). For a 10-15 minute reviewer route,
 read [Technical Review Packet](./TECHNICAL_REVIEW_PACKET.md).
 For current CI, local gate, committed evidence, runtime reachability, and public boundary status, read
-[Public Proof Status](./PUBLIC_PROOF_STATUS.md).
+[Public Evidence Status](./PUBLIC_PROOF_STATUS.md).
 
 | Requirement | Evidence |
 | --- | --- |
@@ -29,14 +29,14 @@ For current CI, local gate, committed evidence, runtime reachability, and public
 | Reviewer evidence pack | `docs/REVIEWER_EVIDENCE_PACK.md`, `docs/evidence/reviewer-snapshot.sanitized.json`, `scripts/capture_reviewer_evidence.py` |
 | Failure-mode evidence | `docs/PRODUCTION_READINESS_DRILL.md`, `docs/evidence/production-readiness-drill.sanitized.json`, `scripts/production_readiness_drill.py` |
 | Credentialed sandbox boundary | `docs/CREDENTIALED_SANDBOX_PREFLIGHT.md`, `docs/evidence/credentialed-sandbox-preflight.sanitized.json`, `scripts/credentialed_sandbox_preflight.py`, `.github/workflows/credentialed-sandbox-preflight.yml` |
-| Current public proof status | `docs/PUBLIC_PROOF_STATUS.md`, latest CI, local public gate output, committed live-smoke evidence, runtime reachability boundary, profile Pages route |
-| Runtime proof | `https://saleops.duckdns.org/`, `scripts/reviewer_snapshot.py`, `scripts/smoke_live_demo.sh` when the external edge is reachable |
+| Current public evidence status | `docs/PUBLIC_PROOF_STATUS.md`, latest CI, local public gate output, committed live-smoke evidence, runtime reachability boundary, profile Pages route |
+| Runtime evidence | `https://saleops.duckdns.org/`, `scripts/reviewer_snapshot.py`, `scripts/smoke_live_demo.sh` when the external edge is reachable |
 | Verification discipline | `scripts/verify_public.sh`, `.github/workflows/ci.yml`, `tests/` |
 
 ## Design Signals
 
 - n8n is treated as workflow orchestration, not as the place where core state lives.
-- The hiring signal brief combines buyer-facing replay and failure-mode proof into one shortlist-focused review artifact.
+- The hiring signal brief combines buyer-facing replay and failure-mode evidence into one shortlist-focused review artifact.
 - The business scenario replay shows the buyer-facing result first, then links back to code, tests, and evidence.
 - The backend owns retrieval, scoring, approvals, and integration contracts.
 - External write integrations are dry-run by default, so a public reviewer can inspect payloads without secrets.
@@ -49,7 +49,7 @@ For current CI, local gate, committed evidence, runtime reachability, and public
 - Transcript PII is redacted before RAG ingestion, approval context, CRM handoff payloads, demo JSON, and reviewer snapshots.
 - CRM handoff is queued only after an explicit approval transition.
 - Bitrix24 handoff is modeled as an outbox event with idempotency keys, attempt counters, `next_retry_at`, retry-safe drain, and `dead_letter` state.
-- Bitrix24 proof covers both the production request contract and a real read-only sandbox check for `profile` plus CRM `crm.lead.fields`.
+- Bitrix24 evidence covers both the production request contract and a real read-only sandbox check for `profile` plus CRM `crm.lead.fields`.
 - Runtime identity, worker state, and counters are public, so a reviewer can verify the deployed build without server access.
 - Reviewer acceptance report combines live API, smoke, GitHub Actions, Pages, and PDF checks in one command when the external edge is reachable.
 - Telegram callbacks can be verified with Telegram's webhook secret header in production.
@@ -77,9 +77,9 @@ For current CI, local gate, committed evidence, runtime reachability, and public
 12. Run `python3 scripts/bitrix24_contract_evidence.py`.
 13. If repository secrets exist, run the manual `Credentialed Sandbox Preflight` GitHub Actions workflow.
 14. If `https://saleops.duckdns.org/` is reachable, run `python3 scripts/reviewer_acceptance_report.py`.
-15. If runtime proof is needed, run `bash scripts/smoke_live_demo.sh`.
-16. If runtime proof is needed, open `https://saleops.duckdns.org/llm/runtime`.
-17. If runtime proof is needed, open `https://saleops.duckdns.org/transcription/runtime`.
+15. If runtime evidence is needed, run `bash scripts/smoke_live_demo.sh`.
+16. If runtime evidence is needed, open `https://saleops.duckdns.org/llm/runtime`.
+17. If runtime evidence is needed, open `https://saleops.duckdns.org/transcription/runtime`.
 18. Read `docs/TECHNICAL_REVIEW_PACKET.md`.
 19. Inspect `rag_quality` from `/demo/run` or call `POST /rag/eval` after importing the demo playbook.
 20. Read `docs/PRIVACY_BOUNDARY.md`.

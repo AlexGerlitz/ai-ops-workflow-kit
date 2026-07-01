@@ -1,6 +1,6 @@
 # Demo Walkthrough
 
-This is the short visual proof route for the DriveDesk AI Operator workflow.
+This is the short visual evidence route for the DriveDesk AI Operator workflow.
 
 ![DriveDesk AI Operator demo GIF](./assets/drive-operator-demo.gif)
 
@@ -41,4 +41,4 @@ The GIF is a committed visual artifact, not the source of truth. The source of t
 - `docs/LIVE_OWNER_PROOF.md`
 
 The public verification gate checks that the GIF exists, is a real GIF, and is linked from the
-reviewer-facing proof route.
+reviewer-facing evidence route.

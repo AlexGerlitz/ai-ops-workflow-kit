@@ -217,27 +217,27 @@ def build_profile_report(profile_base_url: str, timeout: float) -> dict[str, Any
     pages = [
         profile_page_check(
             base + "/",
-            ["Open AI Operator case", "Live owner proof", "Start conversation"],
+            ["Open AI Operator case", "Live owner evidence", "Start conversation"],
             timeout,
         ),
         profile_page_check(
             base + "/role-fit.html",
-            ["AI Ops proof status", "Live owner proof", "AI Ops CI workflow"],
+            ["AI Ops evidence status", "Live owner evidence", "AI Ops CI workflow"],
             timeout,
         ),
         profile_page_check(
             base + "/start-conversation.html",
-            ["Current Public Proof", "Live owner proof", "AI Operator case"],
+            ["Current Public Evidence", "Live owner evidence", "AI Operator case"],
             timeout,
         ),
         profile_page_check(
             base + "/drivedesk-ai-operator.html",
-            ["Live owner proof", "Open public proof status", "Open CI workflow"],
+            ["Live owner evidence", "Open public evidence status", "Open CI workflow"],
             timeout,
         ),
         profile_page_check(
             base + "/AI_AUTOMATION_ROLE_FIT.md",
-            ["Live owner proof", "Live Telegram approval evidence", "AI Ops CI workflow"],
+            ["Live owner evidence", "Live Telegram approval evidence", "AI Ops CI workflow"],
             timeout,
         ),
         profile_pdf_check(
@@ -384,7 +384,7 @@ def build_report(
         "private_sandbox_next_step": (
             "Combined Telegram and Bitrix24 owner-run sandbox evidence is present; rerun "
             "Credentialed Sandbox Preflight when rotating either secret, and regenerate "
-            "Live Owner Proof when validating a new Telegram approval."
+            "Live Owner Evidence when validating a new Telegram approval."
         ),
     }
 
@@ -455,7 +455,7 @@ def display_path(path: Path) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Build a sanitized reviewer acceptance report from live public proof surfaces."
+        description="Build a sanitized reviewer acceptance report from live public evidence surfaces."
     )
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL)
     parser.add_argument("--github-repo", default=DEFAULT_GITHUB_REPO)

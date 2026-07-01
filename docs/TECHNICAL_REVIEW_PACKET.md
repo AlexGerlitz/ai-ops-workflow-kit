@@ -76,9 +76,9 @@ For a committed evidence artifact plus the regeneration command, read
 For the acceptance report route, read
 [Reviewer Acceptance Report](./REVIEWER_ACCEPTANCE_REPORT.md).
 For current CI, live smoke, local gate, Pages route, and public boundary status, read
-[Public Proof Status](./PUBLIC_PROOF_STATUS.md).
+[Public Evidence Status](./PUBLIC_PROOF_STATUS.md).
 For employer trigger mapping, read
-[Employer Trigger Proof](./EMPLOYER_TRIGGER_PROOF.md).
+[Employer Trigger Evidence](./EMPLOYER_TRIGGER_PROOF.md).
 For deterministic failure-mode evidence, read
 [Production Readiness Drill](./PRODUCTION_READINESS_DRILL.md).
 For the real-credential boundary, read

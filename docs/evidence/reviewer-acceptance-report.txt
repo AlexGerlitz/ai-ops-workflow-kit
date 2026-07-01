@@ -8,4 +8,4 @@ profile_pages=passed count=6
 bitrix24_contract=passed method=crm.lead.update request_shape=True secret_token_leaked=False
 live_telegram_approval=passed telegram_live=True approval=approved crm_event=queued bitrix24_dry_run=True
 secret_boundaries=secrets_printed=False mutating_external_calls=False
-private_sandbox_next_step=Combined Telegram and Bitrix24 owner-run sandbox evidence is present; rerun Credentialed Sandbox Preflight when rotating either secret, and regenerate Live Owner Proof when validating a new Telegram approval.
+private_sandbox_next_step=Combined Telegram and Bitrix24 owner-run sandbox evidence is present; rerun Credentialed Sandbox Preflight when rotating either secret, and regenerate Live Owner Evidence when validating a new Telegram approval.

@@ -53,14 +53,14 @@ mode=live
 required_targets=bitrix24,telegram missing_required_targets=none
 public_base_url=https://saleops.duckdns.org
 telegram=configured=True get_me=passed webhook=passed
-bitrix24=configured=True profile=passed crm_lead_fields=passed origin=https://b24-jgkzt9.bitrix24.ru
+bitrix24=configured=True profile=passed crm_lead_fields=passed origin=<redacted-bitrix24-origin>
 secret_boundaries=secrets_printed=False mutating_external_calls=False
 ```
 
 The generic committed preflight artifact is intentionally safe to regenerate in no-secret mode.
 Live proof is split into owner-run workflow output plus committed focused artifacts:
 
-- live Telegram approval proof: `docs/evidence/live-telegram-approval.txt`;
+- live Telegram approval evidence: `docs/evidence/live-telegram-approval.txt`;
 - live Bitrix24 read-only proof: `docs/evidence/bitrix24-sandbox-preflight.txt`.
 
 The committed public workflow still avoids CRM writes; production writes remain gated by
@@ -89,7 +89,7 @@ Current committed live Bitrix24 evidence:
 ```text
 mode=live
 required_targets=bitrix24 missing_required_targets=none
-bitrix24=configured=True profile=passed crm_lead_fields=passed origin=https://b24-jgkzt9.bitrix24.ru
+bitrix24=configured=True profile=passed crm_lead_fields=passed origin=<redacted-bitrix24-origin>
 secret_boundaries=secrets_printed=False mutating_external_calls=False
 ```
 

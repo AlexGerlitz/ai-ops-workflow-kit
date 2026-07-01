@@ -35,7 +35,7 @@
     "last_error_present": false
   },
   "approval": {
-    "id": "b4272428-c29d-4ecf-8f01-b2f08f586dca",
+    "id": "<redacted-approval-id>",
     "title": "Approve fresh Telegram callback test",
     "kind": "call_follow_up",
     "status": "approved",
@@ -43,16 +43,16 @@
     "notes_present": true
   },
   "crm_event": {
-    "id": "a97dfa73-c56d-4e76-a39f-2750d2f5b70f",
+    "id": "<redacted-crm-event-id>",
     "adapter_key": "bitrix24.mock",
     "operation": "upsert_lead_follow_up",
     "status": "queued",
     "attempt_count": 0,
-    "source_approval_id": "b4272428-c29d-4ecf-8f01-b2f08f586dca"
+    "source_approval_id": "<redacted-approval-id>"
   },
   "public_boundary": {
     "synthetic_demo_telegram_remains_dry_run": true,
-    "bitrix24_trial_is_not_required_for_public_proof": true,
+    "bitrix24_trial_is_not_required_for_public_evidence": true,
     "real_bitrix24_writes_remain_production_gated": true
   }
 }
