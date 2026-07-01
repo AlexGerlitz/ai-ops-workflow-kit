@@ -13,7 +13,7 @@ state transitions, and integration contracts.
 Profile / contact route: [DriveDesk AI Operator proof route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html),
 [Decision-Ready Contact](https://alexgerlitz.github.io/AlexGerlitz/decision-ready-contact.html),
 [LinkedIn message route](https://www.linkedin.com/in/alex-gerlitz-a659ab3bb/),
-[PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-remote-ai-automation-resume.pdf),
+[PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-python-backend-automation-resume.pdf),
 [portfolio](https://alexgerlitz.github.io/AlexGerlitz/),
 [enterprise readiness](https://alexgerlitz.github.io/AlexGerlitz/enterprise-readiness.html), and
 [inbound brief](https://alexgerlitz.github.io/AlexGerlitz/intake-brief.html).
@@ -26,7 +26,7 @@ Shortest proof path: [LinkedIn Recruiter Packet](https://alexgerlitz.github.io/A
 [Hiring Decision](https://alexgerlitz.github.io/AlexGerlitz/hiring-decision.html) ->
 [DriveDesk Proof Route](https://alexgerlitz.github.io/AlexGerlitz/drivedesk-proof-route.html) ->
 [Decision-Ready Contact](https://alexgerlitz.github.io/AlexGerlitz/decision-ready-contact.html) ->
-[PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-remote-ai-automation-resume.pdf).
+[PDF resume](https://alexgerlitz.github.io/AlexGerlitz/output/pdf/alex-gerlitz-python-backend-automation-resume.pdf).
 
 First useful result: a verified RAG/transcript/approval/CRM slice with backend-owned
 state, tests, logs, docs, and a handoff route.
